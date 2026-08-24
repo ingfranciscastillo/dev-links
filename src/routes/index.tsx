@@ -1,14 +1,51 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import { Cta } from "@/components/landing/cta";
+import { Examples } from "@/components/landing/Examples";
+import { Faq } from "@/components/landing/Faq";
+import { Features } from "@/components/landing/Features";
+import { Hero } from "@/components/landing/Hero";
+import { Pricing } from "@/components/landing/Pricing";
+import { Footer } from "@/components/site/Footer";
+import { Header } from "@/components/site/Header";
 
-export const Route = createFileRoute('/')({ component: Home })
+export const Route = createFileRoute("/")({
+	head: () => ({
+		meta: [
+			{ title: "DevLinks — The link-in-bio built for developers" },
+			{
+				name: "description",
+				content:
+					"Your repos, snippets, articles and projects on one page — auto-synced with GitHub, Dev.to, Hashnode, Medium and Stack Overflow.",
+			},
+			{
+				property: "og:title",
+				content: "DevLinks — The link-in-bio for developers",
+			},
+			{
+				property: "og:description",
+				content:
+					"One page for everything you ship. Built for developers, with the polish of Linear and the speed of Vercel.",
+			},
+			{ property: "og:url", content: "/" },
+		],
+		links: [{ rel: "canonical", href: "/" }],
+	}),
+	component: Landing,
+});
 
-function Home() {
-  return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold">Welcome to TanStack Start</h1>
-      <p className="mt-4 text-lg">
-        Edit <code>src/routes/index.tsx</code> to get started.
-      </p>
-    </div>
-  )
+function Landing() {
+	return (
+		<div className="min-h-dvh bg-background text-foreground">
+			<Header />
+			<main>
+				<Hero />
+				<Features />
+				<Examples />
+				<Pricing />
+				<Faq />
+				<Cta />
+			</main>
+			<Footer />
+		</div>
+	);
 }

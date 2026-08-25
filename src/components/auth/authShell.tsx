@@ -99,15 +99,12 @@ export function OAuthRow({ callbackURL }: { callbackURL?: string } = {}) {
 					Google
 				</button>
 			</div>
-			<div className="relative">
-				<div className="absolute inset-0 flex items-center">
-					<div className="w-full border-t border-hairline" />
-				</div>
-				<div className="relative flex justify-center text-xs uppercase tracking-wider">
-					<span className="bg-surface px-2 text-muted-foreground">
-						or continue with email
-					</span>
-				</div>
+			<div className="flex items-center gap-3">
+				<div className="h-px flex-1 bg-border" />
+				<span className="shrink-0 text-xs uppercase tracking-wider text-muted-foreground">
+					or continue with email
+				</span>
+				<div className="h-px flex-1 bg-border" />
 			</div>
 		</div>
 	);

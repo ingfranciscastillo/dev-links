@@ -3,9 +3,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuthShell, OAuthRow } from "@/components/auth/authShell";
 import { useSignIn } from "@/components/auth/hooks/use-sign-in";
 import { Button } from "@/components/ui/button";
+import {
+	Field,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { signInSchema } from "@/lib/schemas/auth";
+import { zodField } from "@/lib/schemas/field";
 
 export const Route = createFileRoute("/login")({
 	validateSearch: (s: Record<string, unknown>) => ({
@@ -31,109 +37,111 @@ function LoginPage() {
 			title="Welcome back"
 			subtitle="Sign in to manage your DevLinks page."
 		>
-			<OAuthRow />
+			<OAuthRow callbackURL={redirect ?? "/dashboard"} />
 			<form
 				onSubmit={(e) => {
 					e.preventDefault();
 					e.stopPropagation();
 					form.handleSubmit();
 				}}
-				className="space-y-4"
 				noValidate
 			>
-				<form.Field
-					name="email"
-					validators={{
-						onChange: ({ value }) => {
-							const result = signInSchema.shape.email.safeParse(value);
-							return result.success
-								? undefined
-								: result.error.issues[0]?.message;
-						},
-					}}
-					children={(field) => (
-						<div className="space-y-1.5">
-							<Label htmlFor={field.name}>Email</Label>
-							<Input
-								id={field.name}
-								name={field.name}
-								type="email"
-								autoComplete="email"
-								placeholder="you@dev.io"
-								value={field.state.value}
-								onBlur={field.handleBlur}
-								onChange={(e) => field.handleChange(e.target.value)}
-							/>
-							{field.state.meta.isTouched &&
-							field.state.meta.errors.length > 0 ? (
-								<p className="text-xs text-destructive">
-									{field.state.meta.errors.join(", ")}
-								</p>
-							) : null}
-						</div>
-					)}
-				/>
+				<FieldGroup>
+					<form.Field
+						name="email"
+						validators={{ onChange: zodField(signInSchema.shape.email) }}
+					>
+						{(field) => {
+							const invalid =
+								field.state.meta.isTouched &&
+								field.state.meta.errors.length > 0;
+							return (
+								<Field data-invalid={invalid}>
+									<FieldLabel htmlFor={field.name}>Email</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										type="email"
+										autoComplete="email"
+										placeholder="you@dev.io"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										aria-invalid={invalid || undefined}
+									/>
+									{invalid ? (
+										<FieldError>
+											{field.state.meta.errors.join(", ")}
+										</FieldError>
+									) : null}
+								</Field>
+							);
+						}}
+					</form.Field>
 
-				<form.Field
-					name="password"
-					validators={{
-						onChange: ({ value }) => {
-							const result = signInSchema.shape.password.safeParse(value);
-							return result.success
-								? undefined
-								: result.error.issues[0]?.message;
-						},
-					}}
-					children={(field) => (
-						<div className="space-y-1.5">
-							<div className="flex items-center justify-between">
-								<Label htmlFor={field.name}>Password</Label>
-								<Link
-									to="/forgot-password"
-									className="text-xs text-muted-foreground hover:text-foreground"
+					<form.Field
+						name="password"
+						validators={{ onChange: zodField(signInSchema.shape.password) }}
+					>
+						{(field) => {
+							const invalid =
+								field.state.meta.isTouched &&
+								field.state.meta.errors.length > 0;
+							return (
+								<Field data-invalid={invalid}>
+									<div className="flex items-center justify-between">
+										<FieldLabel htmlFor={field.name}>Password</FieldLabel>
+										<Link
+											to="/forgot-password"
+											className="text-xs text-muted-foreground hover:text-foreground"
+										>
+											Forgot?
+										</Link>
+									</div>
+									<Input
+										id={field.name}
+										name={field.name}
+										type="password"
+										autoComplete="current-password"
+										placeholder="••••••••"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										aria-invalid={invalid || undefined}
+									/>
+									{invalid ? (
+										<FieldError>
+											{field.state.meta.errors.join(", ")}
+										</FieldError>
+									) : null}
+								</Field>
+							);
+						}}
+					</form.Field>
+
+					{signIn.error ? (
+						<FieldError>{signIn.error.message}</FieldError>
+					) : null}
+
+					<form.Subscribe
+						selector={(state) => ({
+							canSubmit: state.canSubmit,
+							isSubmitting: state.isSubmitting,
+						})}
+					>
+						{({ canSubmit, isSubmitting }) => (
+							<Field>
+								<Button
+									type="submit"
+									className="w-full"
+									disabled={!canSubmit || signIn.isPending || isSubmitting}
 								>
-									Forgot?
-								</Link>
-							</div>
-							<Input
-								id={field.name}
-								name={field.name}
-								type="password"
-								autoComplete="current-password"
-								placeholder="••••••••"
-								value={field.state.value}
-								onBlur={field.handleBlur}
-								onChange={(e) => field.handleChange(e.target.value)}
-							/>
-							{field.state.meta.isTouched &&
-							field.state.meta.errors.length > 0 ? (
-								<p className="text-xs text-destructive">
-									{field.state.meta.errors.join(", ")}
-								</p>
-							) : null}
-						</div>
-					)}
-				/>
-
-				{signIn.error ? (
-					<p className="text-sm text-destructive">{signIn.error.message}</p>
-				) : null}
-
-				<form.Subscribe
-					selector={(state) => ({
-						canSubmit: state.canSubmit,
-						isSubmitting: state.isSubmitting,
-					})}
-					children={({ canSubmit, isSubmitting }) => (
-						<Button
-							type="submit"
-							className="w-full"
-							disabled={!canSubmit || signIn.isPending || isSubmitting}
-						>
-							{signIn.isPending || isSubmitting ? "Signing in…" : "Sign in"}
-						</Button>
-					)}
-				/>
+									{signIn.isPending || isSubmitting ? "Signing in…" : "Sign in"}
+								</Button>
+							</Field>
+						)}
+					</form.Subscribe>
+				</FieldGroup>
 			</form>
 			<p className="mt-5 text-center text-sm text-muted-foreground">
 				New to DevLinks?{" "}

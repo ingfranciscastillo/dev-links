@@ -24,6 +24,8 @@ import { Route as AuthenticatedDashboardLinksRouteImport } from './routes/_authe
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard/profile'
 import { Route as AuthenticatedDashboardProjectsRouteImport } from './routes/_authenticated/dashboard/projects'
 import { Route as AuthenticatedDashboardSettingsRouteImport } from './routes/_authenticated/dashboard/settings'
+import { Route as AuthenticatedDashboardSnippetsRouteImport } from './routes/_authenticated/dashboard/snippets'
+import { Route as AuthenticatedDashboardThemeRouteImport } from './routes/_authenticated/dashboard/theme'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPublicHooksTrackClickRouteImport } from './routes/api/public/hooks/track-click'
 import { Route as ApiPublicHooksTrackViewRouteImport } from './routes/api/public/hooks/track-view'
@@ -109,6 +111,18 @@ const AuthenticatedDashboardSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardSnippetsRoute =
+  AuthenticatedDashboardSnippetsRouteImport.update({
+    id: '/snippets',
+    path: '/snippets',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardThemeRoute =
+  AuthenticatedDashboardThemeRouteImport.update({
+    id: '/theme',
+    path: '/theme',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -141,6 +155,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
+  '/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
+  '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -160,6 +176,8 @@ export interface FileRoutesByTo {
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
+  '/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
+  '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -181,6 +199,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/_authenticated/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
+  '/_authenticated/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
+  '/_authenticated/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -202,6 +222,8 @@ export interface FileRouteTypes {
     | '/dashboard/profile'
     | '/dashboard/projects'
     | '/dashboard/settings'
+    | '/dashboard/snippets'
+    | '/dashboard/theme'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -221,6 +243,8 @@ export interface FileRouteTypes {
     | '/dashboard/profile'
     | '/dashboard/projects'
     | '/dashboard/settings'
+    | '/dashboard/snippets'
+    | '/dashboard/theme'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -241,6 +265,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/profile'
     | '/_authenticated/dashboard/projects'
     | '/_authenticated/dashboard/settings'
+    | '/_authenticated/dashboard/snippets'
+    | '/_authenticated/dashboard/theme'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -366,6 +392,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSettingsRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/snippets': {
+      id: '/_authenticated/dashboard/snippets'
+      path: '/snippets'
+      fullPath: '/dashboard/snippets'
+      preLoaderRoute: typeof AuthenticatedDashboardSnippetsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/theme': {
+      id: '/_authenticated/dashboard/theme'
+      path: '/theme'
+      fullPath: '/dashboard/theme'
+      preLoaderRoute: typeof AuthenticatedDashboardThemeRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -398,6 +438,8 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
   AuthenticatedDashboardProjectsRoute: typeof AuthenticatedDashboardProjectsRoute
   AuthenticatedDashboardSettingsRoute: typeof AuthenticatedDashboardSettingsRoute
+  AuthenticatedDashboardSnippetsRoute: typeof AuthenticatedDashboardSnippetsRoute
+  AuthenticatedDashboardThemeRoute: typeof AuthenticatedDashboardThemeRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
@@ -410,6 +452,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
     AuthenticatedDashboardProjectsRoute: AuthenticatedDashboardProjectsRoute,
     AuthenticatedDashboardSettingsRoute: AuthenticatedDashboardSettingsRoute,
+    AuthenticatedDashboardSnippetsRoute: AuthenticatedDashboardSnippetsRoute,
+    AuthenticatedDashboardThemeRoute: AuthenticatedDashboardThemeRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =

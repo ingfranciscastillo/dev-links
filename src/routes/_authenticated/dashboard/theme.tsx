@@ -1,16 +1,16 @@
-import { createFileRoute, useRouteContext } from "@tanstack/react-router";
+import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import {
-	Check,
-	Code,
-	LayoutGrid,
-	Palette,
-	RotateCcw,
-	Sparkles,
-	Type,
-} from "lucide-react";
+	CodeIcon,
+	LayersMinimalisticIcon,
+	MagicWand3Icon,
+	Palette2Icon,
+	RestartIcon,
+	TextFormatIcon,
+	Widget4Icon,
+} from "@solar-icons/react/linear";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,7 +55,7 @@ function ThemePage() {
 	};
 
 	return (
-		<DashboardShell>
+		<>
 			<SectionHeader
 				eyebrow="Appearance"
 				title="Theme builder"
@@ -73,7 +73,7 @@ function ThemePage() {
 							});
 						}}
 					>
-						<RotateCcw className="h-4 w-4" /> Reset
+						<RestartIcon size={16} /> Reset
 					</Button>
 				}
 			/>
@@ -84,42 +84,42 @@ function ThemePage() {
 						<TabBtn
 							active={tab === "templates"}
 							onClick={() => setTab("templates")}
-							icon={<LayoutGrid className="h-3.5 w-3.5" />}
+							icon={<LayersMinimalisticIcon className="h-3.5 w-3.5" />}
 						>
 							Templates
 						</TabBtn>
 						<TabBtn
 							active={tab === "colors"}
 							onClick={() => setTab("colors")}
-							icon={<Palette className="h-3.5 w-3.5" />}
+							icon={<Palette2Icon className="h-3.5 w-3.5" />}
 						>
 							Colors
 						</TabBtn>
 						<TabBtn
 							active={tab === "type"}
 							onClick={() => setTab("type")}
-							icon={<Type className="h-3.5 w-3.5" />}
+							icon={<TextFormatIcon className="h-3.5 w-3.5" />}
 						>
 							Type
 						</TabBtn>
 						<TabBtn
 							active={tab === "layout"}
 							onClick={() => setTab("layout")}
-							icon={<LayoutGrid className="h-3.5 w-3.5" />}
+							icon={<Widget4Icon className="h-3.5 w-3.5" />}
 						>
 							Layout
 						</TabBtn>
 						<TabBtn
 							active={tab === "effects"}
 							onClick={() => setTab("effects")}
-							icon={<Sparkles className="h-3.5 w-3.5" />}
+							icon={<MagicWand3Icon className="h-3.5 w-3.5" />}
 						>
 							Effects
 						</TabBtn>
 						<TabBtn
 							active={tab === "css"}
 							onClick={() => setTab("css")}
-							icon={<Code className="h-3.5 w-3.5" />}
+							icon={<CodeIcon className="h-3.5 w-3.5" />}
 						>
 							CSS
 						</TabBtn>
@@ -166,7 +166,7 @@ function ThemePage() {
 					/>
 				</div>
 			</div>
-		</DashboardShell>
+		</>
 	);
 }
 
@@ -250,7 +250,7 @@ function ColorField({
 				<Input
 					value={value}
 					onChange={(e) => onChange(e.target.value)}
-					className="max-w-[130px] font-mono text-xs"
+					className="max-w-32.5 font-mono text-xs"
 				/>
 			</div>
 		</Row>
@@ -287,7 +287,7 @@ function TemplatesPane({
 						>
 							<div className="flex items-center justify-between">
 								<span className="text-sm font-medium">{tpl.name}</span>
-								{active && <Check className="h-3.5 w-3.5" />}
+								{active && <CheckCircleIcon size={14} secondaryOpacity={0} />}
 							</div>
 							<div className="mt-2 flex gap-1">
 								<span

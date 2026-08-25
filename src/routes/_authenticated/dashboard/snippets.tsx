@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Code2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import {
 	EmptyState,
@@ -46,7 +45,7 @@ function SnippetsPage() {
 	const [editing, setEditing] = useState<SnippetItem | "new" | null>(null);
 
 	return (
-		<DashboardShell>
+		<>
 			<SectionHeader
 				eyebrow="Content"
 				title="Snippets"
@@ -144,7 +143,7 @@ function SnippetsPage() {
 					pending={addSnippet.isPending || updateSnippet.isPending}
 				/>
 			) : null}
-		</DashboardShell>
+		</>
 	);
 }
 

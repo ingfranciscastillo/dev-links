@@ -3,7 +3,6 @@ import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { Camera } from "lucide-react";
 import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -45,12 +44,9 @@ function ProfilePage() {
 		},
 	});
 
-	// Hydrate bio/location/website from useProfileCore (only once).
-	const hydratedRef = useRef(false);
 	useEffect(() => {
-		if (hydratedRef.current) return;
 		if (!core.data) return;
-		hydratedRef.current = true;
+
 		form.reset({
 			name: user.name,
 			username: user.username ?? "",
@@ -63,7 +59,7 @@ function ProfilePage() {
 	const avatarHue = hueFromString(user.id);
 
 	return (
-		<DashboardShell>
+		<>
 			<div className="mb-6">
 				<p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
 					Settings
@@ -278,6 +274,6 @@ function ProfilePage() {
 					)}
 				</form.Subscribe>
 			</form>
-		</DashboardShell>
+		</>
 	);
 }

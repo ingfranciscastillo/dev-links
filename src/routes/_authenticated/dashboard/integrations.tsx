@@ -9,7 +9,6 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +89,7 @@ function IntegrationsPage() {
 	}, [reload]);
 
 	return (
-		<DashboardShell>
+		<>
 			<SectionHeader
 				eyebrow="Live"
 				title="Integrations"
@@ -110,7 +109,7 @@ function IntegrationsPage() {
 					);
 				})}
 			</div>
-		</DashboardShell>
+		</>
 	);
 }
 

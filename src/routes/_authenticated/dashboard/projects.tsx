@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Folder, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import {
 	EmptyState,
@@ -62,7 +61,7 @@ function ProjectsPage() {
 	const [editing, setEditing] = useState<ProjectItem | "new" | null>(null);
 
 	return (
-		<DashboardShell>
+		<>
 			<SectionHeader
 				eyebrow="Content"
 				title="Projects"
@@ -204,7 +203,7 @@ function ProjectsPage() {
 					pending={addProject.isPending || updateProject.isPending}
 				/>
 			) : null}
-		</DashboardShell>
+		</>
 	);
 }
 

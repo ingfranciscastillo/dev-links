@@ -18,6 +18,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard/analytics'
 import { Route as AuthenticatedDashboardArticlesRouteImport } from './routes/_authenticated/dashboard/articles'
 import { Route as AuthenticatedDashboardIntegrationsRouteImport } from './routes/_authenticated/dashboard/integrations'
@@ -75,6 +76,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedDashboardIndexRoute =
+  AuthenticatedDashboardIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardAnalyticsRoute =
   AuthenticatedDashboardAnalyticsRouteImport.update({
     id: '/analytics',
@@ -165,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
@@ -176,7 +184,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
-  '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
@@ -187,6 +194,7 @@ export interface FileRoutesByTo {
   '/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
@@ -211,6 +219,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
   '/_authenticated/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
@@ -235,6 +244,7 @@ export interface FileRouteTypes {
     | '/dashboard/snippets'
     | '/dashboard/theme'
     | '/api/auth/$'
+    | '/dashboard/'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
   fileRoutesByTo: FileRoutesByTo
@@ -246,7 +256,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/reset-password'
     | '/signup'
-    | '/dashboard'
     | '/dashboard/analytics'
     | '/dashboard/articles'
     | '/dashboard/integrations'
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/dashboard/snippets'
     | '/dashboard/theme'
     | '/api/auth/$'
+    | '/dashboard'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
   id:
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/snippets'
     | '/_authenticated/dashboard/theme'
     | '/api/auth/$'
+    | '/_authenticated/dashboard/'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
   fileRoutesById: FileRoutesById
@@ -362,6 +373,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/dashboard/': {
+      id: '/_authenticated/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof AuthenticatedDashboardIndexRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/_authenticated/dashboard/analytics': {
       id: '/_authenticated/dashboard/analytics'
@@ -460,6 +478,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardSettingsRoute: typeof AuthenticatedDashboardSettingsRoute
   AuthenticatedDashboardSnippetsRoute: typeof AuthenticatedDashboardSnippetsRoute
   AuthenticatedDashboardThemeRoute: typeof AuthenticatedDashboardThemeRoute
+  AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
@@ -474,6 +493,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardSettingsRoute: AuthenticatedDashboardSettingsRoute,
     AuthenticatedDashboardSnippetsRoute: AuthenticatedDashboardSnippetsRoute,
     AuthenticatedDashboardThemeRoute: AuthenticatedDashboardThemeRoute,
+    AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =

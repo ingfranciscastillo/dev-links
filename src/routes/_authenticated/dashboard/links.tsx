@@ -25,8 +25,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { ModalShell } from "@/components/dashboard/ModalShell";
+import { ModalShell } from "#/components/dashboard/ModalShell";
 import {
 	EmptyState,
 	SectionHeader,
@@ -80,7 +79,7 @@ function LinksPage() {
 	}
 
 	return (
-		<DashboardShell>
+		<>
 			<SectionHeader
 				eyebrow="Content"
 				title="Links"
@@ -162,7 +161,7 @@ function LinksPage() {
 					pending={addLink.isPending || updateLink.isPending}
 				/>
 			) : null}
-		</DashboardShell>
+		</>
 	);
 }
 

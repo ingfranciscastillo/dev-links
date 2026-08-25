@@ -2,7 +2,6 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileText, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import {
 	EmptyState,
@@ -41,7 +40,7 @@ function ArticlesPage() {
 	const sorted = [...data.articles].sort((a, b) => (a.date < b.date ? 1 : -1));
 
 	return (
-		<DashboardShell>
+		<>
 			<SectionHeader
 				eyebrow="Content"
 				title="Articles"
@@ -141,7 +140,7 @@ function ArticlesPage() {
 					pending={addArticle.isPending || updateArticle.isPending}
 				/>
 			) : null}
-		</DashboardShell>
+		</>
 	);
 }
 

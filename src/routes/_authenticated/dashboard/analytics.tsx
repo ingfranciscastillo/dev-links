@@ -15,7 +15,6 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,7 +46,7 @@ function AnalyticsPage() {
 	});
 
 	return (
-		<DashboardShell>
+		<>
 			<SectionHeader
 				eyebrow="Insights"
 				title="Analytics"
@@ -60,7 +59,7 @@ function AnalyticsPage() {
 			) : data ? (
 				<AnalyticsBody data={data} />
 			) : null}
-		</DashboardShell>
+		</>
 	);
 }
 
@@ -290,16 +289,15 @@ function PieRow({ data }: { data: Array<{ name: string; value: number }> }) {
 				<ResponsiveContainer>
 					<PieChart>
 						<Pie
-							data={data}
+							data={data.map((item, i) => ({
+								...item,
+								fill: PIE_COLORS[i % PIE_COLORS.length],
+							}))}
 							dataKey="value"
 							innerRadius={35}
 							outerRadius={65}
 							stroke="none"
-						>
-							{data.map((_, i) => (
-								<Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-							))}
-						</Pie>
+						/>
 						<Tooltip contentStyle={tooltipStyle} />
 					</PieChart>
 				</ResponsiveContainer>

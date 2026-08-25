@@ -25,6 +25,7 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { ModalShell } from "#/components/dashboard/ModalShell";
 import {
 	EmptyState,
@@ -121,8 +122,8 @@ function LinksPage() {
 									onToggle={() => toggleLink.mutate(l.id)}
 									onRemove={() => {
 										removeLink.mutate(l.id, {
-											onSuccess: () => window.alert("Link removed"),
-											onError: () => window.alert("Couldn't remove link"),
+											onSuccess: () => toast.success("Link removed"),
+											onError: () => toast.error("Couldn't remove link"),
 										});
 									}}
 								/>
@@ -140,20 +141,20 @@ function LinksPage() {
 						if (editing === "new") {
 							addLink.mutate(values, {
 								onSuccess: () => {
-									window.alert("Link created");
+									toast.success("Link created");
 									setEditing(null);
 								},
-								onError: () => window.alert("Couldn't create link"),
+								onError: () => toast.error("Couldn't create link"),
 							});
 						} else {
 							updateLink.mutate(
 								{ id: editing.id, ...values },
 								{
 									onSuccess: () => {
-										window.alert("Link updated");
+										toast.success("Link updated");
 										setEditing(null);
 									},
-									onError: () => window.alert("Couldn't update link"),
+									onError: () => toast.error("Couldn't update link"),
 								},
 							);
 						}

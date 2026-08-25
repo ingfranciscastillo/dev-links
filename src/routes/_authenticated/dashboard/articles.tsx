@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
 import { FileText, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import {
 	EmptyState,
@@ -96,8 +97,8 @@ function ArticlesPage() {
 									type="button"
 									onClick={() => {
 										removeArticle.mutate(a.id, {
-											onSuccess: () => window.alert("Article removed"),
-											onError: () => window.alert("Couldn't remove article"),
+											onSuccess: () => toast.success("Article removed"),
+											onError: () => toast.error("Couldn't remove article"),
 										});
 									}}
 									className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-destructive"
@@ -119,20 +120,20 @@ function ArticlesPage() {
 						if (editing === "new") {
 							addArticle.mutate(v, {
 								onSuccess: () => {
-									window.alert("Article added");
+									toast.success("Article added");
 									setEditing(null);
 								},
-								onError: () => window.alert("Couldn't add article"),
+								onError: () => toast.error("Couldn't add article"),
 							});
 						} else {
 							updateArticle.mutate(
 								{ id: editing.id, ...v },
 								{
 									onSuccess: () => {
-										window.alert("Article updated");
+										toast.success("Article updated");
 										setEditing(null);
 									},
-									onError: () => window.alert("Couldn't update article"),
+									onError: () => toast.error("Couldn't update article"),
 								},
 							);
 						}

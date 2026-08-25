@@ -20,6 +20,7 @@ import {
 	updateProject,
 	updateSnippet,
 	updateTheme,
+	upsertMyProfile,
 	wipeProfileData,
 } from "@/lib/api/profile-data.functions";
 import {
@@ -51,6 +52,22 @@ export function useProfileCore() {
 	return useQuery({
 		queryKey: profileCoreKey,
 		queryFn: () => getMyProfileCore(),
+	});
+}
+
+export function useUpdateProfile() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (input: {
+			name: string;
+			username: string;
+			bio?: string;
+			location?: string;
+			website?: string;
+		}) => upsertMyProfile({ data: input }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: profileCoreKey });
+		},
 	});
 }
 

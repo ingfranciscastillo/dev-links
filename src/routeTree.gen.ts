@@ -19,7 +19,9 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard/analytics'
 import { Route as AuthenticatedDashboardArticlesRouteImport } from './routes/_authenticated/dashboard/articles'
+import { Route as AuthenticatedDashboardIntegrationsRouteImport } from './routes/_authenticated/dashboard/integrations'
 import { Route as AuthenticatedDashboardLinksRouteImport } from './routes/_authenticated/dashboard/links'
+import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard/profile'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPublicHooksTrackClickRouteImport } from './routes/api/public/hooks/track-click'
 import { Route as ApiPublicHooksTrackViewRouteImport } from './routes/api/public/hooks/track-view'
@@ -75,10 +77,22 @@ const AuthenticatedDashboardArticlesRoute =
     path: '/articles',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardIntegrationsRoute =
+  AuthenticatedDashboardIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardLinksRoute =
   AuthenticatedDashboardLinksRouteImport.update({
     id: '/links',
     path: '/links',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardProfileRoute =
+  AuthenticatedDashboardProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -108,7 +122,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
+  '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/dashboard/links': typeof AuthenticatedDashboardLinksRoute
+  '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -123,7 +139,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
+  '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/dashboard/links': typeof AuthenticatedDashboardLinksRoute
+  '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -140,7 +158,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/_authenticated/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
+  '/_authenticated/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/_authenticated/dashboard/links': typeof AuthenticatedDashboardLinksRoute
+  '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -157,7 +177,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/analytics'
     | '/dashboard/articles'
+    | '/dashboard/integrations'
     | '/dashboard/links'
+    | '/dashboard/profile'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -172,7 +194,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/analytics'
     | '/dashboard/articles'
+    | '/dashboard/integrations'
     | '/dashboard/links'
+    | '/dashboard/profile'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -188,7 +212,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/dashboard/analytics'
     | '/_authenticated/dashboard/articles'
+    | '/_authenticated/dashboard/integrations'
     | '/_authenticated/dashboard/links'
+    | '/_authenticated/dashboard/profile'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -279,11 +305,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardArticlesRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/integrations': {
+      id: '/_authenticated/dashboard/integrations'
+      path: '/integrations'
+      fullPath: '/dashboard/integrations'
+      preLoaderRoute: typeof AuthenticatedDashboardIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/links': {
       id: '/_authenticated/dashboard/links'
       path: '/links'
       fullPath: '/dashboard/links'
       preLoaderRoute: typeof AuthenticatedDashboardLinksRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/profile': {
+      id: '/_authenticated/dashboard/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof AuthenticatedDashboardProfileRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
     '/api/auth/$': {
@@ -313,14 +353,19 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardAnalyticsRoute: typeof AuthenticatedDashboardAnalyticsRoute
   AuthenticatedDashboardArticlesRoute: typeof AuthenticatedDashboardArticlesRoute
+  AuthenticatedDashboardIntegrationsRoute: typeof AuthenticatedDashboardIntegrationsRoute
   AuthenticatedDashboardLinksRoute: typeof AuthenticatedDashboardLinksRoute
+  AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
     AuthenticatedDashboardAnalyticsRoute: AuthenticatedDashboardAnalyticsRoute,
     AuthenticatedDashboardArticlesRoute: AuthenticatedDashboardArticlesRoute,
+    AuthenticatedDashboardIntegrationsRoute:
+      AuthenticatedDashboardIntegrationsRoute,
     AuthenticatedDashboardLinksRoute: AuthenticatedDashboardLinksRoute,
+    AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =

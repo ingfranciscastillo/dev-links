@@ -8,6 +8,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
 
@@ -231,7 +232,13 @@ export const integrationAccounts = pgTable(
 			.notNull()
 			.defaultNow(),
 	},
-	(table) => [index("integration_accounts_user_id_idx").on(table.userId)],
+	(table) => [
+		index("integration_accounts_user_id_idx").on(table.userId),
+		uniqueIndex("integration_accounts_user_provider_uq").on(
+			table.userId,
+			table.provider,
+		),
+	],
 );
 
 export const integrationCache = pgTable(

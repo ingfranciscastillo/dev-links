@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, not } from "drizzle-orm";
 import { z } from "zod";
+import { user as authUser } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import {
 	articles,
@@ -121,6 +122,56 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 );
 
 const idInput = z.object({ id: z.string() });
+
+// ---------- profile (user + profiles core fields) ----------
+
+export const profileInput = z.object({
+	name: z.string().min(2).max(60),
+	username: z
+		.string()
+		.min(3)
+		.max(24)
+		.regex(/^[a-z0-9_-]+$/, "Only a-z, 0-9, _ and -"),
+	bio: z.string().max(160).optional().or(z.literal("")),
+	location: z.string().max(60).optional().or(z.literal("")),
+	website: z.string().url().optional().or(z.literal("")),
+});
+
+export const upsertMyProfile = createServerFn({ method: "POST" })
+	.validator((input) => profileInput.parse(input))
+	.handler(async ({ data }) => {
+		const userId = await requireUserId();
+		const cleanUsername = data.username.toLowerCase();
+
+		// Check username uniqueness against other rows.
+		const [taken] = await db
+			.select({ id: authUser.id })
+			.from(authUser)
+			.where(
+				and(eq(authUser.username, cleanUsername), not(eq(authUser.id, userId))),
+			)
+			.limit(1);
+		if (taken) {
+			throw new Error("That username is taken");
+		}
+
+		await db
+			.update(authUser)
+			.set({ name: data.name, username: cleanUsername, updatedAt: new Date() })
+			.where(eq(authUser.id, userId));
+
+		await db
+			.update(profiles)
+			.set({
+				bio: data.bio || null,
+				location: data.location || null,
+				website: data.website || null,
+				updatedAt: new Date(),
+			})
+			.where(eq(profiles.id, userId));
+
+		return { ok: true as const };
+	});
 
 // ---------- links ----------
 

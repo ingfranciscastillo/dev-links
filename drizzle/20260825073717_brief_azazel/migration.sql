@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "integration_accounts_user_provider_uq" ON "integration_accounts" ("user_id","provider");

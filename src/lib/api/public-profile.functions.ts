@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { and, asc, desc, eq, ilike } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { user as authUserTable } from "@/db/auth-schema";
 import { db } from "@/db/index";
@@ -41,6 +41,8 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 		z.object({ username: z.string().min(1).max(64) }).parse(input),
 	)
 	.handler(async ({ data }): Promise<PublicProfile> => {
+		// lower(username) = input: sin comodines inyectables (% _) y compatible
+		// con el índice unique de username.
 		const [profile] = await db
 			.select({
 				id: profiles.id,
@@ -53,7 +55,9 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			})
 			.from(profiles)
 			.innerJoin(authUserTable, eq(authUserTable.id, profiles.id))
-			.where(ilike(authUserTable.username, data.username))
+			.where(
+				sql`lower(${authUserTable.username}) = ${data.username.toLowerCase()}`,
+			)
 			.limit(1);
 
 		if (!profile) return null;

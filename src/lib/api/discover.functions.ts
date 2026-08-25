@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, or, type SQL, sql } from "drizzle-orm";
 import { z } from "zod";
 import { user as userTable } from "@/db/auth-schema";
 import { db } from "@/db/index";
@@ -29,15 +29,9 @@ const inputSchema = z.object({
 });
 
 export const searchProfiles = createServerFn({ method: "GET" })
-	.inputValidator((raw) => inputSchema.parse(raw))
+	.validator((raw) => inputSchema.parse(raw))
 	.handler(async ({ data }): Promise<DiscoverResult[]> => {
 		try {
-			// TODO: full-text search via profiles.search_tsv once the maintenance
-			// trigger is in place. For now we ignore `data.q` (full-text column is
-			// declared and GIN-indexed but never populated).
-			const query = data.q.trim();
-			void query;
-
 			const baseQuery = db
 				.select({
 					id: profiles.id,
@@ -54,7 +48,22 @@ export const searchProfiles = createServerFn({ method: "GET" })
 				.from(profiles)
 				.leftJoin(userTable, eq(userTable.id, profiles.id));
 
-			const conditions = [];
+			// Búsqueda de texto simple (ILIKE) sobre name/username/bio/location.
+			// Pendiente: full-text vía profiles.search_tsv cuando exista el
+			// trigger de mantenimiento (columna declarada + GIN, aún sin poblar).
+			const conditions: SQL[] = [];
+
+			const query = data.q.trim();
+			if (query) {
+				const pattern = `%${query.replace(/[%_\\]/g, "\\$&")}%`;
+				const textMatch = or(
+					ilike(userTable.name, pattern),
+					ilike(userTable.username, pattern),
+					ilike(profiles.bio, pattern),
+					ilike(profiles.location, pattern),
+				);
+				if (textMatch) conditions.push(textMatch);
+			}
 
 			if (data.language)
 				conditions.push(eq(profiles.primaryLanguage, data.language));
@@ -69,10 +78,8 @@ export const searchProfiles = createServerFn({ method: "GET" })
 				);
 			}
 
-			const rows = await (conditions.length > 0
-				? baseQuery.where(sql.join(conditions, sql.raw(" AND ")))
-				: baseQuery
-			)
+			const rows = await baseQuery
+				.where(conditions.length > 0 ? and(...conditions) : undefined)
 				.orderBy(desc(profiles.updatedAt))
 				.limit(data.limit);
 

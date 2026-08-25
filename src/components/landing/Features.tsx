@@ -1,5 +1,4 @@
 import {
-	BoltIcon,
 	ChartSquareIcon,
 	CodeSquareIcon,
 	GlobeIcon,

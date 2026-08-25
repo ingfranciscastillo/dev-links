@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import {
 	AlertCircle,
 	CheckCircle2,
@@ -8,23 +7,24 @@ import {
 	Save,
 	Trash2,
 } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-	deleteIntegrationAccount,
-	type IntegrationAccount,
-	listMyIntegrationAccounts,
-	refreshIntegration,
-	upsertIntegrationAccount,
-} from "@/lib/api/integrations/account.functions";
+import type { IntegrationAccount } from "@/lib/api/integrations/account.functions";
 import {
 	PROVIDER_LABEL,
 	PROVIDERS,
 	type Provider,
 } from "@/lib/integrations/types";
+import {
+	useDeleteIntegrationAccount,
+	useIntegrationAccounts,
+	useRefreshIntegration,
+	useUpsertIntegrationAccount,
+} from "@/lib/queries/integrations";
 
 export const Route = createFileRoute("/_authenticated/dashboard/integrations")({
 	head: () => ({
@@ -72,21 +72,7 @@ const PROVIDER_HELP: Record<
 };
 
 function IntegrationsPage() {
-	const [accounts, setAccounts] = useState<IntegrationAccount[] | null>(null);
-	const list = useServerFn(listMyIntegrationAccounts);
-
-	const reload = useCallback(async () => {
-		try {
-			const data = await list();
-			setAccounts(data);
-		} catch (err) {
-			window.alert(err instanceof Error ? err.message : "Failed to load");
-		}
-	}, [list]);
-
-	useEffect(() => {
-		reload();
-	}, [reload]);
+	const { data: accounts } = useIntegrationAccounts();
 
 	return (
 		<>
@@ -104,7 +90,6 @@ function IntegrationsPage() {
 							key={provider}
 							provider={provider}
 							account={account}
-							onChanged={reload}
 						/>
 					);
 				})}
@@ -116,11 +101,9 @@ function IntegrationsPage() {
 function IntegrationCard({
 	provider,
 	account,
-	onChanged,
 }: {
 	provider: Provider;
 	account: IntegrationAccount | null;
-	onChanged: () => void;
 }) {
 	const help = PROVIDER_HELP[provider];
 	const [handle, setHandle] = useState(account?.handle ?? "");
@@ -129,10 +112,14 @@ function IntegrationCard({
 			? String((account?.config?.[help.configField.key] as string) ?? "")
 			: "",
 	);
-	const [busy, setBusy] = useState<"save" | "sync" | "delete" | null>(null);
-	const upsert = useServerFn(upsertIntegrationAccount);
-	const del = useServerFn(deleteIntegrationAccount);
-	const refresh = useServerFn(refreshIntegration);
+
+	const upsertAccount = useUpsertIntegrationAccount();
+	const deleteAccount = useDeleteIntegrationAccount();
+	const refreshAccount = useRefreshIntegration();
+	const busy =
+		upsertAccount.isPending ||
+		refreshAccount.isPending ||
+		deleteAccount.isPending;
 
 	useEffect(() => {
 		setHandle(account?.handle ?? "");
@@ -145,54 +132,43 @@ function IntegrationCard({
 
 	async function handleSave() {
 		if (!handle.trim()) {
-			window.alert("Handle is required");
+			toast.error("Handle is required");
 			return;
 		}
-		setBusy("save");
 		try {
 			const config: Record<string, string> = {};
 			if (help.configField && configValue.trim()) {
 				config[help.configField.key] = configValue.trim();
 			}
-			await upsert({
-				data: { provider, handle: handle.trim(), config },
+			await upsertAccount.mutateAsync({
+				provider,
+				handle: handle.trim(),
+				config,
 			});
-			window.alert(`${PROVIDER_LABEL[provider]} saved`);
-			onChanged();
+			toast.success(`${PROVIDER_LABEL[provider]} saved`);
 		} catch (err) {
-			window.alert(err instanceof Error ? err.message : "Save failed");
-		} finally {
-			setBusy(null);
+			toast.error(err instanceof Error ? err.message : "Save failed");
 		}
 	}
 
 	async function handleSync() {
-		setBusy("sync");
 		try {
-			const res = await refresh({ data: { provider } });
-			window.alert(
+			const res = await refreshAccount.mutateAsync(provider);
+			toast.success(
 				`Synced ${PROVIDER_LABEL[provider]} (${res.kinds.join(", ")})`,
 			);
-			onChanged();
 		} catch (err) {
-			window.alert(err instanceof Error ? err.message : "Sync failed");
-			onChanged();
-		} finally {
-			setBusy(null);
+			toast.error(err instanceof Error ? err.message : "Sync failed");
 		}
 	}
 
 	async function handleDelete() {
 		if (!window.confirm(`Disconnect ${PROVIDER_LABEL[provider]}?`)) return;
-		setBusy("delete");
 		try {
-			await del({ data: { provider } });
-			window.alert(`${PROVIDER_LABEL[provider]} disconnected`);
-			onChanged();
+			await deleteAccount.mutateAsync(provider);
+			toast.success(`${PROVIDER_LABEL[provider]} disconnected`);
 		} catch (err) {
-			window.alert(err instanceof Error ? err.message : "Delete failed");
-		} finally {
-			setBusy(null);
+			toast.error(err instanceof Error ? err.message : "Delete failed");
 		}
 	}
 
@@ -245,25 +221,25 @@ function IntegrationCard({
 			</div>
 
 			<div className="mt-4 flex flex-wrap gap-2">
-				<Button onClick={handleSave} disabled={busy !== null} size="sm">
+				<Button onClick={handleSave} disabled={busy} size="sm">
 					<Save className="mr-1.5 h-3.5 w-3.5" />
 					{account ? "Update" : "Connect"}
 				</Button>
 				<Button
 					onClick={handleSync}
-					disabled={busy !== null || !account}
+					disabled={busy || !account}
 					size="sm"
 					variant="outline"
 				>
 					<RefreshCw
-						className={`mr-1.5 h-3.5 w-3.5 ${busy === "sync" ? "animate-spin" : ""}`}
+						className={`mr-1.5 h-3.5 w-3.5 ${refreshAccount.isPending ? "animate-spin" : ""}`}
 					/>
 					Sync now
 				</Button>
 				{account && (
 					<Button
 						onClick={handleDelete}
-						disabled={busy !== null}
+						disabled={busy}
 						size="sm"
 						variant="ghost"
 						className="text-muted-foreground"

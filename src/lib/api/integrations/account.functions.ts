@@ -97,22 +97,24 @@ export const deleteIntegrationAccount = createServerFn({ method: "POST" })
 	.validator((input) => providerInputSchema.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
-		await db
-			.delete(integrationCache)
-			.where(
-				and(
-					eq(integrationCache.userId, userId),
-					eq(integrationCache.provider, data.provider),
-				),
-			);
-		await db
-			.delete(integrationAccounts)
-			.where(
-				and(
-					eq(integrationAccounts.userId, userId),
-					eq(integrationAccounts.provider, data.provider),
-				),
-			);
+		await db.transaction(async (tx) => {
+			await tx
+				.delete(integrationCache)
+				.where(
+					and(
+						eq(integrationCache.userId, userId),
+						eq(integrationCache.provider, data.provider),
+					),
+				);
+			await tx
+				.delete(integrationAccounts)
+				.where(
+					and(
+						eq(integrationAccounts.userId, userId),
+						eq(integrationAccounts.provider, data.provider),
+					),
+				);
+		});
 		return { ok: true as const };
 	});
 

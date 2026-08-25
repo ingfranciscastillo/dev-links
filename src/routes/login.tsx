@@ -1,7 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuthShell, OAuthRow } from "@/components/auth/authShell";
-import { useSignIn } from "@/components/auth/hooks/use-sign-in";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -10,6 +9,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { useSignIn } from "@/lib/queries/use-sign-in";
 import { signInSchema } from "@/lib/schemas/auth";
 import { zodField } from "@/lib/schemas/field";
 

@@ -1,7 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AuthShell, OAuthRow } from "@/components/auth/authShell";
-import { useSignUp } from "@/components/auth/hooks/use-sign-up";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -15,6 +14,7 @@ import {
 	InputGroupAddon,
 	InputGroupInput,
 } from "@/components/ui/input-group";
+import { useSignUp } from "@/lib/queries/use-sign-up";
 import {
 	emailSchema,
 	nameSchema,

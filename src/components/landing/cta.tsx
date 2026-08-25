@@ -1,4 +1,4 @@
-import { ArrowRightIcon } from "@solar-icons/react/linear/arrow-right";
+import { ArrowRightIcon } from "@solar-icons/react/linear";
 
 export function Cta() {
 	return (

@@ -3,9 +3,10 @@ import {
 	ChartSquareIcon,
 	CodeSquareIcon,
 	GlobeIcon,
+	ImportIcon,
 	MagnifierIcon,
 	PaletteIcon,
-	StarsIcon,
+	SpeedometerMaxIcon,
 } from "@solar-icons/react/linear";
 import { GithubIcon } from "@/components/brand-icons";
 
@@ -41,12 +42,12 @@ const items = [
 		desc: "Filter devs by language, stack, country and availability.",
 	},
 	{
-		icon: StarsIcon,
+		icon: ImportIcon,
 		title: "Auto-imports",
 		desc: "Dev.to, Hashnode, Medium RSS and Stack Overflow — all in sync.",
 	},
 	{
-		icon: BoltIcon,
+		icon: SpeedometerMaxIcon,
 		title: "Built for speed",
 		desc: "Edge-rendered, SEO-first, accessible by default.",
 	},

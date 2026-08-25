@@ -1,4 +1,4 @@
-import { CheckSquareIcon } from "@solar-icons/react/linear/check-square";
+import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import { SectionHeader } from "./Features";
 
 const plans = [
@@ -72,10 +72,10 @@ export function Pricing() {
 							</div>
 							<ul className="mt-6 space-y-2.5 text-sm">
 								{p.features.map((f) => (
-									<li key={f} className="flex items-start gap-2.5">
-										<CheckSquareIcon
-											width={16}
-											height={16}
+									<li key={f} className="flex items-center gap-2.5">
+										<CheckCircleIcon
+											size={20}
+											secondaryOpacity={0}
 											className="mt-0.5 shrink-0 text-brand"
 										/>
 										<span className="text-muted-foreground">{f}</span>

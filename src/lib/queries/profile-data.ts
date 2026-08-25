@@ -16,6 +16,7 @@ import {
 	resetTheme,
 	toggleLink,
 	updateArticle,
+	updateDiscovery,
 	updateLink,
 	updateProject,
 	updateSnippet,
@@ -67,6 +68,22 @@ export function useUpdateProfile() {
 		}) => upsertMyProfile({ data: input }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: profileCoreKey });
+		},
+	});
+}
+
+export function useUpdateDiscovery() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (input: {
+			country?: string;
+			primaryLanguage?: string;
+			seniority?: string;
+			technologies?: string[];
+			available?: boolean;
+		}) => updateDiscovery({ data: input }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: profileDataKey });
 		},
 	});
 }

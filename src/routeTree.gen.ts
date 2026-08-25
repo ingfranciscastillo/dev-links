@@ -22,6 +22,8 @@ import { Route as AuthenticatedDashboardArticlesRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardIntegrationsRouteImport } from './routes/_authenticated/dashboard/integrations'
 import { Route as AuthenticatedDashboardLinksRouteImport } from './routes/_authenticated/dashboard/links'
 import { Route as AuthenticatedDashboardProfileRouteImport } from './routes/_authenticated/dashboard/profile'
+import { Route as AuthenticatedDashboardProjectsRouteImport } from './routes/_authenticated/dashboard/projects'
+import { Route as AuthenticatedDashboardSettingsRouteImport } from './routes/_authenticated/dashboard/settings'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPublicHooksTrackClickRouteImport } from './routes/api/public/hooks/track-click'
 import { Route as ApiPublicHooksTrackViewRouteImport } from './routes/api/public/hooks/track-view'
@@ -95,6 +97,18 @@ const AuthenticatedDashboardProfileRoute =
     path: '/profile',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardProjectsRoute =
+  AuthenticatedDashboardProjectsRouteImport.update({
+    id: '/projects',
+    path: '/projects',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardSettingsRoute =
+  AuthenticatedDashboardSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -125,6 +139,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/dashboard/links': typeof AuthenticatedDashboardLinksRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
+  '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -142,6 +158,8 @@ export interface FileRoutesByTo {
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/dashboard/links': typeof AuthenticatedDashboardLinksRoute
   '/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
+  '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -161,6 +179,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
   '/_authenticated/dashboard/links': typeof AuthenticatedDashboardLinksRoute
   '/_authenticated/dashboard/profile': typeof AuthenticatedDashboardProfileRoute
+  '/_authenticated/dashboard/projects': typeof AuthenticatedDashboardProjectsRoute
+  '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -180,6 +200,8 @@ export interface FileRouteTypes {
     | '/dashboard/integrations'
     | '/dashboard/links'
     | '/dashboard/profile'
+    | '/dashboard/projects'
+    | '/dashboard/settings'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -197,6 +219,8 @@ export interface FileRouteTypes {
     | '/dashboard/integrations'
     | '/dashboard/links'
     | '/dashboard/profile'
+    | '/dashboard/projects'
+    | '/dashboard/settings'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -215,6 +239,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/integrations'
     | '/_authenticated/dashboard/links'
     | '/_authenticated/dashboard/profile'
+    | '/_authenticated/dashboard/projects'
+    | '/_authenticated/dashboard/settings'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -326,6 +352,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardProfileRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/projects': {
+      id: '/_authenticated/dashboard/projects'
+      path: '/projects'
+      fullPath: '/dashboard/projects'
+      preLoaderRoute: typeof AuthenticatedDashboardProjectsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/settings': {
+      id: '/_authenticated/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof AuthenticatedDashboardSettingsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -356,6 +396,8 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardIntegrationsRoute: typeof AuthenticatedDashboardIntegrationsRoute
   AuthenticatedDashboardLinksRoute: typeof AuthenticatedDashboardLinksRoute
   AuthenticatedDashboardProfileRoute: typeof AuthenticatedDashboardProfileRoute
+  AuthenticatedDashboardProjectsRoute: typeof AuthenticatedDashboardProjectsRoute
+  AuthenticatedDashboardSettingsRoute: typeof AuthenticatedDashboardSettingsRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
@@ -366,6 +408,8 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
       AuthenticatedDashboardIntegrationsRoute,
     AuthenticatedDashboardLinksRoute: AuthenticatedDashboardLinksRoute,
     AuthenticatedDashboardProfileRoute: AuthenticatedDashboardProfileRoute,
+    AuthenticatedDashboardProjectsRoute: AuthenticatedDashboardProjectsRoute,
+    AuthenticatedDashboardSettingsRoute: AuthenticatedDashboardSettingsRoute,
   }
 
 const AuthenticatedDashboardRouteWithChildren =

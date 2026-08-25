@@ -173,6 +173,37 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 		return { ok: true as const };
 	});
 
+const discoveryInput = z.object({
+	country: z
+		.string()
+		.length(2)
+		.regex(/^[A-Z]+$/)
+		.optional()
+		.or(z.literal("")),
+	primaryLanguage: z.string().max(40).optional().or(z.literal("")),
+	seniority: z.string().max(40).optional().or(z.literal("")),
+	technologies: z.array(z.string().min(1).max(40)).max(20).default([]),
+	available: z.boolean().default(false),
+});
+
+export const updateDiscovery = createServerFn({ method: "POST" })
+	.validator((input) => discoveryInput.parse(input))
+	.handler(async ({ data }) => {
+		const userId = await requireUserId();
+		await db
+			.update(profiles)
+			.set({
+				country: data.country || null,
+				primaryLanguage: data.primaryLanguage || null,
+				seniority: data.seniority || null,
+				technologies: data.technologies,
+				available: data.available,
+				updatedAt: new Date(),
+			})
+			.where(eq(profiles.id, userId));
+		return { ok: true as const };
+	});
+
 // ---------- links ----------
 
 const linkInput = z.object({

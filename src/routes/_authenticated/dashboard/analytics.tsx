@@ -1,11 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
 import { Eye, Lock, MousePointerClick, TrendingUp, Users } from "lucide-react";
 import {
 	Bar,
 	BarChart,
-	Cell,
 	Line,
 	LineChart,
 	Pie,
@@ -17,10 +14,8 @@ import {
 } from "recharts";
 import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
-import {
-	type AnalyticsSummary,
-	getMyAnalytics,
-} from "@/lib/api/analytics.functions";
+import type { AnalyticsSummary } from "@/lib/api/analytics.functions";
+import { useMyAnalytics } from "@/lib/queries/analytics";
 
 export const Route = createFileRoute("/_authenticated/dashboard/analytics")({
 	head: () => ({ meta: [{ title: "Analytics — DevLinks" }] }),
@@ -38,12 +33,7 @@ const PIE_COLORS = [
 ];
 
 function AnalyticsPage() {
-	const fetchAnalytics = useServerFn(getMyAnalytics);
-	const { data, isLoading } = useQuery({
-		queryKey: ["analytics-30d"],
-		queryFn: () => fetchAnalytics(),
-		staleTime: 60_000,
-	});
+	const { data, isLoading, isError, refetch } = useMyAnalytics();
 
 	return (
 		<>
@@ -54,6 +44,8 @@ function AnalyticsPage() {
 			/>
 			{isLoading ? (
 				<SkeletonGrid />
+			) : isError ? (
+				<ErrorState onRetry={() => refetch()} />
 			) : data?.plan !== "pro" ? (
 				<UpgradeGate />
 			) : data ? (
@@ -72,6 +64,20 @@ function SkeletonGrid() {
 					className="h-24 animate-pulse rounded-xl border border-hairline bg-surface/40"
 				/>
 			))}
+		</div>
+	);
+}
+
+function ErrorState({ onRetry }: { onRetry: () => void }) {
+	return (
+		<div className="rounded-xl border border-hairline bg-surface/40 p-10 text-center">
+			<h2 className="text-lg font-semibold">Couldn't load your analytics</h2>
+			<p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+				Something went wrong while fetching your stats. Please try again.
+			</p>
+			<Button variant="outline" className="mt-6" onClick={onRetry}>
+				Retry
+			</Button>
 		</div>
 	);
 }

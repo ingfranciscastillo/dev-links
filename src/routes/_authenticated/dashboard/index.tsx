@@ -9,11 +9,9 @@ import {
 	MousePointerClick,
 	Share2,
 } from "lucide-react";
-import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import {
-	useAnalyticsSummary,
-	useProfileData,
-} from "@/lib/queries/profile-data";
+import toast from "react-hot-toast";
+import { useAnalyticsSummary } from "@/lib/queries/analytics";
+import { useProfileCore, useProfileData } from "@/lib/queries/profile-data";
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
 	head: () => ({ meta: [{ title: "Dashboard — DevLinks" }] }),
@@ -23,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/")({
 function DashboardHome() {
 	const { user } = useRouteContext({ from: "/_authenticated" });
 	const data = useProfileData();
+	const core = useProfileCore();
 	const analytics = useAnalyticsSummary(7);
 
 	const activeLinks = data.links.filter((l) => l.active).length;
@@ -52,9 +51,9 @@ function DashboardHome() {
 		const url = `${window.location.origin}/${user.username ?? ""}`;
 		try {
 			await navigator.clipboard.writeText(url);
-			window.alert("Link copied to clipboard");
+			toast.success("Link copied to clipboard");
 		} catch {
-			window.alert("Couldn't copy");
+			toast.error("Couldn't copy");
 		}
 	}
 
@@ -163,7 +162,7 @@ function DashboardHome() {
 							</div>
 						</div>
 						<p className="mt-4 text-sm text-muted-foreground">
-							{(user as { bio?: string }).bio ??
+							{core.data?.bio ||
 								"Add a short bio in your profile to help visitors know what you build."}
 						</p>
 					</div>

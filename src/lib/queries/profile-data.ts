@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMyAnalyticsSummary } from "@/lib/api/analytics.functions";
 import {
 	addArticle,
 	addLink,
@@ -84,14 +83,8 @@ export function useUpdateDiscovery() {
 		}) => updateDiscovery({ data: input }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: profileDataKey });
+			queryClient.invalidateQueries({ queryKey: profileCoreKey });
 		},
-	});
-}
-
-export function useAnalyticsSummary(days = 7) {
-	return useQuery({
-		queryKey: ["analytics-summary", days],
-		queryFn: () => getMyAnalyticsSummary({ data: { days } }),
 	});
 }
 

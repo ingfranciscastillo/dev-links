@@ -63,13 +63,14 @@ export function Header() {
 						) : (
 							<>
 								<Link
-									to="/sign-in"
+									to="/login"
+									search={{ redirect: undefined }}
 									className="hidden h-9 items-center rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
 								>
 									Sign in
 								</Link>
 								<Link
-									to="/sign-up"
+									to="/signup"
 									className="inline-flex h-9 items-center rounded-md bg-foreground px-3.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
 								>
 									Get started

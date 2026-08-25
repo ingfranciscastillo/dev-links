@@ -12,6 +12,24 @@ const trustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
 	.map((o) => o.trim())
 	.filter(Boolean);
 
+const socialProviders: NonNullable<
+	Parameters<typeof betterAuth>[0]["socialProviders"]
+> = {};
+
+if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
+	socialProviders.github = {
+		clientId: process.env.GITHUB_CLIENT_ID,
+		clientSecret: process.env.GITHUB_CLIENT_SECRET,
+	};
+}
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+	socialProviders.google = {
+		clientId: process.env.GOOGLE_CLIENT_ID,
+		clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+	};
+}
+
 export const auth = betterAuth({
 	appName: "dev-links",
 	secret: process.env.BETTER_AUTH_SECRET,
@@ -50,6 +68,15 @@ export const auth = betterAuth({
 				html: `<p>Welcome to dev-links, ${user.name ?? ""}.</p><p>Confirm your email: <a href="${url}">${url}</a></p>`,
 				text: `Verify your email: ${url}`,
 			});
+		},
+	},
+
+	socialProviders,
+
+	account: {
+		accountLinking: {
+			enabled: true,
+			trustedProviders: ["github", "google"],
 		},
 	},
 
@@ -100,6 +127,7 @@ export const auth = betterAuth({
 			"/api/auth/forget-password": { window: 60, max: 3 },
 			"/api/auth/reset-password": { window: 60, max: 3 },
 			"/api/auth/verify-email": { window: 60, max: 5 },
+			"/api/auth/sign-in/social": { window: 60, max: 10 },
 			"/api/auth/sign-out": false,
 		},
 	},

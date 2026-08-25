@@ -2,6 +2,14 @@ import { LinkRoundIcon } from "@solar-icons/react/linear/link-round";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { GithubIcon, GoogleIcon } from "@/components/brand-icons";
+import { authClient } from "@/lib/auth-client";
+
+const githubEnabled = Boolean(
+	import.meta.env.VITE_AUTH_GITHUB_ENABLED ?? false,
+);
+const googleEnabled = Boolean(
+	import.meta.env.VITE_AUTH_GOOGLE_ENABLED ?? false,
+);
 
 export function AuthShell({
 	title,
@@ -46,26 +54,48 @@ export function AuthShell({
 	);
 }
 
-export function OAuthRow() {
+export function OAuthRow({ callbackURL }: { callbackURL?: string } = {}) {
+	const handleSocial = (provider: "github" | "google") => () => {
+		void authClient.signIn.social({
+			provider,
+			callbackURL: callbackURL ?? "/dashboard",
+		});
+	};
+
+	const buttonClass = (enabled: boolean) =>
+		enabled
+			? "inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-surface text-sm text-foreground transition-colors hover:bg-surface-elevated"
+			: "inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-surface text-sm text-muted-foreground opacity-60 cursor-not-allowed";
+
 	return (
 		<div className="space-y-3">
 			<div className="grid grid-cols-2 gap-2">
 				<button
 					type="button"
-					disabled
-					title="Coming soon"
-					className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-surface text-sm text-muted-foreground opacity-60"
+					onClick={githubEnabled ? handleSocial("github") : undefined}
+					disabled={!githubEnabled}
+					title={
+						githubEnabled
+							? "Continue with GitHub"
+							: "GitHub sign-in not configured"
+					}
+					className={buttonClass(githubEnabled)}
 				>
-					<GithubIcon size={16} className="h-4 w-4" />
+					<GithubIcon size={16} />
 					GitHub
 				</button>
 				<button
 					type="button"
-					disabled
-					title="Coming soon"
-					className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-surface text-sm text-muted-foreground opacity-60"
+					onClick={googleEnabled ? handleSocial("google") : undefined}
+					disabled={!googleEnabled}
+					title={
+						googleEnabled
+							? "Continue with Google"
+							: "Google sign-in not configured"
+					}
+					className={buttonClass(googleEnabled)}
 				>
-					<GoogleIcon size={16} className="h-4 w-4" />
+					<GoogleIcon size={16} />
 					Google
 				</button>
 			</div>

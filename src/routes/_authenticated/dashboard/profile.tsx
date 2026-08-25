@@ -1,7 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { Camera } from "lucide-react";
-import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +10,10 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { profileInput } from "@/lib/api/profile-data.functions";
+import {
+	type ProfileCore,
+	profileInput,
+} from "@/lib/api/profile-data.functions";
 import { useProfileCore, useUpdateProfile } from "@/lib/queries/profile-data";
 import { zodField } from "@/lib/schemas/field";
 import { hueFromString } from "@/lib/user";
@@ -22,41 +24,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/profile")({
 });
 
 function ProfilePage() {
-	const { user } = useRouteContext({ from: "/_authenticated/dashboard" });
 	const core = useProfileCore();
-	const updateProfile = useUpdateProfile();
-
-	const form = useForm({
-		defaultValues: {
-			name: user.name,
-			username: user.username ?? "",
-			bio: "",
-			location: "",
-			website: "",
-		},
-		onSubmit: async ({ value }) => {
-			try {
-				await updateProfile.mutateAsync(value);
-				toast.success("Profile updated");
-			} catch (err) {
-				toast.error(err instanceof Error ? err.message : "Save failed");
-			}
-		},
-	});
-
-	useEffect(() => {
-		if (!core.data) return;
-
-		form.reset({
-			name: user.name,
-			username: user.username ?? "",
-			bio: core.data.bio,
-			location: core.data.location,
-			website: core.data.website,
-		});
-	}, [core.data, form, user.name, user.username]);
-
-	const avatarHue = hueFromString(user.id);
 
 	return (
 		<>
@@ -70,110 +38,96 @@ function ProfilePage() {
 				</p>
 			</div>
 
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					form.handleSubmit();
-				}}
-				className="max-w-2xl flex flex-col gap-6"
-				noValidate
-			>
-				<div className="rounded-xl border border-hairline bg-surface/40 p-6">
-					<div className="flex items-center gap-4">
-						<div
-							className="relative flex h-16 w-16 items-center justify-center rounded-full text-xl font-semibold text-background"
-							style={{ background: `oklch(0.7 0.18 ${avatarHue})` }}
+			{/*
+				Gate según la guía oficial de TanStack Form (Async Initial Values):
+				el form se monta una sola vez con datos reales — sin efectos ni
+				form.reset(), que en el adaptador React v1 puede ser revertido por
+				el update() posterior con las defaultValues originales.
+			*/}
+			{core.data ? (
+				<ProfileForm core={core.data} />
+			) : (
+				<div className="max-w-2xl grid gap-4" aria-busy="true">
+					<FormSkeleton />
+					<FormSkeleton />
+				</div>
+			)}
+		</>
+	);
+}
+
+function FormSkeleton() {
+	return (
+		<div className="h-44 animate-pulse rounded-xl border border-hairline bg-surface/40" />
+	);
+}
+
+function ProfileForm({ core }: { core: ProfileCore }) {
+	const { user } = useRouteContext({ from: "/_authenticated/dashboard" });
+	const updateProfile = useUpdateProfile();
+
+	const avatarHue = hueFromString(user.id);
+
+	const form = useForm({
+		defaultValues: {
+			name: user.name,
+			username: user.username ?? "",
+			bio: core.bio,
+			location: core.location,
+			website: core.website,
+		},
+		onSubmit: async ({ value }) => {
+			try {
+				await updateProfile.mutateAsync(value);
+				toast.success("Profile updated");
+			} catch (err) {
+				toast.error(err instanceof Error ? err.message : "Save failed");
+			}
+		},
+	});
+
+	return (
+		<form
+			onSubmit={(e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				form.handleSubmit();
+			}}
+			className="max-w-2xl flex flex-col gap-6"
+			noValidate
+		>
+			<div className="rounded-xl border border-hairline bg-surface/40 p-6">
+				<div className="flex items-center gap-4">
+					<div
+						className="relative flex h-16 w-16 items-center justify-center rounded-full text-xl font-semibold text-background"
+						style={{ background: `oklch(0.7 0.18 ${avatarHue})` }}
+					>
+						{user.name.slice(0, 1).toUpperCase()}
+						<button
+							type="button"
+							title="Coming soon"
+							className="absolute -bottom-1 -right-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-muted-foreground"
 						>
-							{user.name.slice(0, 1).toUpperCase()}
-							<button
-								type="button"
-								title="Coming soon"
-								className="absolute -bottom-1 -right-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-muted-foreground"
-							>
-								<Camera className="h-3 w-3" />
-							</button>
-						</div>
-						<div>
-							<p className="text-sm font-medium">Avatar</p>
-							<p className="text-xs text-muted-foreground">
-								PNG or JPG, max 2MB. Upload coming soon.
-							</p>
-						</div>
+							<Camera className="h-3 w-3" />
+						</button>
+					</div>
+					<div>
+						<p className="text-sm font-medium">Avatar</p>
+						<p className="text-xs text-muted-foreground">
+							PNG or JPG, max 2MB. Upload coming soon.
+						</p>
 					</div>
 				</div>
+			</div>
 
-				<div className="rounded-xl border border-hairline bg-surface/40 p-6">
-					<FieldGroup>
-						<div className="grid gap-5 sm:grid-cols-2">
-							<form.Field
-								name="name"
-								validators={{
-									onChange: zodField(profileInput.shape.name),
-								}}
-							>
-								{(field) => {
-									const invalid =
-										field.state.meta.isTouched &&
-										field.state.meta.errors.length > 0;
-									return (
-										<Field data-invalid={invalid}>
-											<FieldLabel htmlFor={field.name}>Name</FieldLabel>
-											<Input
-												id={field.name}
-												name={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-												aria-invalid={invalid || undefined}
-											/>
-											{invalid ? (
-												<FieldError>
-													{field.state.meta.errors.join(", ")}
-												</FieldError>
-											) : null}
-										</Field>
-									);
-								}}
-							</form.Field>
-
-							<form.Field
-								name="username"
-								validators={{
-									onChange: zodField(profileInput.shape.username),
-								}}
-							>
-								{(field) => {
-									const invalid =
-										field.state.meta.isTouched &&
-										field.state.meta.errors.length > 0;
-									return (
-										<Field data-invalid={invalid}>
-											<FieldLabel htmlFor={field.name}>Username</FieldLabel>
-											<Input
-												id={field.name}
-												name={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) =>
-													field.handleChange(e.target.value.toLowerCase())
-												}
-												aria-invalid={invalid || undefined}
-											/>
-											{invalid ? (
-												<FieldError>
-													{field.state.meta.errors.join(", ")}
-												</FieldError>
-											) : null}
-										</Field>
-									);
-								}}
-							</form.Field>
-						</div>
-
+			<div className="rounded-xl border border-hairline bg-surface/40 p-6">
+				<FieldGroup>
+					<div className="grid gap-5 sm:grid-cols-2">
 						<form.Field
-							name="bio"
-							validators={{ onChange: zodField(profileInput.shape.bio) }}
+							name="name"
+							validators={{
+								onChange: zodField(profileInput.shape.name),
+							}}
 						>
 							{(field) => {
 								const invalid =
@@ -181,17 +135,14 @@ function ProfilePage() {
 									field.state.meta.errors.length > 0;
 								return (
 									<Field data-invalid={invalid}>
-										<FieldLabel htmlFor={field.name}>Bio</FieldLabel>
-										<textarea
+										<FieldLabel htmlFor={field.name}>Name</FieldLabel>
+										<Input
 											id={field.name}
 											name={field.name}
-											rows={3}
-											value={field.state.value ?? ""}
+											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="Full-stack engineer building developer tools…"
 											aria-invalid={invalid || undefined}
-											className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 										/>
 										{invalid ? (
 											<FieldError>
@@ -203,77 +154,142 @@ function ProfilePage() {
 							}}
 						</form.Field>
 
-						<div className="grid gap-5 sm:grid-cols-2">
-							<form.Field name="location">
-								{(field) => (
-									<Field>
-										<FieldLabel htmlFor={field.name}>Location</FieldLabel>
+						<form.Field
+							name="username"
+							validators={{
+								onChange: zodField(profileInput.shape.username),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel htmlFor={field.name}>Username</FieldLabel>
 										<Input
 											id={field.name}
 											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) =>
+												field.handleChange(e.target.value.toLowerCase())
+											}
+											aria-invalid={invalid || undefined}
+										/>
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
+					</div>
+
+					<form.Field
+						name="bio"
+						validators={{ onChange: zodField(profileInput.shape.bio) }}
+					>
+						{(field) => {
+							const invalid =
+								field.state.meta.isTouched &&
+								field.state.meta.errors.length > 0;
+							return (
+								<Field data-invalid={invalid}>
+									<FieldLabel htmlFor={field.name}>Bio</FieldLabel>
+									<textarea
+										id={field.name}
+										name={field.name}
+										rows={3}
+										value={field.state.value ?? ""}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										placeholder="Full-stack engineer building developer tools…"
+										aria-invalid={invalid || undefined}
+										className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+									/>
+									{invalid ? (
+										<FieldError>
+											{field.state.meta.errors.join(", ")}
+										</FieldError>
+									) : null}
+								</Field>
+							);
+						}}
+					</form.Field>
+
+					<div className="grid gap-5 sm:grid-cols-2">
+						<form.Field name="location">
+							{(field) => (
+								<Field>
+									<FieldLabel htmlFor={field.name}>Location</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										value={field.state.value ?? ""}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										placeholder="Madrid, Spain"
+									/>
+								</Field>
+							)}
+						</form.Field>
+
+						<form.Field
+							name="website"
+							validators={{
+								onChange: zodField(profileInput.shape.website),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel htmlFor={field.name}>Website</FieldLabel>
+										<Input
+											id={field.name}
+											name={field.name}
+											type="url"
 											value={field.state.value ?? ""}
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="Madrid, Spain"
+											placeholder="https://your.dev"
+											aria-invalid={invalid || undefined}
 										/>
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
 									</Field>
-								)}
-							</form.Field>
+								);
+							}}
+						</form.Field>
+					</div>
+				</FieldGroup>
+			</div>
 
-							<form.Field
-								name="website"
-								validators={{
-									onChange: zodField(profileInput.shape.website),
-								}}
-							>
-								{(field) => {
-									const invalid =
-										field.state.meta.isTouched &&
-										field.state.meta.errors.length > 0;
-									return (
-										<Field data-invalid={invalid}>
-											<FieldLabel htmlFor={field.name}>Website</FieldLabel>
-											<Input
-												id={field.name}
-												name={field.name}
-												type="url"
-												value={field.state.value ?? ""}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-												placeholder="https://your.dev"
-												aria-invalid={invalid || undefined}
-											/>
-											{invalid ? (
-												<FieldError>
-													{field.state.meta.errors.join(", ")}
-												</FieldError>
-											) : null}
-										</Field>
-									);
-								}}
-							</form.Field>
-						</div>
-					</FieldGroup>
-				</div>
-
-				<form.Subscribe
-					selector={(state) => ({
-						canSubmit: state.canSubmit,
-						isSubmitting: state.isSubmitting,
-					})}
-				>
-					{({ canSubmit, isSubmitting }) => (
-						<Button
-							type="submit"
-							disabled={!canSubmit || updateProfile.isPending || isSubmitting}
-						>
-							{updateProfile.isPending || isSubmitting
-								? "Saving…"
-								: "Save changes"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</form>
-		</>
+			<form.Subscribe
+				selector={(state) => ({
+					canSubmit: state.canSubmit,
+					isSubmitting: state.isSubmitting,
+				})}
+			>
+				{({ canSubmit, isSubmitting }) => (
+					<Button
+						type="submit"
+						disabled={!canSubmit || updateProfile.isPending || isSubmitting}
+					>
+						{updateProfile.isPending || isSubmitting
+							? "Saving…"
+							: "Save changes"}
+					</Button>
+				)}
+			</form.Subscribe>
+		</form>
 	);
 }

@@ -10,11 +10,14 @@ import { SectionHeader } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import type { ProfileCore } from "@/lib/api/profile-data.functions";
 import { authClient } from "@/lib/auth-client";
 import {
+	useProfileCore,
 	useUpdateDiscovery,
 	useWipeProfileData,
 } from "@/lib/queries/profile-data";
+import { passwordSchema } from "@/lib/schemas/auth";
 
 export const Route = createFileRoute("/_authenticated/dashboard/settings")({
 	head: () => ({ meta: [{ title: "Settings — DevLinks" }] }),
@@ -30,74 +33,54 @@ const SENIORITY_OPTIONS = [
 	{ value: "principal", label: "Principal" },
 ];
 
+type DiscoveryForm = {
+	country: string;
+	primaryLanguage: string;
+	seniority: string;
+	technologies: string;
+	available: boolean;
+};
+
 function SettingsPage() {
 	const { user } = useRouteContext({ from: "/_authenticated/dashboard" });
 	const navigate = useNavigate();
-	const updateDiscovery = useUpdateDiscovery();
 	const wipeProfileData = useWipeProfileData();
 	const [confirm, setConfirm] = useState("");
 	const [pwLoading, setPwLoading] = useState(false);
-	const [disc, setDisc] = useState({
-		country: "",
-		primaryLanguage: "",
-		seniority: "",
-		technologies: "",
-		available: false,
-	});
-
-	const handleCountryChange = (raw: string) => {
-		setDisc((d) => ({
-			...d,
-			country: raw.toUpperCase().slice(0, 2),
-		}));
-	};
-
-	async function saveDiscovery(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		try {
-			await updateDiscovery.mutateAsync({
-				country: disc.country,
-				primaryLanguage: disc.primaryLanguage,
-				seniority: disc.seniority,
-				technologies: disc.technologies
-					.split(",")
-					.map((s) => s.trim())
-					.filter(Boolean)
-					.slice(0, 20),
-				available: disc.available,
-			});
-			toast.success("Discovery info saved");
-		} catch (err) {
-			toast.error(err instanceof Error ? err.message : "Save failed");
-		}
-	}
 
 	async function handleChangePassword(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
-		const fd = new FormData(e.currentTarget);
+		// currentTarget se invalida tras el await — capturar antes.
+		const formEl = e.currentTarget;
+		const fd = new FormData(formEl);
 		const currentPassword = String(fd.get("currentPassword") ?? "");
-		const newPassword = String(fd.get("password") ?? "");
-		if (newPassword.length < 6) {
-			toast.error("At least 6 characters");
+		const parsedPw = passwordSchema.safeParse(String(fd.get("password") ?? ""));
+		if (!parsedPw.success) {
+			toast.error(parsedPw.error.issues[0]?.message ?? "Invalid password");
 			return;
 		}
 		setPwLoading(true);
 		try {
 			const { error } = await authClient.changePassword({
 				currentPassword,
-				newPassword,
+				newPassword: parsedPw.data,
 			});
 			if (error) {
 				toast.error(error.message ?? "Couldn't update password");
 			} else {
 				toast.success("Password updated");
-				e.currentTarget.reset();
+				formEl.reset();
 			}
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Update failed");
 		} finally {
 			setPwLoading(false);
 		}
+	}
+
+	async function handleSignOut() {
+		await authClient.signOut();
+		navigate({ to: "/" });
 	}
 
 	async function handleWipe() {
@@ -108,11 +91,6 @@ function SettingsPage() {
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Wipe failed");
 		}
-	}
-
-	async function handleSignOut() {
-		await authClient.signOut();
-		navigate({ to: "/" });
 	}
 
 	return (
@@ -141,99 +119,7 @@ function SettingsPage() {
 					</p>
 				</section>
 
-				<section className="rounded-xl border border-hairline bg-surface/40 p-6">
-					<h2 className="text-base font-semibold">Discovery</h2>
-					<p className="mt-1 text-sm text-muted-foreground">
-						Help other developers find you on{" "}
-						<a href="/discover" className="underline">
-							Discover
-						</a>
-						.
-					</p>
-					<form
-						onSubmit={saveDiscovery}
-						className="mt-4 grid gap-4 sm:grid-cols-2"
-					>
-						<div className="space-y-1.5">
-							<Label htmlFor="country">Country (ISO-2)</Label>
-							<Input
-								id="country"
-								value={disc.country}
-								onChange={(e) => handleCountryChange(e.target.value)}
-								placeholder="ES"
-								maxLength={2}
-							/>
-						</div>
-						<div className="space-y-1.5">
-							<Label htmlFor="primary_language">Primary language</Label>
-							<Input
-								id="primary_language"
-								value={disc.primaryLanguage}
-								onChange={(e) =>
-									setDisc({
-										...disc,
-										primaryLanguage: e.target.value,
-									})
-								}
-								placeholder="TypeScript"
-							/>
-						</div>
-						<div className="space-y-1.5">
-							<Label htmlFor="seniority">Seniority</Label>
-							<select
-								id="seniority"
-								value={disc.seniority}
-								onChange={(e) =>
-									setDisc({ ...disc, seniority: e.target.value })
-								}
-								className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-							>
-								{SENIORITY_OPTIONS.map((opt) => (
-									<option key={opt.value} value={opt.value}>
-										{opt.label}
-									</option>
-								))}
-							</select>
-						</div>
-						<div className="space-y-1.5">
-							<Label className="flex items-center gap-2">
-								<input
-									type="checkbox"
-									checked={disc.available}
-									onChange={(e) =>
-										setDisc({
-											...disc,
-											available: e.target.checked,
-										})
-									}
-									className="h-4 w-4 rounded border-input"
-								/>
-								Available for hire
-							</Label>
-						</div>
-						<div className="sm:col-span-2 space-y-1.5">
-							<Label htmlFor="technologies">
-								Technologies (comma-separated)
-							</Label>
-							<Input
-								id="technologies"
-								value={disc.technologies}
-								onChange={(e) =>
-									setDisc({
-										...disc,
-										technologies: e.target.value,
-									})
-								}
-								placeholder="React, Node.js, Postgres"
-							/>
-						</div>
-						<div className="sm:col-span-2">
-							<Button type="submit" disabled={updateDiscovery.isPending}>
-								{updateDiscovery.isPending ? "Saving…" : "Save discovery info"}
-							</Button>
-						</div>
-					</form>
-				</section>
+				<DiscoverySection />
 
 				<section className="rounded-xl border border-hairline bg-surface/40 p-6">
 					<h2 className="text-base font-semibold">Change password</h2>
@@ -308,5 +194,152 @@ function SettingsPage() {
 				</section>
 			</div>
 		</>
+	);
+}
+
+function DiscoverySection() {
+	const core = useProfileCore();
+
+	return (
+		<section className="rounded-xl border border-hairline bg-surface/40 p-6">
+			<h2 className="text-base font-semibold">Discovery</h2>
+			<p className="mt-1 text-sm text-muted-foreground">
+				Help other developers find you on{" "}
+				<a href="/discover" className="underline">
+					Discover
+				</a>
+				.
+			</p>
+			{/*
+				Gate según la guía oficial de TanStack Form (Async Initial Values):
+				el form se monta una sola vez con datos reales — sin efectos de
+				hidratación posteriores al montaje.
+			*/}
+			{core.data ? (
+				<DiscoveryForm core={core.data} />
+			) : (
+				<div
+					className="mt-4 h-56 animate-pulse rounded-lg border border-hairline bg-surface/60"
+					aria-busy="true"
+				/>
+			)}
+		</section>
+	);
+}
+
+function DiscoveryForm({ core }: { core: ProfileCore }) {
+	const updateDiscovery = useUpdateDiscovery();
+	const [disc, setDisc] = useState<DiscoveryForm>(() => ({
+		country: core.country,
+		primaryLanguage: core.primaryLanguage,
+		seniority: core.seniority,
+		technologies: core.technologies.join(", "),
+		available: core.available,
+	}));
+
+	const handleCountryChange = (raw: string) => {
+		setDisc((d) => ({
+			...d,
+			country: raw.toUpperCase().slice(0, 2),
+		}));
+	};
+
+	async function saveDiscovery(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		try {
+			await updateDiscovery.mutateAsync({
+				country: disc.country,
+				primaryLanguage: disc.primaryLanguage,
+				seniority: disc.seniority,
+				technologies: disc.technologies
+					.split(",")
+					.map((s) => s.trim())
+					.filter(Boolean)
+					.slice(0, 20),
+				available: disc.available,
+			});
+			toast.success("Discovery info saved");
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Save failed");
+		}
+	}
+
+	return (
+		<form onSubmit={saveDiscovery} className="mt-4 grid gap-4 sm:grid-cols-2">
+			<div className="space-y-1.5">
+				<Label htmlFor="country">Country (ISO-2)</Label>
+				<Input
+					id="country"
+					value={disc.country}
+					onChange={(e) => handleCountryChange(e.target.value)}
+					placeholder="ES"
+					maxLength={2}
+				/>
+			</div>
+			<div className="space-y-1.5">
+				<Label htmlFor="primary_language">Primary language</Label>
+				<Input
+					id="primary_language"
+					value={disc.primaryLanguage}
+					onChange={(e) =>
+						setDisc({
+							...disc,
+							primaryLanguage: e.target.value,
+						})
+					}
+					placeholder="TypeScript"
+				/>
+			</div>
+			<div className="space-y-1.5">
+				<Label htmlFor="seniority">Seniority</Label>
+				<select
+					id="seniority"
+					value={disc.seniority}
+					onChange={(e) => setDisc({ ...disc, seniority: e.target.value })}
+					className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+				>
+					{SENIORITY_OPTIONS.map((opt) => (
+						<option key={opt.value} value={opt.value}>
+							{opt.label}
+						</option>
+					))}
+				</select>
+			</div>
+			<div className="space-y-1.5">
+				<Label className="flex items-center gap-2">
+					<input
+						type="checkbox"
+						checked={disc.available}
+						onChange={(e) =>
+							setDisc({
+								...disc,
+								available: e.target.checked,
+							})
+						}
+						className="h-4 w-4 rounded border-input"
+					/>
+					Available for hire
+				</Label>
+			</div>
+			<div className="sm:col-span-2 space-y-1.5">
+				<Label htmlFor="technologies">Technologies (comma-separated)</Label>
+				<Input
+					id="technologies"
+					value={disc.technologies}
+					onChange={(e) =>
+						setDisc({
+							...disc,
+							technologies: e.target.value,
+						})
+					}
+					placeholder="React, Node.js, Postgres"
+				/>
+			</div>
+			<div className="sm:col-span-2">
+				<Button type="submit" disabled={updateDiscovery.isPending}>
+					{updateDiscovery.isPending ? "Saving…" : "Save discovery info"}
+				</Button>
+			</div>
+		</form>
 	);
 }

@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { and, asc, desc, eq, not } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { user as authUser } from "@/db/auth-schema";
 import { db } from "@/db/index";
@@ -13,7 +13,11 @@ import {
 } from "@/db/schema";
 import { ensureSession } from "@/lib/auth.functions";
 import { defaultTheme, type ProfileData } from "@/lib/schemas";
-import { parseThemeConfig, themeV2Schema } from "@/lib/theme-config";
+import {
+	parseThemeConfig,
+	type ThemeV2,
+	themeV2Schema,
+} from "@/lib/theme-config";
 import { templateById } from "@/lib/theme-templates";
 
 // Todas las funciones de este archivo derivan el userId de la sesión,
@@ -21,6 +25,49 @@ import { templateById } from "@/lib/theme-templates";
 async function requireUserId() {
 	const session = await ensureSession();
 	return session.user.id;
+}
+
+function isUniqueViolation(err: unknown): boolean {
+	const code = (err as { code?: string } | null)?.code;
+	if (code === "23505") return true;
+	return (
+		err instanceof Error &&
+		/duplicate key value|unique constraint/i.test(err.message)
+	);
+}
+
+// La tabla themes exige columnas legadas NOT NULL que el tema V2 ya no usa;
+// se rellenan con equivalentes derivados del config real.
+const LEGACY_BUTTON_STYLE = {
+	solid: "solid",
+	outline: "outline",
+	ghost: "ghost",
+	gradient: "solid",
+	glass: "solid",
+} as const;
+
+function themeLegacyCols(config: ThemeV2) {
+	return {
+		accent: config.accent,
+		background: "dark" as const,
+		radius: "soft" as const,
+		buttonStyle: LEGACY_BUTTON_STYLE[config.buttonStyle],
+	};
+}
+
+async function upsertTheme(
+	userId: string,
+	config: ThemeV2,
+	template: string | null,
+) {
+	const legacy = themeLegacyCols(config);
+	await db
+		.insert(themes)
+		.values({ userId, ...legacy, config, template })
+		.onConflictDoUpdate({
+			target: themes.userId,
+			set: { ...legacy, config, template, updatedAt: new Date() },
+		});
 }
 
 // ---------- read (bundle completo, como el fetchAll viejo) ----------
@@ -91,12 +138,17 @@ export const getMyProfileData = createServerFn({ method: "GET" }).handler(
 	},
 );
 
-// Datos "core" del perfil que no viven en la sesión (bio/location/website/available)
+// Datos "core" del perfil que no viven en la sesión (bio/location/website)
+// más los campos de discovery que consume el dashboard.
 export type ProfileCore = {
 	bio: string;
 	location: string;
 	website: string;
 	available: boolean;
+	country: string;
+	primaryLanguage: string;
+	seniority: string;
+	technologies: string[];
 };
 
 export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
@@ -108,6 +160,10 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 				location: profiles.location,
 				website: profiles.website,
 				available: profiles.available,
+				country: profiles.country,
+				primaryLanguage: profiles.primaryLanguage,
+				seniority: profiles.seniority,
+				technologies: profiles.technologies,
 			})
 			.from(profiles)
 			.where(eq(profiles.id, userId))
@@ -117,6 +173,10 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 			location: row?.location ?? "",
 			website: row?.website ?? "",
 			available: row?.available ?? false,
+			country: row?.country ?? "",
+			primaryLanguage: row?.primaryLanguage ?? "",
+			seniority: row?.seniority ?? "",
+			technologies: row?.technologies ?? [],
 		};
 	},
 );
@@ -143,40 +203,41 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 		const userId = await requireUserId();
 		const cleanUsername = data.username.toLowerCase();
 
-		// Check username uniqueness against other rows.
-		const [taken] = await db
-			.select({ id: authUser.id })
-			.from(authUser)
-			.where(
-				and(eq(authUser.username, cleanUsername), not(eq(authUser.id, userId))),
-			)
-			.limit(1);
-		if (taken) {
-			throw new Error("That username is taken");
-		}
+		try {
+			await db.transaction(async (tx) => {
+				await tx
+					.update(authUser)
+					.set({
+						name: data.name,
+						username: cleanUsername,
+						updatedAt: new Date(),
+					})
+					.where(eq(authUser.id, userId));
 
-		await db
-			.update(authUser)
-			.set({ name: data.name, username: cleanUsername, updatedAt: new Date() })
-			.where(eq(authUser.id, userId));
-
-		await db
-			.insert(profiles)
-			.values({
-				id: userId,
-				bio: data.bio || null,
-				location: data.location || null,
-				website: data.website || null,
-			})
-			.onConflictDoUpdate({
-				target: profiles.id,
-				set: {
-					bio: data.bio || null,
-					location: data.location || null,
-					website: data.website || null,
-					updatedAt: new Date(),
-				},
+				await tx
+					.insert(profiles)
+					.values({
+						id: userId,
+						bio: data.bio || null,
+						location: data.location || null,
+						website: data.website || null,
+					})
+					.onConflictDoUpdate({
+						target: profiles.id,
+						set: {
+							bio: data.bio || null,
+							location: data.location || null,
+							website: data.website || null,
+							updatedAt: new Date(),
+						},
+					});
 			});
+		} catch (err) {
+			if (isUniqueViolation(err)) {
+				throw new Error("That username is taken");
+			}
+			throw err;
+		}
 
 		return { ok: true as const };
 	});
@@ -198,17 +259,22 @@ export const updateDiscovery = createServerFn({ method: "POST" })
 	.validator((input) => discoveryInput.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
+		const values = {
+			country: data.country || null,
+			primaryLanguage: data.primaryLanguage || null,
+			seniority: data.seniority || null,
+			technologies: data.technologies,
+			available: data.available,
+		};
+		// Upsert: la fila profiles puede no existir aún si el usuario nunca
+		// guardó el perfil core — un UPDATE plano sería un no-op silencioso.
 		await db
-			.update(profiles)
-			.set({
-				country: data.country || null,
-				primaryLanguage: data.primaryLanguage || null,
-				seniority: data.seniority || null,
-				technologies: data.technologies,
-				available: data.available,
-				updatedAt: new Date(),
-			})
-			.where(eq(profiles.id, userId));
+			.insert(profiles)
+			.values({ id: userId, ...values })
+			.onConflictDoUpdate({
+				target: profiles.id,
+				set: { ...values, updatedAt: new Date() },
+			});
 		return { ok: true as const };
 	});
 
@@ -224,10 +290,6 @@ export const addLink = createServerFn({ method: "POST" })
 	.validator((input) => linkInput.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
-		const existing = await db
-			.select({ id: links.id })
-			.from(links)
-			.where(eq(links.userId, userId));
 		const [row] = await db
 			.insert(links)
 			.values({
@@ -236,7 +298,8 @@ export const addLink = createServerFn({ method: "POST" })
 				url: data.url,
 				description: data.description || null,
 				active: true,
-				position: existing.length,
+				// Subquery atómico: evita la carrera count-then-insert.
+				position: sql<number>`(SELECT COUNT(*)::int FROM ${links} WHERE ${links.userId} = ${userId})`,
 			})
 			.returning();
 		return {
@@ -282,28 +345,23 @@ export const reorderLinks = createServerFn({ method: "POST" })
 	.validator((input) => reorderInput.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
-		await Promise.all(
-			data.ids.map((id, position) =>
-				db
+		await db.transaction(async (tx) => {
+			for (const [position, id] of data.ids.entries()) {
+				await tx
 					.update(links)
 					.set({ position })
-					.where(and(eq(links.id, id), eq(links.userId, userId))),
-			),
-		);
+					.where(and(eq(links.id, id), eq(links.userId, userId)));
+			}
+		});
 	});
 
 export const toggleLink = createServerFn({ method: "POST" })
 	.validator((input) => idInput.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
-		const [row] = await db
-			.select({ active: links.active })
-			.from(links)
-			.where(and(eq(links.id, data.id), eq(links.userId, userId)));
-		if (!row) return;
 		await db
 			.update(links)
-			.set({ active: !row.active })
+			.set({ active: sql`NOT ${links.active}` })
 			.where(and(eq(links.id, data.id), eq(links.userId, userId)));
 	});
 
@@ -483,10 +541,7 @@ export const updateTheme = createServerFn({ method: "POST" })
 	.validator((input) => themeV2Schema.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
-		await db
-			.update(themes)
-			.set({ config: data, template: null })
-			.where(eq(themes.userId, userId));
+		await upsertTheme(userId, data, null);
 	});
 
 const templateInput = z.object({ templateId: z.string() });
@@ -497,19 +552,13 @@ export const applyThemeTemplate = createServerFn({ method: "POST" })
 		const userId = await requireUserId();
 		const tpl = templateById(data.templateId);
 		if (!tpl) return;
-		await db
-			.update(themes)
-			.set({ config: tpl.config, template: data.templateId })
-			.where(eq(themes.userId, userId));
+		await upsertTheme(userId, tpl.config, data.templateId);
 	});
 
 export const resetTheme = createServerFn({ method: "POST" }).handler(
 	async () => {
 		const userId = await requireUserId();
-		await db
-			.update(themes)
-			.set({ config: defaultTheme, template: null })
-			.where(eq(themes.userId, userId));
+		await upsertTheme(userId, defaultTheme, null);
 	},
 );
 
@@ -518,11 +567,11 @@ export const resetTheme = createServerFn({ method: "POST" }).handler(
 export const wipeProfileData = createServerFn({ method: "POST" }).handler(
 	async () => {
 		const userId = await requireUserId();
-		await Promise.all([
-			db.delete(links).where(eq(links.userId, userId)),
-			db.delete(projects).where(eq(projects.userId, userId)),
-			db.delete(snippets).where(eq(snippets.userId, userId)),
-			db.delete(articles).where(eq(articles.userId, userId)),
-		]);
+		await db.transaction(async (tx) => {
+			await tx.delete(links).where(eq(links.userId, userId));
+			await tx.delete(projects).where(eq(projects.userId, userId));
+			await tx.delete(snippets).where(eq(snippets.userId, userId));
+			await tx.delete(articles).where(eq(articles.userId, userId));
+		});
 	},
 );

@@ -11,12 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiPublicHooksTrackClickRouteImport } from './routes/api/public/hooks/track-click'
+import { Route as ApiPublicHooksTrackViewRouteImport } from './routes/api/public/hooks/track-view'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -25,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -57,75 +65,107 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksTrackClickRoute =
+  ApiPublicHooksTrackClickRouteImport.update({
+    id: '/api/public/hooks/track-click',
+    path: '/api/public/hooks/track-click',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksTrackViewRoute = ApiPublicHooksTrackViewRouteImport.update({
+  id: '/api/public/hooks/track-view',
+  path: '/api/public/hooks/track-view',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/discover': typeof DiscoverRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
+  '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/discover': typeof DiscoverRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
+  '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/discover': typeof DiscoverRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
+  '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/discover'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/dashboard'
     | '/api/auth/$'
+    | '/api/public/hooks/track-click'
+    | '/api/public/hooks/track-view'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/discover'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/dashboard'
     | '/api/auth/$'
+    | '/api/public/hooks/track-click'
+    | '/api/public/hooks/track-view'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/discover'
     | '/forgot-password'
     | '/login'
     | '/reset-password'
     | '/signup'
     | '/_authenticated/dashboard'
     | '/api/auth/$'
+    | '/api/public/hooks/track-click'
+    | '/api/public/hooks/track-view'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  DiscoverRoute: typeof DiscoverRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiPublicHooksTrackClickRoute: typeof ApiPublicHooksTrackClickRoute
+  ApiPublicHooksTrackViewRoute: typeof ApiPublicHooksTrackViewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -142,6 +182,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -186,6 +233,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/track-click': {
+      id: '/api/public/hooks/track-click'
+      path: '/api/public/hooks/track-click'
+      fullPath: '/api/public/hooks/track-click'
+      preLoaderRoute: typeof ApiPublicHooksTrackClickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/track-view': {
+      id: '/api/public/hooks/track-view'
+      path: '/api/public/hooks/track-view'
+      fullPath: '/api/public/hooks/track-view'
+      preLoaderRoute: typeof ApiPublicHooksTrackViewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,11 +265,14 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  DiscoverRoute: DiscoverRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiPublicHooksTrackClickRoute: ApiPublicHooksTrackClickRoute,
+  ApiPublicHooksTrackViewRoute: ApiPublicHooksTrackViewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

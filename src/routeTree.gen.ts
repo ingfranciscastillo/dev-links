@@ -17,6 +17,8 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard/analytics'
+import { Route as AuthenticatedDashboardArticlesRouteImport } from './routes/_authenticated/dashboard/articles'
 import { Route as AuthenticatedDashboardLinksRouteImport } from './routes/_authenticated/dashboard/links'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPublicHooksTrackClickRouteImport } from './routes/api/public/hooks/track-click'
@@ -61,6 +63,18 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedDashboardAnalyticsRoute =
+  AuthenticatedDashboardAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
+const AuthenticatedDashboardArticlesRoute =
+  AuthenticatedDashboardArticlesRouteImport.update({
+    id: '/articles',
+    path: '/articles',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardLinksRoute =
   AuthenticatedDashboardLinksRouteImport.update({
     id: '/links',
@@ -92,6 +106,8 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
+  '/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
   '/dashboard/links': typeof AuthenticatedDashboardLinksRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
@@ -105,6 +121,8 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
+  '/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
   '/dashboard/links': typeof AuthenticatedDashboardLinksRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
@@ -120,6 +138,8 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
+  '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
+  '/_authenticated/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
   '/_authenticated/dashboard/links': typeof AuthenticatedDashboardLinksRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
@@ -135,6 +155,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/dashboard'
+    | '/dashboard/analytics'
+    | '/dashboard/articles'
     | '/dashboard/links'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
@@ -148,6 +170,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/dashboard'
+    | '/dashboard/analytics'
+    | '/dashboard/articles'
     | '/dashboard/links'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
@@ -162,6 +186,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_authenticated/dashboard'
+    | '/_authenticated/dashboard/analytics'
+    | '/_authenticated/dashboard/articles'
     | '/_authenticated/dashboard/links'
     | '/api/auth/$'
     | '/api/public/hooks/track-click'
@@ -239,6 +265,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/dashboard/analytics': {
+      id: '/_authenticated/dashboard/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/analytics'
+      preLoaderRoute: typeof AuthenticatedDashboardAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
+    '/_authenticated/dashboard/articles': {
+      id: '/_authenticated/dashboard/articles'
+      path: '/articles'
+      fullPath: '/dashboard/articles'
+      preLoaderRoute: typeof AuthenticatedDashboardArticlesRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/links': {
       id: '/_authenticated/dashboard/links'
       path: '/links'
@@ -271,11 +311,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedDashboardRouteChildren {
+  AuthenticatedDashboardAnalyticsRoute: typeof AuthenticatedDashboardAnalyticsRoute
+  AuthenticatedDashboardArticlesRoute: typeof AuthenticatedDashboardArticlesRoute
   AuthenticatedDashboardLinksRoute: typeof AuthenticatedDashboardLinksRoute
 }
 
 const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
   {
+    AuthenticatedDashboardAnalyticsRoute: AuthenticatedDashboardAnalyticsRoute,
+    AuthenticatedDashboardArticlesRoute: AuthenticatedDashboardArticlesRoute,
     AuthenticatedDashboardLinksRoute: AuthenticatedDashboardLinksRoute,
   }
 

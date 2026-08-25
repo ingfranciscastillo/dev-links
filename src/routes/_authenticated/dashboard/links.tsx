@@ -13,6 +13,7 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
 import {
 	Eye,
@@ -24,7 +25,6 @@ import {
 	Trash2,
 } from "lucide-react";
 import { useState } from "react";
-import type { z } from "zod";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import {
@@ -32,8 +32,13 @@ import {
 	SectionHeader,
 } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
+import {
+	Field,
+	FieldError,
+	FieldGroup,
+	FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { domainOf, iconForUrl } from "@/lib/icons";
 import {
 	useAddLink,
@@ -44,13 +49,12 @@ import {
 	useUpdateLink,
 } from "@/lib/queries/profile-data";
 import { type LinkItem, linkSchema } from "@/lib/schemas";
+import { zodField } from "@/lib/schemas/field";
 
 export const Route = createFileRoute("/_authenticated/dashboard/links")({
 	head: () => ({ meta: [{ title: "Links — DevLinks" }] }),
 	component: LinksPage,
 });
-
-const formSchema = linkSchema.omit({ id: true, active: true });
 
 function LinksPage() {
 	const data = useProfileData();
@@ -248,6 +252,12 @@ function LinkRow({
 	);
 }
 
+type LinkFormValues = {
+	title: string;
+	url: string;
+	description: string;
+};
+
 function LinkDialog({
 	initial,
 	onClose,
@@ -256,82 +266,119 @@ function LinkDialog({
 }: {
 	initial: LinkItem | null;
 	onClose: () => void;
-	onSubmit: (values: z.infer<typeof formSchema>) => void;
+	onSubmit: (values: LinkFormValues) => void;
 	pending?: boolean;
 }) {
-	const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-	const fields = {
-		title: initial?.title ?? "",
-		url: initial?.url ?? "",
-		description: initial?.description ?? "",
-	};
-
-	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		const fd = new FormData(e.currentTarget);
-		const parsed = formSchema.safeParse({
-			title: fd.get("title"),
-			url: fd.get("url"),
-			description: fd.get("description") || "",
-		});
-		if (!parsed.success) {
-			const f = parsed.error.flatten().fieldErrors;
-			setErrors({
-				title: f.title?.[0],
-				url: f.url?.[0],
-				description: f.description?.[0],
-			});
-			return;
-		}
-		setErrors({});
-		onSubmit(parsed.data);
-	}
+	const form = useForm({
+		defaultValues: {
+			title: initial?.title ?? "",
+			url: initial?.url ?? "",
+			description: initial?.description ?? "",
+		},
+		onSubmit: async ({ value }) => {
+			onSubmit(value);
+		},
+	});
 
 	return (
 		<ModalShell title={initial ? "Edit link" : "New link"} onClose={onClose}>
-			<form onSubmit={handleSubmit} className="space-y-4" noValidate>
-				<div className="space-y-1.5">
-					<Label htmlFor="title">Title</Label>
-					<Input
-						id="title"
+			<form
+				onSubmit={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					form.handleSubmit();
+				}}
+				className="flex flex-col gap-4"
+				noValidate
+			>
+				<FieldGroup>
+					<form.Field
 						name="title"
-						defaultValue={fields.title}
-						placeholder="My portfolio"
-					/>
-					{errors.title ? (
-						<p className="text-xs text-destructive">{errors.title}</p>
-					) : null}
-				</div>
-				<div className="space-y-1.5">
-					<Label htmlFor="url">URL</Label>
-					<Input
-						id="url"
+						validators={{
+							onChange: zodField(linkSchema.shape.title),
+						}}
+					>
+						{(field) => {
+							const invalid =
+								field.state.meta.isTouched &&
+								field.state.meta.errors.length > 0;
+							return (
+								<Field data-invalid={invalid}>
+									<FieldLabel htmlFor={field.name}>Title</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										placeholder="My portfolio"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										aria-invalid={invalid || undefined}
+									/>
+									{invalid ? (
+										<FieldError>
+											{field.state.meta.errors.join(", ")}
+										</FieldError>
+									) : null}
+								</Field>
+							);
+						}}
+					</form.Field>
+
+					<form.Field
 						name="url"
-						type="url"
-						defaultValue={fields.url}
-						placeholder="https://…"
-					/>
-					{errors.url ? (
-						<p className="text-xs text-destructive">{errors.url}</p>
-					) : null}
-				</div>
-				<div className="space-y-1.5">
-					<Label htmlFor="description">Description (optional)</Label>
-					<Input
-						id="description"
-						name="description"
-						defaultValue={fields.description}
-						placeholder="Short line shown below the title"
-					/>
-					{errors.description ? (
-						<p className="text-xs text-destructive">{errors.description}</p>
-					) : null}
-				</div>
+						validators={{ onChange: zodField(linkSchema.shape.url) }}
+					>
+						{(field) => {
+							const invalid =
+								field.state.meta.isTouched &&
+								field.state.meta.errors.length > 0;
+							return (
+								<Field data-invalid={invalid}>
+									<FieldLabel htmlFor={field.name}>URL</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										type="url"
+										placeholder="https://…"
+										value={field.state.value}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										aria-invalid={invalid || undefined}
+									/>
+									{invalid ? (
+										<FieldError>
+											{field.state.meta.errors.join(", ")}
+										</FieldError>
+									) : null}
+								</Field>
+							);
+						}}
+					</form.Field>
+
+					<form.Field name="description">
+						{(field) => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>
+									Description (optional)
+								</FieldLabel>
+								<Input
+									id={field.name}
+									name={field.name}
+									placeholder="Short line shown below the title"
+									value={field.state.value}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+								/>
+							</Field>
+						)}
+					</form.Field>
+				</FieldGroup>
+
 				<div className="flex justify-end gap-2 pt-2">
 					<Button type="button" variant="ghost" onClick={onClose}>
 						Cancel
 					</Button>
-					<Button type="submit" disabled={pending}>
+					<Button type="submit" disabled={pending || !form.state.canSubmit}>
 						{initial ? "Save" : "Create"}
 					</Button>
 				</div>

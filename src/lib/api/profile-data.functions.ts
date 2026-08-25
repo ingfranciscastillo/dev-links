@@ -161,14 +161,22 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 			.where(eq(authUser.id, userId));
 
 		await db
-			.update(profiles)
-			.set({
+			.insert(profiles)
+			.values({
+				id: userId,
 				bio: data.bio || null,
 				location: data.location || null,
 				website: data.website || null,
-				updatedAt: new Date(),
 			})
-			.where(eq(profiles.id, userId));
+			.onConflictDoUpdate({
+				target: profiles.id,
+				set: {
+					bio: data.bio || null,
+					location: data.location || null,
+					website: data.website || null,
+					updatedAt: new Date(),
+				},
+			});
 
 		return { ok: true as const };
 	});

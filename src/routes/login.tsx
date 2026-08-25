@@ -12,10 +12,14 @@ import { Input } from "@/components/ui/input";
 import { useSignIn } from "@/lib/queries/use-sign-in";
 import { signInSchema } from "@/lib/schemas/auth";
 import { zodField } from "@/lib/schemas/field";
+import { safeRedirectPath } from "@/lib/utils";
 
 export const Route = createFileRoute("/login")({
 	validateSearch: (s: Record<string, unknown>) => ({
-		redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+		redirect:
+			safeRedirectPath(
+				typeof s.redirect === "string" ? s.redirect : undefined,
+			) ?? undefined,
 	}),
 	head: () => ({ meta: [{ title: "Sign in — DevLinks" }] }),
 	component: LoginPage,

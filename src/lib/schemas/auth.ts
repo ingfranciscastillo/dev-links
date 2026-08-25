@@ -4,7 +4,8 @@ export const emailSchema = z
 	.email("Enter a valid email")
 	.min(1, "Email is required");
 
-export const passwordSchema = z.string().min(6, "At least 6 characters");
+// Debe coincidir con minPasswordLength de better-auth (src/lib/auth.ts).
+export const passwordSchema = z.string().min(8, "At least 8 characters");
 
 export const signInSchema = z.object({
 	email: emailSchema,

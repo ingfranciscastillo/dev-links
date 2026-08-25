@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AuthShell } from "@/components/auth/authShell";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,36 +23,41 @@ export const Route = createFileRoute("/reset-password")({
 });
 
 function ResetPage() {
-	const navigate = useNavigate();
 	const { token } = Route.useSearch();
 	const reset = useResetPassword();
 
 	const form = useForm({
 		defaultValues: { password: "", confirm: "" },
 		onSubmit: async ({ value }) => {
-			if (!token) throw new Error("Missing reset token.");
-			await reset.mutateAsync({ newPassword: value.password, token });
-			setTimeout(
-				() =>
-					navigate({
-						to: "/login",
-						search: { redirect: undefined },
-					}),
-				1200,
-			);
+			await reset.mutateAsync({
+				newPassword: value.password,
+				token: token ?? "",
+			});
 		},
 	});
+
+	if (!token) {
+		return (
+			<AuthShell
+				title="Missing reset token"
+				subtitle="This link is incomplete or malformed."
+			>
+				<div className="space-y-4 text-center">
+					<p className="text-sm text-muted-foreground">
+						Request a fresh link and open it from your email.
+					</p>
+					<Button asChild className="w-full">
+						<Link to="/forgot-password">Request new link</Link>
+					</Button>
+				</div>
+			</AuthShell>
+		);
+	}
 
 	if (reset.isSuccess) {
 		return (
 			<AuthShell title="Password updated" subtitle="Redirecting to sign in…">
-				<Link
-					to="/login"
-					search={{ redirect: undefined }}
-					className="block text-center text-sm text-muted-foreground hover:text-foreground"
-				>
-					Go to sign in
-				</Link>
+				<RedirectToLogin />
 			</AuthShell>
 		);
 	}
@@ -170,5 +176,26 @@ function ResetPage() {
 				</FieldGroup>
 			</form>
 		</AuthShell>
+	);
+}
+
+function RedirectToLogin() {
+	const navigate = useNavigate();
+	useEffect(() => {
+		const t = setTimeout(
+			() => navigate({ to: "/login", search: { redirect: undefined } }),
+			1200,
+		);
+		return () => clearTimeout(t);
+	}, [navigate]);
+
+	return (
+		<Link
+			to="/login"
+			search={{ redirect: undefined }}
+			className="block text-center text-sm text-muted-foreground hover:text-foreground"
+		>
+			Go to sign in
+		</Link>
 	);
 }

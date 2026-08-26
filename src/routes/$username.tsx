@@ -117,13 +117,13 @@ function ProfilePage() {
 	const styleTag = theme ? themeToStyleTag(theme, ".tt-scope") : "";
 
 	return (
-		<div className="tt-scope min-h-dvh bg-background text-foreground">
+		<div className="tt-scope min-h-dvh overflow-x-hidden bg-background text-foreground">
 			{theme && (
 				/* biome-ignore lint/security/noDangerouslySetInnerHtml: theme styles are scoped to .tt-scope and generated server-side */
 				<style dangerouslySetInnerHTML={{ __html: styleTag }} />
 			)}
 			<ProfileHeader username={live.username} available={live.available} />
-			<main className="mx-auto grid max-w-6xl gap-8 px-4 pb-24 sm:px-6 lg:grid-cols-[320px_1fr]">
+			<main className="mx-auto grid max-w-6xl gap-8 px-4 pb-24 sm:px-6 lg:grid-cols-[320px_minmax(0,1fr)]">
 				<ProfileSidebar
 					name={live.name}
 					username={live.username}
@@ -133,7 +133,7 @@ function ProfilePage() {
 					available={live.available}
 					avatarHue={avatarHue}
 				/>
-				<div className="space-y-10">
+				<div className="space-y-10 min-w-0">
 					<LinksSection
 						links={live.data.links}
 						themed={Boolean(theme)}

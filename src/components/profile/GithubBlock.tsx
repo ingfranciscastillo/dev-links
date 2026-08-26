@@ -62,20 +62,35 @@ export function GithubBlock({ payload }: { payload: GithubPayload }) {
 	);
 }
 
-function Heatmap({ heatmap }: { heatmap: GithubPayload["heatmap"] }) {
-	// Group by week; heatmap is already chronological.
-	const weeks: Array<Array<{ date: string; level: number }>> = [];
-	let current: Array<{ date: string; level: number }> = [];
-	for (const cell of heatmap) {
-		const dow = new Date(cell.date).getUTCDay();
-		if (dow === 0 && current.length) {
-			weeks.push(current);
-			current = [];
-		}
-		current.push(cell);
-	}
-	if (current.length) weeks.push(current);
+function buildWeeks(heatmap: GithubPayload["heatmap"]) {
+	if (heatmap.length === 0) return [];
 
+	const byDate = new Map(heatmap.map((c) => [c.date, c.level]));
+	const start = new Date(`${heatmap[0].date}T00:00:00Z`);
+	const end = new Date(`${heatmap[heatmap.length - 1].date}T00:00:00Z`);
+
+	const gridStart = new Date(start);
+	gridStart.setUTCDate(gridStart.getUTCDate() - gridStart.getUTCDay());
+
+	const days: Array<{ date: string; level: number }> = [];
+	for (
+		let d = new Date(gridStart);
+		d <= end;
+		d.setUTCDate(d.getUTCDate() + 1)
+	) {
+		const iso = d.toISOString().slice(0, 10);
+		days.push({ date: iso, level: byDate.get(iso) ?? 0 });
+	}
+
+	const weeks: Array<Array<{ date: string; level: number }>> = [];
+	for (let i = 0; i < days.length; i += 7) {
+		weeks.push(days.slice(i, i + 7));
+	}
+	return weeks;
+}
+
+function Heatmap({ heatmap }: { heatmap: GithubPayload["heatmap"] }) {
+	const weeks = buildWeeks(heatmap);
 	const colors = [
 		"bg-surface-elevated",
 		"bg-emerald-900/60",
@@ -86,8 +101,8 @@ function Heatmap({ heatmap }: { heatmap: GithubPayload["heatmap"] }) {
 	return (
 		<div className="overflow-x-auto rounded-xl border border-hairline bg-surface p-3">
 			<div className="flex gap-0.75">
-				{weeks.map((week, _) => (
-					<div key={crypto.randomUUID()} className="flex flex-col gap-0.75">
+				{weeks.map((week) => (
+					<div key={week[0].date} className="flex flex-col gap-0.75">
 						{week.map((c) => (
 							<span
 								key={c.date}

@@ -29,6 +29,7 @@ import { Route as AuthenticatedDashboardSettingsRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardSnippetsRouteImport } from './routes/_authenticated/dashboard/snippets'
 import { Route as AuthenticatedDashboardThemeRouteImport } from './routes/_authenticated/dashboard/theme'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiPublicHooksIntegrationsRefreshRouteImport } from './routes/api/public/hooks/integrations-refresh'
 import { Route as ApiPublicHooksTrackClickRouteImport } from './routes/api/public/hooks/track-click'
 import { Route as ApiPublicHooksTrackViewRouteImport } from './routes/api/public/hooks/track-view'
 
@@ -141,6 +142,12 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksIntegrationsRefreshRoute =
+  ApiPublicHooksIntegrationsRefreshRouteImport.update({
+    id: '/api/public/hooks/integrations-refresh',
+    path: '/api/public/hooks/integrations-refresh',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksTrackClickRoute =
   ApiPublicHooksTrackClickRouteImport.update({
     id: '/api/public/hooks/track-click',
@@ -173,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
@@ -195,6 +203,7 @@ export interface FileRoutesByTo {
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
@@ -220,6 +229,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
 }
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
     | '/dashboard/theme'
     | '/api/auth/$'
     | '/dashboard/'
+    | '/api/public/hooks/integrations-refresh'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
   fileRoutesByTo: FileRoutesByTo
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/dashboard/theme'
     | '/api/auth/$'
     | '/dashboard'
+    | '/api/public/hooks/integrations-refresh'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
   id:
@@ -291,6 +303,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/theme'
     | '/api/auth/$'
     | '/_authenticated/dashboard/'
+    | '/api/public/hooks/integrations-refresh'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
   fileRoutesById: FileRoutesById
@@ -305,6 +318,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiPublicHooksIntegrationsRefreshRoute: typeof ApiPublicHooksIntegrationsRefreshRoute
   ApiPublicHooksTrackClickRoute: typeof ApiPublicHooksTrackClickRoute
   ApiPublicHooksTrackViewRoute: typeof ApiPublicHooksTrackViewRoute
 }
@@ -451,6 +465,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/integrations-refresh': {
+      id: '/api/public/hooks/integrations-refresh'
+      path: '/api/public/hooks/integrations-refresh'
+      fullPath: '/api/public/hooks/integrations-refresh'
+      preLoaderRoute: typeof ApiPublicHooksIntegrationsRefreshRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/track-click': {
       id: '/api/public/hooks/track-click'
       path: '/api/public/hooks/track-click'
@@ -523,6 +544,8 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiPublicHooksIntegrationsRefreshRoute:
+    ApiPublicHooksIntegrationsRefreshRoute,
   ApiPublicHooksTrackClickRoute: ApiPublicHooksTrackClickRoute,
   ApiPublicHooksTrackViewRoute: ApiPublicHooksTrackViewRoute,
 }

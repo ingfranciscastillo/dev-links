@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "integration_cache_user_provider_kind_uq" ON "integration_cache" ("user_id","provider","kind");

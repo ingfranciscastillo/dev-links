@@ -266,7 +266,15 @@ export const integrationCache = pgTable(
 
 		etag: text("etag"),
 	},
-	(table) => [index("integration_cache_user_id_idx").on(table.userId)],
+	(table) => [
+		index("integration_cache_user_id_idx").on(table.userId),
+		// Requerida por el upsert onConflictDoUpdate([userId, provider, kind]).
+		uniqueIndex("integration_cache_user_provider_kind_uq").on(
+			table.userId,
+			table.provider,
+			table.kind,
+		),
+	],
 );
 
 export const pageViews = pgTable(

@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 import { z } from "zod";
 import { user as authUser } from "@/db/auth-schema";
 import { db } from "@/db/index";
@@ -26,6 +27,10 @@ async function requireUserId() {
 	const session = await ensureSession();
 	return session.user.id;
 }
+
+// db.transaction no existe en el driver neon-http; los writes multi-statement
+// van por db.batch (endpoint batch de Neon: un roundtrip, atómico).
+type Batch = [BatchItem<"pg">, ...Array<BatchItem<"pg">>];
 
 function isUniqueViolation(err: unknown): boolean {
 	const code = (err as { code?: string } | null)?.code;
@@ -204,17 +209,18 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 		const cleanUsername = data.username.toLowerCase();
 
 		try {
-			await db.transaction(async (tx) => {
-				await tx
+			// db.batch: las statements viajan en una sola petición y Neon las
+			// ejecuta atómicamente (db.transaction no existe en neon-http).
+			await db.batch([
+				db
 					.update(authUser)
 					.set({
 						name: data.name,
 						username: cleanUsername,
 						updatedAt: new Date(),
 					})
-					.where(eq(authUser.id, userId));
-
-				await tx
+					.where(eq(authUser.id, userId)),
+				db
 					.insert(profiles)
 					.values({
 						id: userId,
@@ -230,8 +236,8 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 							website: data.website || null,
 							updatedAt: new Date(),
 						},
-					});
-			});
+					}),
+			]);
 		} catch (err) {
 			if (isUniqueViolation(err)) {
 				throw new Error("That username is taken");
@@ -345,14 +351,18 @@ export const reorderLinks = createServerFn({ method: "POST" })
 	.validator((input) => reorderInput.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
-		await db.transaction(async (tx) => {
-			for (const [position, id] of data.ids.entries()) {
-				await tx
+		if (data.ids.length === 0) return;
+		// Batch atómico: un roundtrip, todo-o-nada en Neon.
+		const statements: Array<BatchItem<"pg">> = [];
+		for (const [position, id] of data.ids.entries()) {
+			statements.push(
+				db
 					.update(links)
 					.set({ position })
-					.where(and(eq(links.id, id), eq(links.userId, userId)));
-			}
-		});
+					.where(and(eq(links.id, id), eq(links.userId, userId))),
+			);
+		}
+		await db.batch(statements as Batch);
 	});
 
 export const toggleLink = createServerFn({ method: "POST" })
@@ -567,11 +577,11 @@ export const resetTheme = createServerFn({ method: "POST" }).handler(
 export const wipeProfileData = createServerFn({ method: "POST" }).handler(
 	async () => {
 		const userId = await requireUserId();
-		await db.transaction(async (tx) => {
-			await tx.delete(links).where(eq(links.userId, userId));
-			await tx.delete(projects).where(eq(projects.userId, userId));
-			await tx.delete(snippets).where(eq(snippets.userId, userId));
-			await tx.delete(articles).where(eq(articles.userId, userId));
-		});
+		await db.batch([
+			db.delete(links).where(eq(links.userId, userId)),
+			db.delete(projects).where(eq(projects.userId, userId)),
+			db.delete(snippets).where(eq(snippets.userId, userId)),
+			db.delete(articles).where(eq(articles.userId, userId)),
+		]);
 	},
 );

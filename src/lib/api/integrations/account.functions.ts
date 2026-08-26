@@ -1,11 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { and, asc, eq } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 import { z } from "zod";
 import { db } from "@/db/index";
 import { integrationAccounts, integrationCache } from "@/db/schema";
 import { ensureSession } from "@/lib/auth.functions";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
 import { PROVIDERS, type Provider } from "@/lib/integrations/types";
+
+// db.transaction no existe en el driver neon-http; los writes multi-statement
+// van por db.batch (endpoint batch de Neon: un roundtrip, atómico).
+type Batch = [BatchItem<"pg">, ...Array<BatchItem<"pg">>];
 
 const providerSchema = z.enum([...PROVIDERS] as [Provider, ...Provider[]]);
 
@@ -97,24 +102,24 @@ export const deleteIntegrationAccount = createServerFn({ method: "POST" })
 	.validator((input) => providerInputSchema.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
-		await db.transaction(async (tx) => {
-			await tx
+		await db.batch([
+			db
 				.delete(integrationCache)
 				.where(
 					and(
 						eq(integrationCache.userId, userId),
 						eq(integrationCache.provider, data.provider),
 					),
-				);
-			await tx
+				),
+			db
 				.delete(integrationAccounts)
 				.where(
 					and(
 						eq(integrationAccounts.userId, userId),
 						eq(integrationAccounts.provider, data.provider),
 					),
-				);
-		});
+				),
+		]);
 		return { ok: true as const };
 	});
 
@@ -154,43 +159,52 @@ export const refreshIntegration = createServerFn({ method: "POST" })
 				config: (account.config ?? {}) as Record<string, unknown>,
 			});
 
+			// Batch: un solo HTTP roundtrip y ejecución atómica en Neon —
+			// si falla algún kind, no queda caché parcial marcado como
+			// sincronizado; lastSyncedAt solo avanza con todo el set.
+			const now = new Date();
+			const statements: Array<BatchItem<"pg">> = [];
 			for (const r of results) {
-				await db
-					.insert(integrationCache)
-					.values({
-						userId,
-						provider: data.provider,
-						kind: r.kind,
-						payload: r.payload,
-						fetchedAt: new Date(),
-						expiresAt: r.expiresInMs
-							? new Date(Date.now() + r.expiresInMs)
-							: null,
-					})
-					.onConflictDoUpdate({
-						target: [
-							integrationCache.userId,
-							integrationCache.provider,
-							integrationCache.kind,
-						],
-						set: {
+				statements.push(
+					db
+						.insert(integrationCache)
+						.values({
+							userId,
+							provider: data.provider,
+							kind: r.kind,
 							payload: r.payload,
-							fetchedAt: new Date(),
+							fetchedAt: now,
 							expiresAt: r.expiresInMs
 								? new Date(Date.now() + r.expiresInMs)
 								: null,
-						},
-					});
+						})
+						.onConflictDoUpdate({
+							target: [
+								integrationCache.userId,
+								integrationCache.provider,
+								integrationCache.kind,
+							],
+							set: {
+								payload: r.payload,
+								fetchedAt: now,
+								expiresAt: r.expiresInMs
+									? new Date(Date.now() + r.expiresInMs)
+									: null,
+							},
+						}),
+				);
 			}
-
-			await db
-				.update(integrationAccounts)
-				.set({
-					lastSyncedAt: new Date(),
-					lastError: null,
-					updatedAt: new Date(),
-				})
-				.where(eq(integrationAccounts.id, account.id));
+			statements.push(
+				db
+					.update(integrationAccounts)
+					.set({
+						lastSyncedAt: now,
+						lastError: null,
+						updatedAt: now,
+					})
+					.where(eq(integrationAccounts.id, account.id)),
+			);
+			await db.batch(statements as Batch);
 
 			return { ok: true as const, kinds: results.map((r) => r.kind) };
 		} catch (err) {

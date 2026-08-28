@@ -1,9 +1,15 @@
+import { AddCircleIcon } from "@solar-icons/react/line-duotone";
+import {
+	ArrowRightUpIcon,
+	FolderIcon,
+	PenIcon,
+	TrashBin2Icon,
+} from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowUpRight, Folder, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
-
+import { GithubIcon } from "#/components/brand-icons";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
@@ -81,7 +87,12 @@ function ProjectsPage() {
 						onClick={() => setEditing("new")}
 						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
-						<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+						<AddCircleIcon
+							secondaryOpacity={0}
+							size={25}
+							className="h-3.5 w-3.5"
+							strokeWidth={1.7}
+						/>
 						New project
 					</Button>
 				</div>
@@ -90,7 +101,7 @@ function ProjectsPage() {
 			{data.projects.length === 0 ? (
 				<div className="mt-8">
 					<EmptyState
-						icon={Folder}
+						icon={FolderIcon}
 						title="No projects yet"
 						description="Add the ones you&apos;re proud of — side projects count too."
 						action={
@@ -98,7 +109,12 @@ function ProjectsPage() {
 								onClick={() => setEditing("new")}
 								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 							>
-								<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+								<AddCircleIcon
+									secondaryOpacity={0}
+									size={25}
+									className="h-3.5 w-3.5"
+									strokeWidth={1.7}
+								/>
 								Add your first project
 							</Button>
 						}
@@ -250,7 +266,7 @@ function ProjectRow({
 						title="GitHub"
 						aria-label={`Open ${project.name} on GitHub`}
 					>
-						<ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
+						<GithubIcon className="h-4 w-4" />
 					</a>
 				) : null}
 
@@ -263,7 +279,7 @@ function ProjectRow({
 						title="Demo"
 						aria-label={`Open ${project.name} demo`}
 					>
-						<ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
+						<ArrowRightUpIcon className="h-4 w-4" strokeWidth={1.5} />
 					</a>
 				) : null}
 
@@ -274,7 +290,7 @@ function ProjectRow({
 					title="Edit"
 					aria-label={`Edit ${project.name}`}
 				>
-					<Pencil className="h-4 w-4" strokeWidth={1.5} />
+					<PenIcon className="h-4 w-4" strokeWidth={1.5} />
 				</button>
 
 				<button
@@ -284,7 +300,7 @@ function ProjectRow({
 					title="Delete"
 					aria-label={`Delete ${project.name}`}
 				>
-					<Trash2 className="h-4 w-4" strokeWidth={1.5} />
+					<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
 				</button>
 			</div>
 		</article>

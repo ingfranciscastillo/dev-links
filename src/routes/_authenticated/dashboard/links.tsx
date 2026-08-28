@@ -13,17 +13,17 @@ import {
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { AddCircleIcon } from "@solar-icons/react/line-duotone";
+import {
+	EyeClosedIcon,
+	EyeIcon,
+	LinkIcon,
+	PenIcon,
+	SortVerticalIcon,
+	TrashBin2Icon,
+} from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-	Eye,
-	EyeOff,
-	GripVertical,
-	Link as LinkIcon,
-	Pencil,
-	Plus,
-	Trash2,
-} from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -106,7 +106,12 @@ function LinksPage() {
 						onClick={() => setEditing("new")}
 						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
-						<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+						<AddCircleIcon
+							secondaryOpacity={0}
+							size={25}
+							className="h-3.5 w-3.5"
+							strokeWidth={1.7}
+						/>
 						New link
 					</Button>
 				</div>
@@ -123,7 +128,12 @@ function LinksPage() {
 								onClick={() => setEditing("new")}
 								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 							>
-								<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+								<AddCircleIcon
+									secondaryOpacity={0}
+									size={25}
+									className="h-3.5 w-3.5"
+									strokeWidth={1.7}
+								/>
 								Add your first link
 							</Button>
 						}
@@ -247,7 +257,7 @@ function LinkRow({
 				className="flex h-8 w-8 cursor-grab touch-none items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
 				aria-label="Drag to reorder"
 			>
-				<GripVertical className="h-4 w-4" strokeWidth={1.5} />
+				<SortVerticalIcon className="h-4 w-4" strokeWidth={1.5} />
 			</button>
 
 			<div className="flex min-w-0 items-center gap-4 pr-4">
@@ -294,9 +304,9 @@ function LinkRow({
 					aria-label={link.active ? "Hide link" : "Show link"}
 				>
 					{link.active ? (
-						<Eye className="h-4 w-4" strokeWidth={1.5} />
+						<EyeIcon className="h-4 w-4" strokeWidth={1.5} />
 					) : (
-						<EyeOff className="h-4 w-4" strokeWidth={1.5} />
+						<EyeClosedIcon className="h-4 w-4" strokeWidth={1.5} />
 					)}
 				</button>
 
@@ -307,7 +317,7 @@ function LinkRow({
 					title="Edit"
 					aria-label="Edit link"
 				>
-					<Pencil className="h-4 w-4" strokeWidth={1.5} />
+					<PenIcon className="h-4 w-4" strokeWidth={1.5} />
 				</button>
 
 				<button
@@ -317,7 +327,7 @@ function LinkRow({
 					title="Delete"
 					aria-label="Delete link"
 				>
-					<Trash2 className="h-4 w-4" strokeWidth={1.5} />
+					<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
 				</button>
 			</div>
 		</li>

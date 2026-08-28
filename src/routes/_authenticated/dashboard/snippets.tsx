@@ -1,6 +1,11 @@
+import { AddCircleIcon } from "@solar-icons/react/line-duotone";
+import {
+	CodeSquareIcon,
+	PenIcon,
+	TrashBin2Icon,
+} from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
-import { Code2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -65,7 +70,11 @@ function SnippetsPage() {
 						onClick={() => setEditing("new")}
 						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
-						<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+						<AddCircleIcon
+							secondaryOpacity={0.5}
+							className="h-3.5 w-3.5"
+							strokeWidth={1.7}
+						/>
 						New snippet
 					</Button>
 				</div>
@@ -74,7 +83,7 @@ function SnippetsPage() {
 			{data.snippets.length === 0 ? (
 				<div className="mt-8">
 					<EmptyState
-						icon={Code2}
+						icon={CodeSquareIcon}
 						title="No snippets yet"
 						description="Save that one-liner you always forget."
 						action={
@@ -82,7 +91,11 @@ function SnippetsPage() {
 								onClick={() => setEditing("new")}
 								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 							>
-								<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+								<AddCircleIcon
+									secondaryOpacity={0.5}
+									className="h-3.5 w-3.5"
+									strokeWidth={1.7}
+								/>
 								Add your first snippet
 							</Button>
 						}
@@ -191,7 +204,7 @@ function SnippetEntry({
 						title="Edit"
 						aria-label={`Edit ${snippet.title}`}
 					>
-						<Pencil className="h-4 w-4" strokeWidth={1.5} />
+						<PenIcon className="h-4 w-4" strokeWidth={1.5} />
 					</button>
 
 					<button
@@ -201,7 +214,7 @@ function SnippetEntry({
 						title="Delete"
 						aria-label={`Delete ${snippet.title}`}
 					>
-						<Trash2 className="h-4 w-4" strokeWidth={1.5} />
+						<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
 					</button>
 				</div>
 			</header>

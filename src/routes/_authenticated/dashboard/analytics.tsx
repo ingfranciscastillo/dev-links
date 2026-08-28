@@ -1,5 +1,11 @@
+import {
+	CursorIcon,
+	EyeIcon,
+	GraphUpIcon,
+	LockKeyholeIcon,
+	UsersGroupRoundedIcon,
+} from "@solar-icons/react/linear";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, Lock, MousePointerClick, TrendingUp, Users } from "lucide-react";
 import {
 	Bar,
 	BarChart,
@@ -128,7 +134,7 @@ function UpgradeGate() {
 		<div className="mt-8 border-y border-border py-16">
 			<div className="flex items-start gap-5">
 				<div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center border border-border text-brand">
-					<Lock className="h-4 w-4" strokeWidth={1.5} />
+					<LockKeyholeIcon className="h-4 w-4" strokeWidth={1.5} />
 				</div>
 
 				<div className="max-w-2xl">
@@ -190,24 +196,24 @@ function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 			<section className="border-y border-border" aria-label="Summary">
 				<div className="grid sm:grid-cols-2 lg:grid-cols-4">
 					<StatBlock
-						icon={Eye}
+						icon={EyeIcon}
 						label="Page views"
 						value={totals.views.toLocaleString()}
 					/>
 
 					<StatBlock
-						icon={Users}
+						icon={UsersGroupRoundedIcon}
 						label="Unique visitors"
 						value={totals.uniqueVisitors.toLocaleString()}
 					/>
 
 					<StatBlock
-						icon={MousePointerClick}
+						icon={CursorIcon}
 						label="Total clicks"
 						value={totals.clicks.toLocaleString()}
 					/>
 
-					<StatBlock icon={TrendingUp} label="CTR" value={`${totals.ctr}%`} />
+					<StatBlock icon={GraphUpIcon} label="CTR" value={`${totals.ctr}%`} />
 				</div>
 			</section>
 

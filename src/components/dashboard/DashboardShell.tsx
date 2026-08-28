@@ -1,45 +1,67 @@
 import {
+	Chart2Icon,
+	CodeSquareIcon,
+	FolderWithFilesIcon,
+	Home2Icon,
+	LinkIcon,
+	Logout2Icon,
+	NotesIcon,
+	PaletteIcon,
+	PlugCircleIcon,
+	SettingsIcon,
+	UserIcon,
+} from "@solar-icons/react/linear";
+import {
 	Link,
 	useNavigate,
 	useRouteContext,
 	useRouter,
 } from "@tanstack/react-router";
-import {
-	BarChart3,
-	Code2,
-	FileText,
-	Folder,
-	Home,
-	Link as LinkIcon,
-	LogOut,
-	Palette,
-	Plug,
-	Settings,
-	User,
-} from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode, SVGProps } from "react";
 
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { authClient } from "@/lib/auth-client";
 
+type NavIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
 type NavItem = {
 	label: string;
 	to: string;
-	icon: typeof Home;
+	icon: NavIcon;
 	end?: boolean;
 };
 
 const nav: NavItem[] = [
-	{ label: "Overview", to: "/dashboard", icon: Home, end: true },
-	{ label: "Profile", to: "/dashboard/profile", icon: User },
+	{ label: "Overview", to: "/dashboard", icon: Home2Icon, end: true },
+	{ label: "Profile", to: "/dashboard/profile", icon: UserIcon },
 	{ label: "Links", to: "/dashboard/links", icon: LinkIcon },
-	{ label: "Projects", to: "/dashboard/projects", icon: Folder },
-	{ label: "Snippets", to: "/dashboard/snippets", icon: Code2 },
-	{ label: "Articles", to: "/dashboard/articles", icon: FileText },
-	{ label: "Integrations", to: "/dashboard/integrations", icon: Plug },
-	{ label: "Theme", to: "/dashboard/theme", icon: Palette },
-	{ label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
-	{ label: "Settings", to: "/dashboard/settings", icon: Settings },
+	{
+		label: "Projects",
+		to: "/dashboard/projects",
+		icon: FolderWithFilesIcon,
+	},
+	{
+		label: "Snippets",
+		to: "/dashboard/snippets",
+		icon: CodeSquareIcon,
+	},
+	{ label: "Articles", to: "/dashboard/articles", icon: NotesIcon },
+	{
+		label: "Integrations",
+		to: "/dashboard/integrations",
+		icon: PlugCircleIcon,
+	},
+	{ label: "Theme", to: "/dashboard/theme", icon: PaletteIcon },
+	{
+		label: "Analytics",
+		to: "/dashboard/analytics",
+		icon: Chart2Icon,
+	},
+	{
+		label: "Settings",
+		to: "/dashboard/settings",
+		icon: SettingsIcon,
+	},
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
@@ -177,7 +199,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 								aria-label="Sign out"
 								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 							>
-								<LogOut className="h-4 w-4" strokeWidth={1.7} />
+								<Logout2Icon className="h-4 w-4" strokeWidth={1.7} />
 							</button>
 
 							<div className="ml-1 flex h-8 w-8 items-center justify-center border border-border bg-surface font-display text-sm text-foreground">
@@ -200,7 +222,7 @@ export function EmptyState({
 	title,
 	description,
 }: {
-	icon: typeof Home;
+	icon: NavIcon;
 	title: string;
 	description: string;
 }) {

@@ -1,11 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
 import {
-	AlertCircle,
-	CheckCircle2,
-	RefreshCw,
-	Save,
-	Trash2,
-} from "lucide-react";
+	DangerCircleIcon,
+	DisketteIcon,
+	RefreshIcon,
+	TrashBin2Icon,
+} from "@solar-icons/react/linear";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -256,7 +255,7 @@ function IntegrationRow({
 					<div className="mt-4">
 						{account?.lastSyncedAt ? (
 							<p className="flex items-start gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.07em] text-brand">
-								<CheckCircle2
+								<DangerCircleIcon
 									className="mt-0.5 h-3 w-3 shrink-0"
 									strokeWidth={1.5}
 								/>
@@ -272,7 +271,7 @@ function IntegrationRow({
 
 						{account?.lastError && (
 							<p className="mt-2 flex items-start gap-2 text-xs leading-relaxed text-destructive">
-								<AlertCircle
+								<DangerCircleIcon
 									className="mt-0.5 h-3.5 w-3.5 shrink-0"
 									strokeWidth={1.5}
 								/>
@@ -334,7 +333,7 @@ function IntegrationRow({
 						disabled={busy}
 						className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
-						<Save className="h-3.5 w-3.5" strokeWidth={1.5} />
+						<DisketteIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
 						{account ? "Update" : "Connect"}
 					</Button>
 
@@ -344,7 +343,7 @@ function IntegrationRow({
 						variant="outline"
 						className="h-9 rounded-none border-border px-3 font-mono text-[9px] uppercase tracking-[0.08em]"
 					>
-						<RefreshCw
+						<RefreshIcon
 							className={
 								refreshAccount.isPending
 									? "h-3.5 w-3.5 animate-spin"
@@ -364,7 +363,7 @@ function IntegrationRow({
 							title="Disconnect"
 							aria-label={`Disconnect ${PROVIDER_LABEL[provider]}`}
 						>
-							<Trash2 size={15} strokeWidth={1.5} />
+							<TrashBin2Icon size={15} strokeWidth={1.5} />
 						</button>
 					)}
 				</div>

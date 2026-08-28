@@ -1,14 +1,14 @@
-import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import {
-	ArrowUpRight,
-	Code2,
-	Eye,
-	FileText,
-	Folder,
-	Link as LinkIcon,
-	MousePointerClick,
-	Share2,
-} from "lucide-react";
+	ArrowRightUpIcon,
+	CodeSquareIcon,
+	CursorIcon,
+	EyeIcon,
+	FolderIcon,
+	LinkIcon,
+	NotesIcon,
+	ShareIcon,
+} from "@solar-icons/react/linear";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import toast from "react-hot-toast";
 import { useAnalyticsSummary } from "@/lib/queries/analytics";
 import { useProfileCore, useProfileData } from "@/lib/queries/profile-data";
@@ -32,13 +32,13 @@ function DashboardHome() {
 			label: "Page views",
 			value: totals.views.toLocaleString(),
 			meta: "Last 7 days",
-			icon: Eye,
+			icon: EyeIcon,
 		},
 		{
 			label: "Total clicks",
 			value: totals.clicks.toLocaleString(),
 			meta: "Last 7 days",
-			icon: MousePointerClick,
+			icon: CursorIcon,
 		},
 		{
 			label: "Active links",
@@ -81,7 +81,7 @@ function DashboardHome() {
 					onClick={share}
 					className="group inline-flex w-fit items-center gap-2 border border-foreground px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
 				>
-					<Share2 className="h-3.5 w-3.5" />
+					<ShareIcon className="h-3.5 w-3.5" />
 					Share my page
 				</button>
 			</header>
@@ -123,21 +123,21 @@ function DashboardHome() {
 			<section className="border-b border-border py-8">
 				<div className="grid sm:grid-cols-3">
 					<MiniStat
-						icon={Folder}
+						icon={FolderIcon}
 						label="Projects"
 						value={data.projects.length}
 						to="/dashboard/projects"
 					/>
 
 					<MiniStat
-						icon={Code2}
+						icon={CodeSquareIcon}
 						label="Snippets"
 						value={data.snippets.length}
 						to="/dashboard/snippets"
 					/>
 
 					<MiniStat
-						icon={FileText}
+						icon={NotesIcon}
 						label="Articles"
 						value={data.articles.length}
 						to="/dashboard/articles"
@@ -171,7 +171,7 @@ function DashboardHome() {
 							className="group inline-flex shrink-0 items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-brand"
 						>
 							Open
-							<ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+							<ArrowRightUpIcon className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
 						</Link>
 					</div>
 

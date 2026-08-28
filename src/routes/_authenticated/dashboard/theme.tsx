@@ -315,7 +315,7 @@ function TemplatesPane({
 
 								{active && (
 									<CheckCircleIcon
-										size={16}
+										size={25}
 										secondaryOpacity={0}
 										className="shrink-0"
 									/>

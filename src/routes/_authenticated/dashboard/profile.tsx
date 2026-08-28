@@ -1,6 +1,6 @@
+import { CameraIcon } from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
-import { Camera } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -108,7 +108,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								aria-label="Change avatar"
 								className="absolute -bottom-2 -right-2 inline-flex h-7 w-7 items-center justify-center border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
 							>
-								<Camera className="h-3.5 w-3.5" strokeWidth={1.5} />
+								<CameraIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
 							</button>
 						</div>
 

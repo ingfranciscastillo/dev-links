@@ -1,9 +1,9 @@
+import { DangerCircleIcon } from "@solar-icons/react/linear";
 import {
 	createFileRoute,
 	useNavigate,
 	useRouteContext,
 } from "@tanstack/react-router";
-import { AlertTriangle } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -209,7 +209,7 @@ function SettingsPage() {
 				<section className="border-t border-destructive/40 py-8">
 					<div className="flex items-start gap-4">
 						<div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center border border-destructive/30 text-destructive">
-							<AlertTriangle className="h-4 w-4" strokeWidth={1.5} />
+							<DangerCircleIcon className="h-4 w-4" strokeWidth={1.5} />
 						</div>
 
 						<div className="min-w-0 flex-1">

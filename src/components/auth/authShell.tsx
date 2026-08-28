@@ -23,31 +23,34 @@ export function AuthShell({
 	footer?: ReactNode;
 }) {
 	return (
-		<div className="relative min-h-dvh bg-background text-foreground">
-			<div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,oklch(0.7_0.2_260/0.12),transparent_60%)]" />
-			<header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
-				<Link
-					to="/"
-					className="flex items-center gap-2 font-semibold tracking-tight"
-				>
-					<span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-foreground text-background">
-						<LinkRoundIcon size={14} />
+		<div className="min-h-dvh bg-background text-foreground">
+			<header className="mx-auto flex h-16 w-full max-w-editorial items-center justify-between border-b border-border px-5 sm:px-8">
+				<Link to="/" className="flex items-center gap-2.5">
+					<span className="font-display text-xl leading-none tracking-[-0.03em]">
+						DevLinks
 					</span>
-					DevLinks
+					<span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+						01
+					</span>
 				</Link>
 				{footer}
 			</header>
-
-			<main className="mx-auto flex w-full max-w-md flex-col px-4 pb-16 pt-8 sm:px-6">
-				<div className="text-center">
-					<h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-					{subtitle ? (
-						<p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
-					) : null}
-				</div>
-
-				<div className="mt-8 rounded-xl border border-border bg-surface/60 p-6 shadow-card backdrop-blur">
-					{children}
+			<main className="mx-auto w-full max-w-editorial px-5 pb-24 pt-20 sm:px-8 sm:pt-28">
+				<div className="mx-auto w-full max-w-md">
+					<div>
+						<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+							DevLinks / Account
+						</p>
+						<h1 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+							{title}
+						</h1>
+						{subtitle ? (
+							<p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
+								{subtitle}
+							</p>
+						) : null}
+					</div>
+					<div className="mt-10 border-t border-border pt-8">{children}</div>
 				</div>
 			</main>
 		</div>
@@ -61,15 +64,13 @@ export function OAuthRow({ callbackURL }: { callbackURL?: string } = {}) {
 			callbackURL: callbackURL ?? "/dashboard",
 		});
 	};
-
 	const buttonClass = (enabled: boolean) =>
 		enabled
-			? "inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-surface text-sm text-foreground transition-colors hover:bg-surface-elevated"
-			: "inline-flex h-9 items-center justify-center gap-2 rounded-md border border-border bg-surface text-sm text-muted-foreground opacity-60 cursor-not-allowed";
-
+			? "inline-flex h-11 items-center justify-center gap-2.5 border border-border font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
+			: "inline-flex h-11 cursor-not-allowed items-center justify-center gap-2.5 border border-border font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground opacity-50";
 	return (
-		<div className="space-y-3">
-			<div className="grid grid-cols-2 gap-2">
+		<div className="space-y-6">
+			<div className="grid grid-cols-2 gap-3">
 				<button
 					type="button"
 					onClick={githubEnabled ? handleSocial("github") : undefined}
@@ -81,8 +82,7 @@ export function OAuthRow({ callbackURL }: { callbackURL?: string } = {}) {
 					}
 					className={buttonClass(githubEnabled)}
 				>
-					<GithubIcon size={16} />
-					GitHub
+					<GithubIcon size={15} /> GitHub
 				</button>
 				<button
 					type="button"
@@ -95,13 +95,12 @@ export function OAuthRow({ callbackURL }: { callbackURL?: string } = {}) {
 					}
 					className={buttonClass(googleEnabled)}
 				>
-					<GoogleIcon size={16} />
-					Google
+					<GoogleIcon size={15} /> Google
 				</button>
 			</div>
-			<div className="flex items-center gap-3">
+			<div className="flex items-center gap-4">
 				<div className="h-px flex-1 bg-border" />
-				<span className="shrink-0 text-xs uppercase tracking-wider text-muted-foreground">
+				<span className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
 					or continue with email
 				</span>
 				<div className="h-px flex-1 bg-border" />

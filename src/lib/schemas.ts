@@ -3,7 +3,7 @@ import { z } from "zod";
 export const linkSchema = z.object({
 	id: z.string(),
 	title: z.string().min(1, "Title is required").max(60),
-	url: z.string().url("Must be a valid URL"),
+	url: z.url("Must be a valid URL"),
 	description: z.string().max(120).optional().or(z.literal("")),
 	active: z.boolean(),
 });
@@ -14,8 +14,8 @@ export const projectSchema = z.object({
 	name: z.string().min(1).max(60),
 	description: z.string().max(200),
 	tech: z.array(z.string()).max(12),
-	github: z.string().url().optional().or(z.literal("")),
-	demo: z.string().url().optional().or(z.literal("")),
+	github: z.url().optional().or(z.literal("")),
+	demo: z.url().optional().or(z.literal("")),
 	status: z.enum(["shipped", "wip", "archived"]),
 });
 export type ProjectItem = z.infer<typeof projectSchema>;
@@ -32,7 +32,7 @@ export const articleSchema = z.object({
 	id: z.string(),
 	title: z.string().min(1).max(160),
 	summary: z.string().max(240).optional().or(z.literal("")),
-	url: z.string().url(),
+	url: z.url(),
 	source: z.string().max(40).optional().or(z.literal("")),
 	date: z.string(), // ISO
 });
@@ -43,11 +43,32 @@ import { defaultThemeV2, type ThemeV2 } from "./theme-config";
 export type ThemeConfig = ThemeV2;
 export const defaultTheme: ThemeV2 = defaultThemeV2;
 
+export type TalkItem = {
+	id: string;
+	title: string;
+	event: string;
+	description: string;
+	date: string | null;
+	slidesUrl: string | null;
+	videoUrl: string | null;
+};
+
+export type SupportLinkItem = {
+	id: string;
+	category: string;
+	platform: string;
+	label: string;
+	url: string;
+	serverId: string | null;
+};
+
 export type ProfileData = {
 	links: LinkItem[];
 	projects: ProjectItem[];
 	snippets: SnippetItem[];
 	articles: ArticleItem[];
+	talks: TalkItem[];
+	supportLinks: SupportLinkItem[];
 	theme: ThemeV2;
 	templateId: string | null;
 };
@@ -57,6 +78,8 @@ export const emptyProfileData: ProfileData = {
 	projects: [],
 	snippets: [],
 	articles: [],
+	talks: [],
+	supportLinks: [],
 	theme: defaultTheme,
 	templateId: null,
 };

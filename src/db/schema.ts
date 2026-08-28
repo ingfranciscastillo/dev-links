@@ -1,6 +1,7 @@
 import {
 	boolean,
 	customType,
+	date,
 	index,
 	integer,
 	jsonb,
@@ -29,9 +30,15 @@ export const buttonStyle = pgEnum("button_style", [
 export const integrationProvider = pgEnum("integration_provider", [
 	"github",
 	"devto",
-	"hashnode",
 	"medium",
 	"stackoverflow",
+	"wakatime",
+	"leetcode",
+	"npm",
+	"bluesky",
+	"mastodon",
+	"dockerhub",
+	"youtube",
 ]);
 
 export const projectStatus = pgEnum("project_status", [
@@ -275,6 +282,73 @@ export const integrationCache = pgTable(
 			table.kind,
 		),
 	],
+);
+
+export const talks = pgTable(
+	"talks",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+
+		title: text("title").notNull(),
+		event: text("event").notNull().default(""),
+		description: text("description").notNull().default(""),
+
+		date: date("date", { mode: "string" }),
+
+		slidesUrl: text("slides_url"),
+		videoUrl: text("video_url"),
+
+		position: integer("position").notNull().default(0),
+
+		createdAt: timestamp("created_at", {
+			withTimezone: true,
+		})
+			.notNull()
+			.defaultNow(),
+
+		updatedAt: timestamp("updated_at", {
+			withTimezone: true,
+		})
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [index("talks_user_id_idx").on(table.userId)],
+);
+
+export const supportLinks = pgTable(
+	"support_links",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+
+		category: text("category").notNull().default("support"),
+		platform: text("platform").notNull(),
+		label: text("label").notNull().default(""),
+		url: text("url").notNull(),
+		serverId: text("server_id"),
+
+		position: integer("position").notNull().default(0),
+
+		createdAt: timestamp("created_at", {
+			withTimezone: true,
+		})
+			.notNull()
+			.defaultNow(),
+
+		updatedAt: timestamp("updated_at", {
+			withTimezone: true,
+		})
+			.notNull()
+			.defaultNow(),
+	},
+	(table) => [index("support_links_user_id_idx").on(table.userId)],
 );
 
 export const pageViews = pgTable(

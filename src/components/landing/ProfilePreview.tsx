@@ -5,6 +5,7 @@ import {
 	StarIcon,
 } from "@solar-icons/react/linear";
 import type { SVGProps } from "react";
+
 import { GithubIcon, XIcon } from "@/components/brand-icons";
 
 function GitBranchIcon(props: SVGProps<SVGSVGElement>) {
@@ -26,103 +27,165 @@ function GitBranchIcon(props: SVGProps<SVGSVGElement>) {
 	);
 }
 
+const repositories = [
+	{
+		name: "next-shadcn-starter",
+		desc: "Production-ready Next.js + shadcn template",
+		lang: "TypeScript",
+		stars: 1240,
+	},
+	{
+		name: "rust-rate-limiter",
+		desc: "Tiny token-bucket limiter for axum",
+		lang: "Rust",
+		stars: 412,
+	},
+	{
+		name: "pg-snapshot",
+		desc: "Logical replication snapshots for Postgres",
+		lang: "Go",
+		stars: 198,
+	},
+];
+
 export function ProfilePreview() {
 	return (
-		<div className="overflow-hidden rounded-2xl border border-hairline bg-surface shadow-card">
-			<div className="flex items-center gap-1.5 border-b border-hairline px-4 py-3">
-				<span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />
-				<span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />
-				<span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" />
-				<span className="ml-3 font-mono text-xs text-muted-foreground">
+		<div className="overflow-hidden bg-background">
+			{/* Browser chrome */}
+			<div className="flex items-center justify-between border-b border-border px-4 py-3">
+				<div className="flex items-center gap-1.5">
+					<span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+					<span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+					<span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
+				</div>
+
+				<span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
 					devlinks.com/francis
 				</span>
+
+				<span className="w-8" aria-hidden="true" />
 			</div>
 
-			<div className="grid gap-6 p-6 md:grid-cols-[1fr_1.2fr]">
-				<div>
+			<div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+				{/* Identity */}
+				<div className="border-b border-border p-6 sm:p-8 lg:border-b-0 lg:border-r">
 					<div className="flex items-start gap-4">
-						<div className="h-16 w-16 shrink-0 rounded-full bg-gradient-to-br from-brand to-brand/40 ring-2 ring-hairline" />
-						<div>
-							<h3 className="text-lg font-semibold tracking-tight">
+						<div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-display text-xl text-brand">
+							F
+						</div>
+
+						<div className="min-w-0">
+							<h3 className="font-display text-2xl tracking-[-0.03em]">
 								Francis Dev
 							</h3>
-							<p className="text-sm text-muted-foreground">
+
+							<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
 								@francis · Senior Engineer
 							</p>
-							<span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-hairline bg-background px-2 py-0.5 text-xs">
-								<span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-								Available for hire
-							</span>
 						</div>
 					</div>
-					<p className="mt-4 text-sm text-muted-foreground">
+
+					<div className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-brand">
+						<span className="h-1.5 w-1.5 rounded-full bg-brand" />
+						Available for hire
+					</div>
+
+					<p className="mt-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
 						Full-stack engineer building developer tools. Rust, TypeScript and
 						Postgres.
 					</p>
-					<ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-						<li className="flex items-center gap-2">
-							<Buildings2Icon size={14} /> Vercel
-						</li>
-						<li className="flex items-center gap-2">
-							<MapPointIcon size={14} /> Madrid, Spain
-						</li>
-						<li className="flex items-center gap-2">
-							<GlobeIcon size={14} /> francis.dev
-						</li>
-					</ul>
-					<div className="mt-4 flex gap-2">
-						<span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-hairline bg-background">
-							<GithubIcon size={14} />
-						</span>
-						<span className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-hairline bg-background">
-							<XIcon size={14} />
-						</span>
+
+					<div className="mt-6 space-y-3 border-t border-border pt-5">
+						<div className="flex items-center gap-2 text-xs text-muted-foreground">
+							<Buildings2Icon size={14} />
+							<span>Vercel</span>
+						</div>
+
+						<div className="flex items-center gap-2 text-xs text-muted-foreground">
+							<MapPointIcon size={14} />
+							<span>Madrid, Spain</span>
+						</div>
+
+						<div className="flex items-center gap-2 text-xs text-muted-foreground">
+							<GlobeIcon size={14} />
+							<span>francis.dev</span>
+						</div>
+					</div>
+
+					<div className="mt-6 flex items-center gap-4">
+						<a
+							href="#"
+							aria-label="GitHub"
+							className="text-muted-foreground transition-colors hover:text-foreground"
+						>
+							<GithubIcon size={15} />
+						</a>
+
+						<a
+							href="#"
+							aria-label="X"
+							className="text-muted-foreground transition-colors hover:text-foreground"
+						>
+							<XIcon size={15} />
+						</a>
 					</div>
 				</div>
 
-				<div className="space-y-3">
-					{[
-						{
-							name: "next-shadcn-starter",
-							desc: "Production-ready Next.js + shadcn template",
-							lang: "TypeScript",
-							stars: 1240,
-						},
-						{
-							name: "rust-rate-limiter",
-							desc: "Tiny token-bucket limiter for axum",
-							lang: "Rust",
-							stars: 412,
-						},
-						{
-							name: "pg-snapshot",
-							desc: "Logical replication snapshots for Postgres",
-							lang: "Go",
-							stars: 198,
-						},
-					].map((r) => (
-						<div
-							key={r.name}
-							className="rounded-lg border border-hairline bg-background p-3 transition-colors hover:bg-surface-elevated"
-						>
-							<div className="flex items-center justify-between">
-								<span className="font-mono text-sm font-medium">{r.name}</span>
-								<span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-									<StarIcon size={12} /> {r.stars}
-								</span>
+				{/* Repositories */}
+				<div className="p-6 sm:p-8">
+					<div className="mb-4 flex items-center justify-between border-b border-border pb-3">
+						<p className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+							Selected repositories
+						</p>
+
+						<p className="font-mono text-[10px] tabular-nums text-muted-foreground">
+							03
+						</p>
+					</div>
+
+					<div>
+						{repositories.map((repo, index) => (
+							<div
+								key={repo.name}
+								className="group border-b border-border py-4 last:border-b-0"
+							>
+								<div className="flex items-start gap-4">
+									<span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+										0{index + 1}
+									</span>
+
+									<div className="min-w-0 flex-1">
+										<div className="flex items-start justify-between gap-4">
+											<span className="font-mono text-sm font-medium text-foreground">
+												{repo.name}
+											</span>
+
+											<span className="inline-flex shrink-0 items-center gap-1 font-mono text-[10px] tabular-nums text-muted-foreground">
+												<StarIcon size={11} />
+												{repo.stars}
+											</span>
+										</div>
+
+										<p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+											{repo.desc}
+										</p>
+
+										<div className="mt-3 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.04em] text-muted-foreground">
+											<span className="inline-flex items-center gap-1.5">
+												<span className="h-1.5 w-1.5 rounded-full bg-brand" />
+												{repo.lang}
+											</span>
+
+											<span className="inline-flex items-center gap-1">
+												<GitBranchIcon width={11} height={11} />
+												main
+											</span>
+										</div>
+									</div>
+								</div>
 							</div>
-							<p className="mt-1 text-xs text-muted-foreground">{r.desc}</p>
-							<div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
-								<span className="inline-flex items-center gap-1.5">
-									<span className="h-2 w-2 rounded-full bg-brand" />
-									{r.lang}
-								</span>
-								<span className="inline-flex items-center gap-1">
-									<GitBranchIcon width={12} height={12} /> main
-								</span>
-							</div>
-						</div>
-					))}
+						))}
+					</div>
 				</div>
 			</div>
 		</div>

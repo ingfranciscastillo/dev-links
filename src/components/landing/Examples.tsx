@@ -1,64 +1,65 @@
 import { ArrowRightUpIcon } from "@solar-icons/react/linear/arrow-right-up";
 import { Link } from "@tanstack/react-router";
+
 import { SectionHeader } from "./Features";
 
 const examples = [
 	{
 		handle: "francis",
 		name: "Francis Dev",
-		role: "Senior Engineer · Vercel",
-		color: "from-brand to-brand/30",
+		role: "Frontend Developer · Product Builder",
 	},
 	{
 		handle: "ada",
 		name: "Ada Park",
-		role: "Rust + Systems · Cloudflare",
-		color: "from-amber-500 to-rose-500/40",
+		role: "Rust · Systems · Open Source",
 	},
 	{
 		handle: "kenji",
 		name: "Kenji Sato",
-		role: "DX Engineer · Linear",
-		color: "from-emerald-500 to-teal-500/40",
+		role: "Developer Experience · Tooling",
 	},
 ];
 
 export function Examples() {
 	return (
-		<section id="examples" className="border-t border-hairline bg-surface/40">
-			<div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+		<section id="examples" className="border-t border-border">
+			<div className="mx-auto max-w-editorial px-5 py-24 sm:px-8 sm:py-32">
 				<SectionHeader
-					eyebrow="Examples"
-					title="Profiles that look made for the web."
-					sub="Three live pages built with DevLinks."
+					eyebrow="03 / Examples"
+					title="See DevLinks in the wild."
+					sub="Different people. Different stacks. Same address."
 				/>
-				<div className="mt-12 grid gap-4 md:grid-cols-3">
-					{examples.map((e) => (
+
+				<div className="mt-16 border-t border-border sm:mt-20">
+					{examples.map((example, index) => (
 						<Link
-							key={e.handle}
+							key={example.handle}
 							to="/$username"
-							params={{ username: e.handle }}
-							className="group overflow-hidden rounded-xl border border-hairline bg-background transition-colors hover:bg-surface-elevated"
+							params={{ username: example.handle }}
+							className="group grid gap-5 border-b border-border py-7 transition-colors hover:bg-surface sm:grid-cols-[4rem_minmax(0,1fr)_20rem_2rem] sm:items-center sm:px-3 sm:py-8"
 						>
-							<div className={`relative h-28 bg-gradient-to-br ${e.color}`}>
-								<div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_50%)]" />
+							<span className="font-mono text-[10px] tracking-[0.08em] text-muted-foreground">
+								{String(index + 1).padStart(2, "0")}
+							</span>
+
+							<div>
+								<h3 className="font-display text-2xl tracking-tight sm:text-3xl">
+									{example.name}
+								</h3>
+
+								<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+									@{example.handle}
+								</p>
 							</div>
-							<div className="-mt-8 px-5 pb-5">
-								<div className="h-14 w-14 rounded-full border-4 border-background bg-surface" />
-								<div className="mt-3 flex items-start justify-between">
-									<div>
-										<p className="font-semibold tracking-tight">{e.name}</p>
-										<p className="text-xs text-muted-foreground">
-											@{e.handle} · {e.role}
-										</p>
-									</div>
-									<ArrowRightUpIcon
-										width={16}
-										height={16}
-										className="text-muted-foreground transition-colors group-hover:text-foreground"
-									/>
-								</div>
-							</div>
+
+							<p className="text-sm text-muted-foreground">{example.role}</p>
+
+							<ArrowRightUpIcon
+								width={16}
+								height={16}
+								className="text-muted-foreground transition-all duration-200 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-brand"
+							/>
 						</Link>
 					))}
 				</div>

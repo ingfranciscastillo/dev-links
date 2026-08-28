@@ -1,103 +1,190 @@
-import { ArrowRightIcon, StarsIcon } from "@solar-icons/react/linear";
-import gsap from "gsap";
-import { useEffect, useRef } from "react";
+import { ArrowRightIcon, ArrowRightUpIcon } from "@solar-icons/react/linear";
+import { motion, useReducedMotion } from "motion/react";
+
 import { GithubIcon } from "@/components/brand-icons";
 import { ProfilePreview } from "./ProfilePreview";
 
-export function Hero() {
-	const root = useRef<HTMLDivElement>(null);
+const ease = [0.16, 1, 0.3, 1] as const;
 
-	useEffect(() => {
-		if (!root.current) return;
-		const ctx = gsap.context(() => {
-			gsap.from("[data-anim='hero-item']", {
-				y: 18,
-				opacity: 0,
-				duration: 0.8,
-				ease: "power3.out",
-				stagger: 0.08,
-			});
-			gsap.from("[data-anim='hero-card']", {
-				y: 30,
-				opacity: 0,
-				duration: 1,
-				delay: 0.2,
-				ease: "power3.out",
-			});
-		}, root);
-		return () => ctx.revert();
-	}, []);
+export function Hero() {
+	const reduceMotion = useReducedMotion();
+
+	const duration = reduceMotion ? 0.01 : 0.7;
 
 	return (
-		<section ref={root} className="relative overflow-hidden">
-			<div className="absolute inset-0 -z-10 grid-bg" aria-hidden />
-			<div className="absolute inset-0 -z-10 radial-glow" aria-hidden />
+		<section id="top" className="relative">
+			<div className="mx-auto w-full max-w-editorial px-5 pb-24 pt-28 sm:px-8 sm:pb-32 sm:pt-36 lg:pt-44">
+				<div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-end">
+					<div>
+						<motion.p
+							className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground"
+							initial={{ opacity: 0, y: 8 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{
+								duration: reduceMotion ? 0.01 : 0.5,
+								delay: 0.1,
+								ease,
+							}}
+						>
+							DevLinks — Developer Identity Platform
+						</motion.p>
 
-			<div className="mx-auto max-w-6xl px-4 pb-20 pt-20 sm:px-6 sm:pt-28 lg:pt-32">
-				<div className="mx-auto max-w-3xl text-center">
-					<a
-						href="/#features"
-						data-anim="hero-item"
-						className="inline-flex items-center gap-2 rounded-full border border-hairline bg-surface px-3 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+						<motion.h1 className="mt-7 max-w-5xl text-balance font-display text-[15vw] leading-[0.88] tracking-[-0.045em] text-foreground sm:text-[6.5rem] md:text-[8rem] lg:text-[9rem]">
+							{[
+								{ text: "Everything", delay: 0.18 },
+								{ text: "you build.", delay: 0.26 },
+							].map(({ text, delay }) => (
+								<motion.span
+									key={text}
+									className="block"
+									initial={{
+										opacity: 0,
+										y: 22,
+										filter: "blur(4px)",
+									}}
+									animate={{
+										opacity: 1,
+										y: 0,
+										filter: "blur(0px)",
+									}}
+									transition={{
+										duration,
+										delay,
+										ease,
+									}}
+								>
+									{text.endsWith(".") ? (
+										<>
+											{text.slice(0, -1)}
+											<span className="text-brand">.</span>
+										</>
+									) : (
+										text
+									)}
+								</motion.span>
+							))}
+
+							<motion.span
+								className="block italic text-brand"
+								initial={{
+									opacity: 0,
+									y: 22,
+									filter: "blur(4px)",
+								}}
+								animate={{
+									opacity: 1,
+									y: 0,
+									filter: "blur(0px)",
+								}}
+								transition={{
+									duration,
+									delay: 0.34,
+									ease,
+								}}
+							>
+								One address.
+							</motion.span>
+						</motion.h1>
+					</div>
+
+					<motion.p
+						className="max-w-xs pb-2 text-[15px] leading-relaxed text-muted-foreground lg:justify-self-end lg:text-base"
+						initial={{ opacity: 0, y: 14 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.6,
+							delay: 0.48,
+							ease,
+						}}
 					>
-						<StarsIcon size={12} className="text-brand" />
-						Now in beta — claim your username
-						<ArrowRightIcon size={12} />
-					</a>
+						One page for your work, writing, projects, profiles, and everything
+						you want people to find.
+					</motion.p>
+				</div>
 
-					<h1
-						data-anim="hero-item"
-						className="mt-6 text-balance text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+				<motion.div
+					className="mt-12 h-px w-full bg-border sm:mt-16"
+					initial={{ opacity: 0, scaleX: 0 }}
+					animate={{ opacity: 1, scaleX: 1 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.6,
+						delay: 0.56,
+						ease,
+					}}
+					style={{ originX: 0 }}
+				/>
+
+				<div className="mt-6 flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-between">
+					<motion.p
+						className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground"
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.5,
+							delay: 0.64,
+							ease,
+						}}
 					>
-						<span className="text-gradient">
-							The link-in-bio built for developers.
-						</span>
-					</h1>
+						devlinks.com/
+						<span className="text-foreground">your-handle</span>
+					</motion.p>
 
-					<p
-						data-anim="hero-item"
-						className="mx-auto mt-6 max-w-2xl text-pretty text-base text-muted-foreground sm:text-lg"
-					>
-						One page for your repos, snippets, articles and projects.
-						Auto-synced with GitHub, Dev.to, Hashnode, Medium and Stack
-						Overflow.
-					</p>
-
-					<div
-						data-anim="hero-item"
-						className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row"
+					<motion.div
+						className="flex flex-wrap items-center gap-4"
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.5,
+							delay: 0.72,
+							ease,
+						}}
 					>
 						<a
 							href="/#cta"
-							className="inline-flex h-11 items-center gap-2 rounded-md bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+							className="group inline-flex items-center gap-2 border border-foreground px-5 py-3 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
 						>
-							Claim your devlinks.com/you
-							<ArrowRightIcon size={16} />
+							Create your profile
+							<ArrowRightIcon
+								size={13}
+								className="transition-transform duration-300 group-hover:translate-x-1"
+							/>
 						</a>
+
 						<a
 							href="/francis"
-							className="inline-flex h-11 items-center gap-2 rounded-md border border-border bg-surface px-5 text-sm font-medium transition-colors hover:bg-surface-elevated"
+							className="inline-flex items-center gap-2 px-1 py-3 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
 						>
-							<GithubIcon size={16} />
-							See a live profile
+							<GithubIcon size={14} />
+							See example
+							<ArrowRightUpIcon size={13} />
 						</a>
+					</motion.div>
+				</div>
+
+				<motion.div
+					className="mt-20 sm:mt-24 lg:mt-32"
+					initial={{ opacity: 0, y: 30 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.9,
+						delay: 0.82,
+						ease,
+					}}
+				>
+					<div className="mb-4 flex items-center justify-between">
+						<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+							01 / Public profile
+						</p>
+
+						<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+							Live preview
+						</p>
 					</div>
 
-					<p
-						data-anim="hero-item"
-						className="mt-4 font-mono text-xs text-muted-foreground"
-					>
-						devlinks.com/<span className="text-foreground">your-handle</span>
-					</p>
-				</div>
-
-				<div data-anim="hero-card" className="relative mx-auto mt-16 max-w-4xl">
-					<div
-						className="absolute inset-x-10 -top-6 -z-10 h-40 bg-brand/30 blur-3xl"
-						aria-hidden
-					/>
-					<ProfilePreview />
-				</div>
+					<div className="border border-border bg-surface-elevated">
+						<ProfilePreview />
+					</div>
+				</motion.div>
 			</div>
 		</section>
 	);

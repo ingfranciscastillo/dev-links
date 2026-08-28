@@ -35,26 +35,42 @@ const faqs = [
 
 export function Faq() {
 	return (
-		<section id="faq" className="border-t border-hairline bg-surface/40">
-			<div className="mx-auto max-w-3xl px-4 py-20 sm:px-6 sm:py-28">
-				<SectionHeader eyebrow="FAQ" title="Questions, answered." />
-				<Accordion type="single" collapsible className="mt-10">
-					{faqs.map((f, i) => (
-						<AccordionItem
-							key={i}
-							value={`item-${i}`}
-							className="border-hairline"
-						>
-							<AccordionTrigger className="text-left text-base hover:no-underline">
-								{f.q}
-							</AccordionTrigger>
-							<AccordionContent className="text-muted-foreground">
-								{f.a}
-							</AccordionContent>
-						</AccordionItem>
-					))}
-				</Accordion>
-			</div>
+		<section id="faq" className="border-t border-border">
+			{" "}
+			<div className="mx-auto max-w-editorial px-5 py-24 sm:px-8 sm:py-32">
+				{" "}
+				<SectionHeader eyebrow="05 / FAQ" title="Questions, answered." />{" "}
+				<div className="mt-16 max-w-3xl border-t border-border sm:mt-20">
+					{" "}
+					<Accordion type="single" collapsible>
+						{" "}
+						{faqs.map((faq, index) => (
+							<AccordionItem
+								key={faq.q}
+								value={`item-${index}`}
+								className="border-b border-border"
+							>
+								{" "}
+								<AccordionTrigger className="group py-6 text-left font-display text-xl tracking-[-0.02em] hover:no-underline sm:py-7 sm:text-2xl">
+									{" "}
+									<span className="flex items-start gap-4">
+										{" "}
+										<span className="pt-1 font-mono text-[9px] tracking-[0.08em] text-muted-foreground">
+											{" "}
+											{String(index + 1).padStart(2, "0")}{" "}
+										</span>{" "}
+										<span>{faq.q}</span>{" "}
+									</span>{" "}
+								</AccordionTrigger>{" "}
+								<AccordionContent className="pb-7 pl-8 text-sm leading-relaxed text-muted-foreground sm:pb-8">
+									{" "}
+									<div className="max-w-2xl">{faq.a}</div>{" "}
+								</AccordionContent>{" "}
+							</AccordionItem>
+						))}{" "}
+					</Accordion>{" "}
+				</div>{" "}
+			</div>{" "}
 		</section>
 	);
 }

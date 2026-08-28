@@ -2,44 +2,53 @@ import { ArrowRightIcon } from "@solar-icons/react/linear";
 
 export function Cta() {
 	return (
-		<section id="cta" className="border-t border-hairline">
-			<div className="relative mx-auto max-w-5xl overflow-hidden px-4 py-24 sm:px-6">
-				<div className="absolute inset-0 -z-10 radial-glow" aria-hidden />
-				<div className="mx-auto max-w-2xl text-center">
-					<h2 className="text-balance text-3xl font-semibold tracking-tight sm:text-5xl">
-						<span className="text-gradient">
-							Your devlinks.com/handle is waiting.
-						</span>
-					</h2>
-					<p className="mx-auto mt-4 max-w-xl text-pretty text-muted-foreground">
-						Sign up in 30 seconds. Connect GitHub. Share a single link from
-						every bio you have.
-					</p>
-
-					<form
-						onSubmit={(e) => e.preventDefault()}
-						className="mx-auto mt-8 flex max-w-md flex-col gap-2 sm:flex-row"
-					>
-						<div className="flex h-11 flex-1 items-center rounded-md border border-border bg-surface pl-3 focus-within:ring-2 focus-within:ring-ring">
-							<span className="select-none font-mono text-sm text-muted-foreground">
-								devlinks.com/
-							</span>
-							<input
-								aria-label="Your username"
-								placeholder="your-handle"
-								className="h-full flex-1 bg-transparent px-1 text-sm placeholder:text-muted-foreground focus:outline-none"
-							/>
-						</div>
-						<button
-							type="submit"
-							className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-foreground px-5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-						>
-							Claim it <ArrowRightIcon size={16} />
-						</button>
-					</form>
-					<p className="mt-3 text-xs text-muted-foreground">
-						No credit card. Free forever.
-					</p>
+		<section id="cta" className="border-t border-border">
+			<div className="mx-auto max-w-editorial px-5 py-28 sm:px-8 sm:py-36 lg:py-44">
+				<div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
+					<div>
+						<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+							06 / Get started
+						</p>
+						<h2 className="mt-6 max-w-4xl font-display text-[13vw] leading-[0.88] tracking-[-0.045em] text-foreground sm:text-7xl md:text-8xl lg:text-9xl">
+							Your <br /> <span className="italic text-brand">address</span>
+							<br /> is waiting.
+						</h2>
+					</div>
+					<div className="lg:pb-2">
+						<p className="text-[15px] leading-relaxed text-muted-foreground sm:text-base">
+							Sign up in 30 seconds. Connect your services. Share one profile
+							everywhere.
+						</p>
+						<form onSubmit={(e) => e.preventDefault()} className="mt-8">
+							<label htmlFor="cta-username" className="sr-only">
+								Your username
+							</label>
+							<div className="flex border-b border-foreground pb-2 focus-within:border-brand">
+								<span className="shrink-0 font-mono text-[12px] text-muted-foreground">
+									devlinks.com/
+								</span>
+								<input
+									id="cta-username"
+									placeholder="your-handle"
+									className="min-w-0 flex-1 bg-transparent px-1 font-mono text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none"
+								/>
+								<button
+									type="submit"
+									aria-label="Claim username"
+									className="group ml-3 inline-flex shrink-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:text-brand"
+								>
+									Claim it
+									<ArrowRightIcon
+										size={13}
+										className="transition-transform duration-300 group-hover:translate-x-1"
+									/>
+								</button>
+							</div>
+							<p className="mt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+								No credit card · Free forever
+							</p>
+						</form>
+					</div>
 				</div>
 			</div>
 		</section>

@@ -1,99 +1,98 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
+import { ArrowRightIcon } from "@solar-icons/react/linear/arrow-right";
+
 import { SectionHeader } from "./Features";
+
+const rows = [
+	["All integrations", "All", "All"],
+	["Connected sources", "Up to 5", "Unlimited"],
+	["Sync frequency", "Daily", "Frequent"],
+	["Links", "Up to 5", "Unlimited"],
+	["Projects", "Up to 5", "Unlimited"],
+	["Snippets", "Up to 5", "Unlimited"],
+	["Basic themes", "Included", "Included"],
+	["Analytics", "—", "Included"],
+	["Custom domain", "—", "Included"],
+	["Custom CSS", "—", "Included"],
+	["DevLinks branding", "Included", "Removed"],
+	["Priority support", "—", "Included"],
+];
 
 const plans = [
 	{
 		name: "Free",
 		price: "$0",
-		sub: "For trying it out",
-		features: [
-			"devlinks.com subdomain",
-			"Up to 10 links",
-			"Up to 5 projects",
-			"Up to 5 snippets",
-			"Basic themes",
-			"GitHub auto-sync",
-		],
+		sub: "forever",
 		cta: "Start free",
 		href: "/#cta",
-		featured: false,
 	},
 	{
 		name: "Pro",
 		price: "$5",
 		sub: "per month",
-		features: [
-			"Custom domain",
-			"Unlimited links, projects & snippets",
-			"Full analytics dashboard",
-			"Premium themes + custom CSS",
-			"Remove watermark",
-			"Priority support",
-		],
 		cta: "Go Pro",
 		href: "/#cta",
-		featured: true,
 	},
 ];
 
 export function Pricing() {
 	return (
-		<section id="pricing" className="border-t border-hairline">
-			<div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
+		<section id="pricing" className="border-t border-border">
+			<div className="mx-auto max-w-editorial px-5 py-24 sm:px-8 sm:py-32">
 				<SectionHeader
-					eyebrow="Pricing"
-					title="Free forever. Pro when you're ready."
+					eyebrow="04 / Pricing"
+					title="Free forever. Pro when you need more."
+					sub="Start with everything you need to build your developer presence. Upgrade when you want more control."
 				/>
-				<div className="mx-auto mt-12 grid max-w-3xl gap-4 md:grid-cols-2">
-					{plans.map((p) => (
-						<div
-							key={p.name}
-							className={`relative flex flex-col rounded-2xl border p-6 ${
-								p.featured
-									? "border-brand/40 bg-surface shadow-glow"
-									: "border-hairline bg-background"
-							}`}
-						>
-							{p.featured && (
-								<span className="absolute -top-2.5 left-6 inline-flex items-center rounded-full border border-brand/40 bg-background px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-brand">
-									Recommended
-								</span>
-							)}
-							<div className="flex items-baseline justify-between">
-								<h3 className="text-lg font-semibold tracking-tight">
-									{p.name}
-								</h3>
-								<div className="flex items-baseline gap-1">
-									<span className="text-3xl font-semibold tracking-tight">
-										{p.price}
-									</span>
-									<span className="text-xs text-muted-foreground">{p.sub}</span>
+
+				<div className="mt-16 border-t border-border sm:mt-20">
+					<div className="grid grid-cols-[minmax(0,1fr)_7rem_7rem] border-b border-border py-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:grid-cols-[minmax(0,1fr)_10rem_10rem]">
+						<span>Feature</span>
+
+						{plans.map((plan) => (
+							<div key={plan.name} className="text-right">
+								<div className="text-foreground">{plan.name}</div>
+								<div className="mt-1 normal-case tracking-normal">
+									{plan.price} · {plan.sub}
 								</div>
 							</div>
-							<ul className="mt-6 space-y-2.5 text-sm">
-								{p.features.map((f) => (
-									<li key={f} className="flex items-center gap-2.5">
-										<CheckCircleIcon
-											size={20}
-											secondaryOpacity={0}
-											className="mt-0.5 shrink-0 text-brand"
-										/>
-										<span className="text-muted-foreground">{f}</span>
-									</li>
-								))}
-							</ul>
-							<a
-								href={p.href}
-								className={`mt-8 inline-flex h-10 items-center justify-center rounded-md px-4 text-sm font-medium transition-opacity ${
-									p.featured
-										? "bg-foreground text-background hover:opacity-90"
-										: "border border-border bg-surface hover:bg-surface-elevated"
-								}`}
-							>
-								{p.cta}
-							</a>
+						))}
+					</div>
+
+					{rows.map(([label, free, pro], index) => (
+						<div
+							key={label}
+							className="grid grid-cols-[minmax(0,1fr)_7rem_7rem] items-center border-b border-border py-5 sm:grid-cols-[minmax(0,1fr)_10rem_10rem]"
+						>
+							<div className="flex items-baseline gap-3">
+								<span className="font-mono text-[9px] text-muted-foreground">
+									{String(index + 1).padStart(2, "0")}
+								</span>
+
+								<span className="text-sm">{label}</span>
+							</div>
+
+							<span className="text-right text-sm text-muted-foreground">
+								{free}
+							</span>
+
+							<span className="text-right text-sm text-foreground">{pro}</span>
 						</div>
 					))}
+
+					<div className="grid grid-cols-[minmax(0,1fr)_7rem_7rem] py-6 sm:grid-cols-[minmax(0,1fr)_10rem_10rem]">
+						<div />
+
+						<a
+							href="/#cta"
+							className="group col-span-2 inline-flex w-fit justify-self-end items-center gap-2 border border-foreground px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors hover:border-brand hover:text-brand"
+						>
+							Choose a plan
+							<ArrowRightIcon
+								size={13}
+								className="transition-transform duration-300 group-hover:translate-x-1"
+							/>
+						</a>
+					</div>
 				</div>
 			</div>
 		</section>

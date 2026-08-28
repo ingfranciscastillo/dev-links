@@ -1,7 +1,6 @@
 import { ArrowRightIcon, ArrowRightUpIcon } from "@solar-icons/react/linear";
 import { motion, useReducedMotion } from "motion/react";
 
-import { GithubIcon } from "@/components/brand-icons";
 import { ProfilePreview } from "./ProfilePreview";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -154,7 +153,6 @@ export function Hero() {
 							href="/francis"
 							className="inline-flex items-center gap-2 px-1 py-3 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
 						>
-							<GithubIcon size={14} />
 							See example
 							<ArrowRightUpIcon size={13} />
 						</a>

@@ -1,7 +1,10 @@
-import { LinkRoundIcon } from "@solar-icons/react/linear/link-round";
+import { ArrowRightUpIcon } from "@solar-icons/react/linear";
+
 import { Link } from "@tanstack/react-router";
+
 import { GithubIcon } from "@/components/brand-icons";
 import { authClient } from "@/lib/auth-client";
+
 import { ThemeToggle } from "./ThemeToggle";
 
 const nav = [
@@ -17,67 +20,75 @@ export function Header() {
 	const isAuthenticated = Boolean(user);
 
 	return (
-		<header className="sticky top-0 z-50 w-full">
-			<div className="glass border-b border-hairline">
-				<div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6">
-					<Link
-						to="/"
-						className="flex items-center gap-2 font-semibold tracking-tight"
-					>
-						<span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-foreground text-background">
-							<LinkRoundIcon size={14} />
-						</span>
-						<span>DevLinks</span>
-					</Link>
+		<header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm">
+			<div className="mx-auto flex h-16 max-w-editorial items-center justify-between border-b border-border px-5 sm:px-8">
+				<Link to="/" className="group flex items-center gap-2.5">
+					<span className="font-display text-xl leading-none tracking-[-0.03em] text-foreground">
+						DevLinks
+					</span>
+					<span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+						01
+					</span>
+				</Link>
 
-					<nav className="hidden items-center justify-center gap-1 md:flex">
-						{nav.map((item) => (
-							<a
-								key={item.href}
-								href={item.href}
-								className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-surface hover:text-foreground"
-							>
-								{item.label}
-							</a>
-						))}
-					</nav>
-
-					<div className="flex items-center gap-2">
+				<nav className="hidden items-center gap-7 md:flex">
+					{nav.map((item) => (
 						<a
-							href="https://github.com"
-							target="_blank"
-							rel="noreferrer"
-							aria-label="GitHub"
-							className="hidden h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-muted-foreground transition-colors hover:bg-surface-elevated hover:text-foreground sm:inline-flex"
+							key={item.href}
+							href={item.href}
+							className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
 						>
-							<GithubIcon size={16} />
+							{item.label}
 						</a>
-						<ThemeToggle />
-						{isAuthenticated && user ? (
+					))}
+				</nav>
+
+				<div className="flex items-center gap-4">
+					<a
+						href="https://github.com"
+						target="_blank"
+						rel="noreferrer"
+						aria-label="GitHub"
+						className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+					>
+						<GithubIcon size={16} />
+					</a>
+
+					<ThemeToggle />
+
+					{isAuthenticated && user ? (
+						<Link
+							to="/dashboard"
+							className="group inline-flex items-center gap-2 border border-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
+						>
+							Dashboard
+							<ArrowRightUpIcon
+								size={13}
+								className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+							/>
+						</Link>
+					) : (
+						<>
 							<Link
-								to="/dashboard"
-								className="inline-flex h-9 items-center rounded-md bg-foreground px-3.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+								to="/login"
+								search={{ redirect: undefined }}
+								className="hidden font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
 							>
-								Dashboard
+								Sign in
 							</Link>
-						) : (
-							<>
-								<Link
-									to="/login"
-									search={{ redirect: undefined }}
-									className="hidden h-9 items-center rounded-md px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
-								>
-									Sign in
-								</Link>
-								<Link
-									to="/signup"
-									className="inline-flex h-9 items-center rounded-md bg-foreground px-3.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
-								>
-									Get started
-								</Link>
-							</>
-						)}
-					</div>
+
+							<Link
+								to="/signup"
+								className="group inline-flex items-center gap-2 border border-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
+							>
+								Get started
+								<ArrowRightUpIcon
+									size={13}
+									className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+								/>
+							</Link>
+						</>
+					)}
 				</div>
 			</div>
 		</header>

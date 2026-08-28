@@ -1,16 +1,30 @@
+import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-
+import { motion, useReducedMotion } from "motion/react";
 import { useDeferredValue, useMemo, useState } from "react";
-
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
-
 import {
 	type DiscoverResult,
 	searchProfiles,
 } from "@/lib/api/discover.functions";
+
+const LANGUAGES = [
+	"TypeScript",
+	"JavaScript",
+	"Rust",
+	"Go",
+	"Python",
+	"Elixir",
+	"Ruby",
+	"Swift",
+];
+
+const SENIORITIES = ["junior", "mid", "senior", "staff", "principal"];
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export const Route = createFileRoute("/discover")({
 	head: () => ({
@@ -37,21 +51,9 @@ export const Route = createFileRoute("/discover")({
 	component: Discover,
 });
 
-const LANGUAGES = [
-	"TypeScript",
-	"JavaScript",
-	"Rust",
-	"Go",
-	"Python",
-	"Elixir",
-	"Ruby",
-	"Swift",
-];
-
-const SENIORITIES = ["junior", "mid", "senior", "staff", "principal"];
-
 function Discover() {
 	const searchProfilesFn = useServerFn(searchProfiles);
+	const reduceMotion = useReducedMotion();
 
 	const [q, setQ] = useState("");
 	const [language, setLanguage] = useState<string | null>(null);
@@ -87,7 +89,15 @@ function Discover() {
 			<Header />
 
 			<main className="mx-auto max-w-editorial px-5 pb-24 pt-20 sm:px-8 sm:pt-28">
-				<header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
+				<motion.header
+					initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.7,
+						ease,
+					}}
+					className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end"
+				>
 					<div>
 						<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
 							Discover / Directory
@@ -104,11 +114,20 @@ function Discover() {
 						Explore developer profiles by stack, experience, location, and
 						availability.
 					</p>
-				</header>
+				</motion.header>
 
-				<div className="mt-14 border-t border-border pt-6 sm:mt-20">
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.6,
+						delay: reduceMotion ? 0 : 0.1,
+						ease,
+					}}
+					className="mt-14 border-t border-border pt-6 sm:mt-20"
+				>
 					<div className="flex items-center gap-4 border-b border-foreground pb-3">
-						<span className="font-mono text-[10px] uppercase tracking-widest text-brand">
+						<span className="shrink-0 font-mono text-[10px] uppercase tracking-widest text-brand">
 							Search
 						</span>
 
@@ -120,14 +139,16 @@ function Discover() {
 							className="min-w-0 flex-1 bg-transparent font-display text-xl tracking-[-0.02em] text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-2xl"
 						/>
 
-						{isFetching && (
-							<span
-								aria-hidden="true"
-								className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
-							>
-								Searching
-							</span>
-						)}
+						<motion.span
+							animate={{
+								opacity: isFetching ? 1 : 0,
+							}}
+							transition={{ duration: 0.18 }}
+							aria-hidden={!isFetching}
+							className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
+						>
+							Searching
+						</motion.span>
 					</div>
 
 					<div className="mt-5 grid gap-5 border-b border-border pb-6 sm:grid-cols-[auto_1fr_auto] sm:items-start">
@@ -136,17 +157,45 @@ function Discover() {
 								Language
 							</p>
 
-							<div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+							<motion.div
+								className="mt-3 flex flex-wrap gap-x-4 gap-y-2"
+								initial="hidden"
+								animate="visible"
+								variants={{
+									hidden: {},
+									visible: {
+										transition: {
+											staggerChildren: reduceMotion ? 0 : 0.025,
+										},
+									},
+								}}
+							>
 								{LANGUAGES.map((item) => (
-									<FilterButton
+									<motion.div
 										key={item}
-										active={language === item}
-										onClick={() => setLanguage(language === item ? null : item)}
+										variants={{
+											hidden: reduceMotion ? {} : { opacity: 0, y: 6 },
+											visible: {
+												opacity: 1,
+												y: 0,
+												transition: {
+													duration: reduceMotion ? 0.01 : 0.3,
+													ease,
+												},
+											},
+										}}
 									>
-										{item}
-									</FilterButton>
+										<FilterButton
+											active={language === item}
+											onClick={() =>
+												setLanguage(language === item ? null : item)
+											}
+										>
+											{item}
+										</FilterButton>
+									</motion.div>
 								))}
-							</div>
+							</motion.div>
 						</div>
 
 						<div>
@@ -154,38 +203,59 @@ function Discover() {
 								Seniority
 							</p>
 
-							<div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+							<motion.div
+								className="mt-3 flex flex-wrap gap-x-4 gap-y-2"
+								initial="hidden"
+								animate="visible"
+								variants={{
+									hidden: {},
+									visible: {
+										transition: {
+											staggerChildren: reduceMotion ? 0 : 0.03,
+										},
+									},
+								}}
+							>
 								{SENIORITIES.map((item) => (
-									<FilterButton
+									<motion.div
 										key={item}
-										active={seniority === item}
-										onClick={() =>
-											setSeniority(seniority === item ? null : item)
-										}
+										variants={{
+											hidden: reduceMotion ? {} : { opacity: 0, y: 6 },
+											visible: {
+												opacity: 1,
+												y: 0,
+												transition: {
+													duration: reduceMotion ? 0.01 : 0.3,
+													ease,
+												},
+											},
+										}}
 									>
-										{item}
-									</FilterButton>
+										<FilterButton
+											active={seniority === item}
+											onClick={() =>
+												setSeniority(seniority === item ? null : item)
+											}
+										>
+											{item}
+										</FilterButton>
+									</motion.div>
 								))}
-							</div>
+							</motion.div>
 						</div>
 
 						<div className="flex items-end gap-4 sm:justify-self-end">
-							<button
-								type="button"
+							<FilterButton
+								active={available}
 								onClick={() => setAvailable((value) => !value)}
-								className={`inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors ${
-									available
-										? "text-brand"
-										: "text-muted-foreground hover:text-foreground"
-								}`}
 							>
 								<span
-									className={`h-1.5 w-1.5 rounded-full ${
+									className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
 										available ? "bg-brand" : "bg-muted-foreground/40"
 									}`}
 								/>
 								Available for hire
-							</button>
+							</FilterButton>
 
 							<label className="flex items-center gap-2 border-b border-border pb-1">
 								<span className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
@@ -204,21 +274,47 @@ function Discover() {
 							</label>
 						</div>
 					</div>
-				</div>
+				</motion.div>
 
-				<div className="mt-10 flex items-end justify-between border-b border-border pb-3">
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0 }}
+					animate={{ opacity: 1 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.5,
+						delay: reduceMotion ? 0 : 0.2,
+						ease,
+					}}
+					className="mt-10 flex items-end justify-between border-b border-border pb-3"
+				>
 					<p className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
 						Developers
 					</p>
 
-					<p className="font-mono text-[10px] tabular-nums text-muted-foreground">
+					<motion.p
+						key={results.length}
+						initial={reduceMotion ? false : { opacity: 0, y: -4 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.25,
+							ease,
+						}}
+						className="font-mono text-[10px] tabular-nums text-muted-foreground"
+					>
 						{results.length.toString().padStart(2, "0")}
-					</p>
-				</div>
+					</motion.p>
+				</motion.div>
 
 				<div>
 					{results.length === 0 && !isFetching ? (
-						<div className="border-b border-border py-14">
+						<motion.div
+							initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+							animate={{ opacity: 1, y: 0 }}
+							transition={{
+								duration: reduceMotion ? 0.01 : 0.5,
+								ease,
+							}}
+							className="border-b border-border py-14"
+						>
 							<p className="font-display text-2xl tracking-[-0.02em]">
 								No developers found.
 							</p>
@@ -226,11 +322,29 @@ function Discover() {
 							<p className="mt-2 text-sm text-muted-foreground">
 								Try changing your search or removing some filters.
 							</p>
-						</div>
+						</motion.div>
 					) : (
-						results.map((profile, index) => (
-							<ProfileRow key={profile.id} profile={profile} index={index} />
-						))
+						<motion.div
+							initial="hidden"
+							animate="visible"
+							variants={{
+								hidden: {},
+								visible: {
+									transition: {
+										staggerChildren: reduceMotion ? 0 : 0.06,
+									},
+								},
+							}}
+						>
+							{results.map((profile, index) => (
+								<ProfileRow
+									key={profile.id}
+									profile={profile}
+									index={index}
+									reduceMotion={reduceMotion}
+								/>
+							))}
+						</motion.div>
 					)}
 				</div>
 			</main>
@@ -266,77 +380,98 @@ function FilterButton({
 function ProfileRow({
 	profile: p,
 	index,
+	reduceMotion,
 }: {
 	profile: DiscoverResult;
 	index: number;
+	reduceMotion: boolean | null;
 }) {
 	return (
-		<Link
-			to="/$username"
-			params={{ username: p.username }}
-			className="group grid gap-5 border-b border-border py-7 transition-colors hover:bg-surface sm:grid-cols-[4rem_minmax(0,1.4fr)_minmax(14rem,0.8fr)_auto] sm:items-center sm:px-3 sm:py-8"
+		<motion.div
+			variants={{
+				hidden: reduceMotion
+					? {}
+					: {
+							opacity: 0,
+							y: 16,
+						},
+				visible: {
+					opacity: 1,
+					y: 0,
+					transition: {
+						duration: reduceMotion ? 0.01 : 0.5,
+						ease,
+					},
+				},
+			}}
 		>
-			<span className="font-mono text-[10px] tabular-nums text-muted-foreground">
-				{String(index + 1).padStart(2, "0")}
-			</span>
-
-			<div className="min-w-0">
-				<div className="flex items-center gap-3">
-					<h2 className="truncate font-display text-2xl tracking-tight sm:text-3xl">
-						{p.name || p.username}
-					</h2>
-
-					{p.available && (
-						<span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-brand">
-							<span className="h-1.5 w-1.5 rounded-full bg-brand" />
-							Open
-						</span>
-					)}
-				</div>
-
-				<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-					@{p.username}
-					{p.seniority ? ` · ${p.seniority}` : ""}
-					{p.primary_language ? ` · ${p.primary_language}` : ""}
-				</p>
-
-				{p.bio && (
-					<p className="mt-3 line-clamp-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-						{p.bio}
-					</p>
-				)}
-			</div>
-
-			<div className="flex flex-wrap gap-x-3 gap-y-1 sm:justify-self-start">
-				{p.technologies.slice(0, 5).map((technology) => (
-					<span
-						key={technology}
-						className="font-mono text-[9px] uppercase tracking-[0.04em] text-muted-foreground"
-					>
-						{technology}
-					</span>
-				))}
-			</div>
-
-			<div className="flex items-center gap-4 sm:justify-self-end">
-				<div className="text-right">
-					{p.country && (
-						<p className="font-mono text-[10px] text-muted-foreground">
-							{p.country}
-						</p>
-					)}
-
-					{p.location && (
-						<p className="mt-1 max-w-32 truncate text-xs text-muted-foreground">
-							{p.location}
-						</p>
-					)}
-				</div>
-
-				<span className="font-mono text-xs text-muted-foreground transition-all duration-200 group-hover:translate-x-1 group-hover:text-brand">
-					↗
+			<Link
+				to="/$username"
+				params={{ username: p.username }}
+				className="group grid gap-5 border-b border-border py-7 transition-colors hover:bg-surface sm:grid-cols-[4rem_minmax(0,1.4fr)_minmax(14rem,0.8fr)_auto] sm:items-center sm:px-3 sm:py-8"
+			>
+				<span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+					{String(index + 1).padStart(2, "0")}
 				</span>
-			</div>
-		</Link>
+
+				<div className="min-w-0">
+					<div className="flex items-center gap-3">
+						<h2 className="truncate font-display text-2xl tracking-tight sm:text-3xl">
+							{p.name || p.username}
+						</h2>
+
+						{p.available && (
+							<span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-brand">
+								<span className="h-1.5 w-1.5 rounded-full bg-brand" />
+								Open
+							</span>
+						)}
+					</div>
+
+					<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+						@{p.username}
+						{p.seniority ? ` · ${p.seniority}` : ""}
+						{p.primary_language ? ` · ${p.primary_language}` : ""}
+					</p>
+
+					{p.bio && (
+						<p className="mt-3 line-clamp-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+							{p.bio}
+						</p>
+					)}
+				</div>
+
+				<div className="flex flex-wrap gap-x-3 gap-y-1 sm:justify-self-start">
+					{p.technologies.slice(0, 5).map((technology) => (
+						<span
+							key={technology}
+							className="font-mono text-[9px] uppercase tracking-[0.04em] text-muted-foreground"
+						>
+							{technology}
+						</span>
+					))}
+				</div>
+
+				<div className="flex items-center gap-4 sm:justify-self-end">
+					<div className="text-right">
+						{p.country && (
+							<p className="font-mono text-[10px] text-muted-foreground">
+								{p.country}
+							</p>
+						)}
+
+						{p.location && (
+							<p className="mt-1 max-w-32 truncate text-xs text-muted-foreground">
+								{p.location}
+							</p>
+						)}
+					</div>
+
+					<span className="font-mono text-xs text-muted-foreground transition-all duration-200 group-hover:translate-x-1 group-hover:text-brand">
+						<ArrowRightUpIcon width={16} height={16} />
+					</span>
+				</div>
+			</Link>
+		</motion.div>
 	);
 }

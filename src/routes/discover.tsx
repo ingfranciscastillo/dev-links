@@ -1,15 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Search } from "lucide-react";
+
 import { useDeferredValue, useMemo, useState } from "react";
+
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+
 import {
 	type DiscoverResult,
 	searchProfiles,
 } from "@/lib/api/discover.functions";
-import { hueFromString } from "@/lib/user";
 
 export const Route = createFileRoute("/discover")({
 	head: () => ({
@@ -20,7 +21,10 @@ export const Route = createFileRoute("/discover")({
 				content:
 					"Search developer profiles on DevLinks. Filter by language, country, technologies, seniority and availability.",
 			},
-			{ property: "og:title", content: "Discover developers — DevLinks" },
+			{
+				property: "og:title",
+				content: "Discover developers — DevLinks",
+			},
 			{
 				property: "og:description",
 				content:
@@ -43,10 +47,12 @@ const LANGUAGES = [
 	"Ruby",
 	"Swift",
 ];
+
 const SENIORITIES = ["junior", "mid", "senior", "staff", "principal"];
 
 function Discover() {
-	const search = useServerFn(searchProfiles);
+	const searchProfilesFn = useServerFn(searchProfiles);
+
 	const [q, setQ] = useState("");
 	const [language, setLanguage] = useState<string | null>(null);
 	const [seniority, setSeniority] = useState<string | null>(null);
@@ -54,6 +60,7 @@ function Discover() {
 	const [country, setCountry] = useState("");
 
 	const deferredQ = useDeferredValue(q);
+
 	const filters = useMemo(
 		() => ({
 			q: deferredQ,
@@ -69,8 +76,8 @@ function Discover() {
 
 	const { data, isFetching } = useQuery({
 		queryKey: ["discover", filters],
-		queryFn: () => search({ data: filters }),
-		placeholderData: (prev) => prev,
+		queryFn: () => searchProfilesFn({ data: filters }),
+		placeholderData: (previous) => previous,
 	});
 
 	const results = data ?? [];
@@ -78,83 +85,162 @@ function Discover() {
 	return (
 		<div className="min-h-dvh bg-background text-foreground">
 			<Header />
-			<main className="mx-auto max-w-6xl px-4 pb-24 pt-12 sm:px-6">
-				<div>
-					<p className="font-mono text-xs uppercase tracking-widest text-brand">
-						Discover
-					</p>
-					<h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-						Find developers worth following.
-					</h1>
-					<p className="mt-2 max-w-xl text-muted-foreground">
-						Full-text search across bios, tech stacks, and locations.
-					</p>
-				</div>
 
-				<div className="mt-8 flex h-11 items-center gap-2 rounded-md border border-border bg-surface px-3">
-					<Search className="h-4 w-4 text-muted-foreground" />
-					<input
-						value={q}
-						onChange={(e) => setQ(e.target.value)}
-						placeholder="Search by name, bio, technologies…"
-						className="h-full flex-1 bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none"
-						aria-label="Search developers"
-					/>
-					{isFetching && (
-						<span className="font-mono text-xs text-muted-foreground">…</span>
-					)}
-				</div>
-
-				<div className="mt-3 flex flex-wrap items-center gap-2">
-					{LANGUAGES.map((t) => (
-						<Chip
-							key={t}
-							active={language === t}
-							onClick={() => setLanguage(language === t ? null : t)}
-						>
-							{t}
-						</Chip>
-					))}
-					{SENIORITIES.map((s) => (
-						<Chip
-							key={s}
-							active={seniority === s}
-							onClick={() => setSeniority(seniority === s ? null : s)}
-						>
-							{s}
-						</Chip>
-					))}
-					<Chip active={available} onClick={() => setAvailable(!available)}>
-						Available for hire
-					</Chip>
-					<input
-						value={country}
-						onChange={(e) =>
-							setCountry(e.target.value.toUpperCase().slice(0, 2))
-						}
-						placeholder="ES"
-						aria-label="Country code"
-						className="h-7 w-16 rounded-full border border-hairline bg-surface px-3 text-center text-xs uppercase placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-					/>
-				</div>
-
-				<div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-					{results.length === 0 && !isFetching && (
-						<p className="col-span-full rounded-xl border border-hairline bg-surface/40 p-8 text-center text-sm text-muted-foreground">
-							No developers match those filters yet.
+			<main className="mx-auto max-w-editorial px-5 pb-24 pt-20 sm:px-8 sm:pt-28">
+				<header className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-end">
+					<div>
+						<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+							Discover / Directory
 						</p>
+
+						<h1 className="mt-5 max-w-4xl font-display text-[12vw] leading-[0.9] tracking-[-0.045em] sm:text-7xl lg:text-8xl">
+							Find the people
+							<br />
+							behind the work.
+						</h1>
+					</div>
+
+					<p className="max-w-sm text-[15px] leading-relaxed text-muted-foreground lg:justify-self-end">
+						Explore developer profiles by stack, experience, location, and
+						availability.
+					</p>
+				</header>
+
+				<div className="mt-14 border-t border-border pt-6 sm:mt-20">
+					<div className="flex items-center gap-4 border-b border-foreground pb-3">
+						<span className="font-mono text-[10px] uppercase tracking-[0.1em] text-brand">
+							Search
+						</span>
+
+						<input
+							value={q}
+							onChange={(event) => setQ(event.target.value)}
+							placeholder="Name, bio, technologies..."
+							aria-label="Search developers"
+							className="min-w-0 flex-1 bg-transparent font-display text-xl tracking-[-0.02em] text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-2xl"
+						/>
+
+						{isFetching && (
+							<span
+								aria-hidden="true"
+								className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground"
+							>
+								Searching
+							</span>
+						)}
+					</div>
+
+					<div className="mt-5 grid gap-5 border-b border-border pb-6 sm:grid-cols-[auto_1fr_auto] sm:items-start">
+						<div>
+							<p className="font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
+								Language
+							</p>
+
+							<div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+								{LANGUAGES.map((item) => (
+									<FilterButton
+										key={item}
+										active={language === item}
+										onClick={() => setLanguage(language === item ? null : item)}
+									>
+										{item}
+									</FilterButton>
+								))}
+							</div>
+						</div>
+
+						<div>
+							<p className="font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
+								Seniority
+							</p>
+
+							<div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+								{SENIORITIES.map((item) => (
+									<FilterButton
+										key={item}
+										active={seniority === item}
+										onClick={() =>
+											setSeniority(seniority === item ? null : item)
+										}
+									>
+										{item}
+									</FilterButton>
+								))}
+							</div>
+						</div>
+
+						<div className="flex items-end gap-4 sm:justify-self-end">
+							<button
+								type="button"
+								onClick={() => setAvailable((value) => !value)}
+								className={`inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors ${
+									available
+										? "text-brand"
+										: "text-muted-foreground hover:text-foreground"
+								}`}
+							>
+								<span
+									className={`h-1.5 w-1.5 rounded-full ${
+										available ? "bg-brand" : "bg-muted-foreground/40"
+									}`}
+								/>
+								Available for hire
+							</button>
+
+							<label className="flex items-center gap-2 border-b border-border pb-1">
+								<span className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+									Country
+								</span>
+
+								<input
+									value={country}
+									onChange={(event) =>
+										setCountry(event.target.value.toUpperCase().slice(0, 2))
+									}
+									placeholder="ALL"
+									aria-label="Country code"
+									className="w-10 bg-transparent text-center font-mono text-[10px] uppercase text-foreground placeholder:text-muted-foreground focus:outline-none"
+								/>
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<div className="mt-10 flex items-end justify-between border-b border-border pb-3">
+					<p className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+						Developers
+					</p>
+
+					<p className="font-mono text-[10px] tabular-nums text-muted-foreground">
+						{results.length.toString().padStart(2, "0")}
+					</p>
+				</div>
+
+				<div>
+					{results.length === 0 && !isFetching ? (
+						<div className="border-b border-border py-14">
+							<p className="font-display text-2xl tracking-[-0.02em]">
+								No developers found.
+							</p>
+
+							<p className="mt-2 text-sm text-muted-foreground">
+								Try changing your search or removing some filters.
+							</p>
+						</div>
+					) : (
+						results.map((profile, index) => (
+							<ProfileRow key={profile.id} profile={profile} index={index} />
+						))
 					)}
-					{results.map((p) => (
-						<ProfileCard key={p.id} profile={p} />
-					))}
 				</div>
 			</main>
+
 			<Footer />
 		</div>
 	);
 }
 
-function Chip({
+function FilterButton({
 	children,
 	active,
 	onClick,
@@ -167,71 +253,88 @@ function Chip({
 		<button
 			type="button"
 			onClick={onClick}
-			className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-				active
-					? "border-brand bg-brand/10 text-brand"
-					: "border-hairline bg-surface text-muted-foreground hover:text-foreground"
+			className={`font-mono text-[10px] uppercase tracking-[0.05em] transition-colors ${
+				active ? "text-brand" : "text-muted-foreground hover:text-foreground"
 			}`}
 		>
+			{active && <span className="mr-1.5">/</span>}
 			{children}
 		</button>
 	);
 }
 
-function ProfileCard({ profile: p }: { profile: DiscoverResult }) {
-	const hue = hueFromString(p.id);
+function ProfileRow({
+	profile: p,
+	index,
+}: {
+	profile: DiscoverResult;
+	index: number;
+}) {
 	return (
 		<Link
 			to="/$username"
 			params={{ username: p.username }}
-			className="group rounded-xl border border-hairline bg-surface p-5 transition-colors hover:bg-surface-elevated"
+			className="group grid gap-5 border-b border-border py-7 transition-colors hover:bg-surface sm:grid-cols-[4rem_minmax(0,1.4fr)_minmax(14rem,0.8fr)_auto] sm:items-center sm:px-3 sm:py-8"
 		>
-			<div className="flex items-start gap-3">
-				<div
-					className="h-12 w-12 shrink-0 rounded-full ring-2 ring-hairline"
-					style={{
-						background: `linear-gradient(135deg, oklch(0.7 0.2 ${hue}), oklch(0.45 0.18 ${hue}))`,
-					}}
-				/>
-				<div className="min-w-0 flex-1">
-					<p className="truncate font-semibold tracking-tight">
+			<span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+				{String(index + 1).padStart(2, "0")}
+			</span>
+
+			<div className="min-w-0">
+				<div className="flex items-center gap-3">
+					<h2 className="truncate font-display text-2xl tracking-[-0.025em] sm:text-3xl">
 						{p.name || p.username}
-					</p>
-					<p className="truncate text-xs text-muted-foreground">
-						@{p.username}
-						{p.seniority ? ` · ${p.seniority}` : ""}
-						{p.primary_language ? ` · ${p.primary_language}` : ""}
-					</p>
+					</h2>
+
+					{p.available && (
+						<span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-brand">
+							<span className="h-1.5 w-1.5 rounded-full bg-brand" />
+							Open
+						</span>
+					)}
 				</div>
-				{p.available && (
-					<span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-500">
-						<span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-						Hire
-					</span>
+
+				<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+					@{p.username}
+					{p.seniority ? ` · ${p.seniority}` : ""}
+					{p.primary_language ? ` · ${p.primary_language}` : ""}
+				</p>
+
+				{p.bio && (
+					<p className="mt-3 line-clamp-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+						{p.bio}
+					</p>
 				)}
 			</div>
-			{p.bio && (
-				<p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
-					{p.bio}
-				</p>
-			)}
-			{p.technologies.length > 0 && (
-				<div className="mt-3 flex flex-wrap gap-1">
-					{p.technologies.slice(0, 5).map((t) => (
-						<span
-							key={t}
-							className="rounded bg-background px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
-						>
-							{t}
-						</span>
-					))}
+
+			<div className="flex flex-wrap gap-x-3 gap-y-1 sm:justify-self-start">
+				{p.technologies.slice(0, 5).map((technology) => (
+					<span
+						key={technology}
+						className="font-mono text-[9px] uppercase tracking-[0.04em] text-muted-foreground"
+					>
+						{technology}
+					</span>
+				))}
+			</div>
+
+			<div className="flex items-center gap-4 sm:justify-self-end">
+				<div className="text-right">
+					{p.country && (
+						<p className="font-mono text-[10px] text-muted-foreground">
+							{p.country}
+						</p>
+					)}
+
+					{p.location && (
+						<p className="mt-1 max-w-32 truncate text-xs text-muted-foreground">
+							{p.location}
+						</p>
+					)}
 				</div>
-			)}
-			<div className="mt-4 flex items-center gap-4 border-t border-hairline pt-3 text-xs text-muted-foreground">
-				{p.country && <span>{p.country}</span>}
-				{p.location && <span className="truncate">{p.location}</span>}
-				<span className="ml-auto opacity-0 transition-opacity group-hover:opacity-100">
-					View →
+
+				<span className="font-mono text-xs text-muted-foreground transition-all duration-200 group-hover:translate-x-1 group-hover:text-brand">
+					↗
 				</span>
 			</div>
 		</Link>

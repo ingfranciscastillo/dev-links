@@ -138,7 +138,24 @@ function fontStack(key: string): string {
 	return found?.stack ?? key;
 }
 
-function backgroundValue(t: ThemeV2): string {
+/**
+ * IMPORTANTE: background-color, background-image y background-size van
+ * SEPARADOS (nunca concatenados en un solo shorthand `background: ...`).
+ *
+ * El bug anterior generaba algo como:
+ *   "#0a0a0a linear-gradient(...) 0 0/24px 24px, #0a0a0a linear-gradient(...) ..."
+ * Eso es CSS inválido: en el shorthand `background`, el color solo puede
+ * aparecer UNA vez y en la ÚLTIMA capa de la lista separada por comas. Con
+ * dos o más capas (grid, mesh) y un color pegado al principio, el navegador
+ * descarta la declaración COMPLETA y no se pinta ningún fondo (de ahí el
+ * "solo se ve blanco"). Separando las propiedades este problema desaparece
+ * para cualquier combinación de capas.
+ */
+function backgroundColorValue(t: ThemeV2): string {
+	return t.bg;
+}
+
+function backgroundImageValue(t: ThemeV2): string {
 	const a = t.accent;
 	const b = t.accent2 ?? t.accent;
 	switch (t.bgStyle) {
@@ -147,13 +164,24 @@ function backgroundValue(t: ThemeV2): string {
 		case "radial":
 			return `radial-gradient(circle at 30% 20%, ${mix(t.bg, a, 0.3)} 0%, ${t.bg} 60%)`;
 		case "mesh":
-			return `${t.bg} radial-gradient(at 20% 10%, ${withAlpha(a, 0.35)} 0px, transparent 50%), radial-gradient(at 80% 0%, ${withAlpha(b, 0.25)} 0px, transparent 50%), radial-gradient(at 80% 90%, ${withAlpha(a, 0.2)} 0px, transparent 50%)`;
+			return `radial-gradient(at 20% 10%, ${withAlpha(a, 0.35)} 0px, transparent 50%), radial-gradient(at 80% 0%, ${withAlpha(b, 0.25)} 0px, transparent 50%), radial-gradient(at 80% 90%, ${withAlpha(a, 0.2)} 0px, transparent 50%)`;
 		case "grid":
-			return `${t.bg} linear-gradient(${withAlpha(t.fg, 0.06)} 1px, transparent 1px) 0 0 / 24px 24px, ${t.bg} linear-gradient(90deg, ${withAlpha(t.fg, 0.06)} 1px, transparent 1px) 0 0 / 24px 24px`;
+			return `linear-gradient(${withAlpha(t.fg, 0.06)} 1px, transparent 1px), linear-gradient(90deg, ${withAlpha(t.fg, 0.06)} 1px, transparent 1px)`;
 		case "dots":
-			return `${t.bg} radial-gradient(${withAlpha(t.fg, 0.1)} 1px, transparent 1px) 0 0 / 18px 18px`;
+			return `radial-gradient(${withAlpha(t.fg, 0.1)} 1px, transparent 1px)`;
 		default:
-			return t.bg;
+			return "none";
+	}
+}
+
+function backgroundSizeValue(t: ThemeV2): string {
+	switch (t.bgStyle) {
+		case "grid":
+			return "24px 24px, 24px 24px";
+		case "dots":
+			return "18px 18px";
+		default:
+			return "auto";
 	}
 }
 
@@ -174,24 +202,36 @@ function shadowValue(t: ThemeV2): string {
 	}
 }
 
+/**
+ * cardWidth controla el max-width del contenedor principal (.tt-container).
+ * Los valores están pensados para el layout real del perfil: sidebar fijo
+ * de 320px + gap de 32px en desktop.
+ *   - narrow  -> layout de una sola columna (estilo link-in-bio clásico),
+ *                el ancho aplica directo al contenido centrado.
+ *   - default -> grid de dos columnas, deja ~728px para el contenido.
+ *   - wide    -> grid de dos columnas, deja ~968px para el contenido.
+ * (El cambio a una columna cuando cardWidth === "narrow" se hace en
+ * $username.tsx, no acá — esta función solo calcula el ancho máximo.)
+ */
 function maxWidth(t: ThemeV2): string {
 	return t.cardWidth === "narrow"
-		? "560px"
+		? "640px"
 		: t.cardWidth === "wide"
-			? "960px"
-			: "720px";
+			? "1320px"
+			: "1080px";
 }
 
 export function themeToCssVars(t: ThemeV2): Record<string, string> {
 	return {
-		"--tt-bg": t.bg,
+		"--tt-bg": backgroundColorValue(t),
+		"--tt-bg-image": backgroundImageValue(t),
+		"--tt-bg-size": backgroundSizeValue(t),
 		"--tt-fg": t.fg,
 		"--tt-muted": t.muted,
 		"--tt-surface": t.surface,
 		"--tt-border": t.border,
 		"--tt-accent": t.accent,
 		"--tt-accent-2": t.accent2 ?? t.accent,
-		"--tt-bg-image": backgroundValue(t),
 		"--tt-radius": `${t.radius}px`,
 		"--tt-card-padding": `${t.cardPadding}px`,
 		"--tt-spacing": `${t.spacing}`,
@@ -217,7 +257,28 @@ export function themeToStyleTag(t: ThemeV2, scope = ".tt-scope"): string {
 	const hover = hoverCss(t.hover, scope);
 	const btn = buttonCss(t, scope);
 	const custom = sanitizeCss(t.customCss);
-	return `${scope} {\n${body}\n}\n${scope} { background: var(--tt-bg-image); color: var(--tt-fg); font-family: var(--tt-body-font); letter-spacing: var(--tt-tracking); }\n${scope} h1, ${scope} h2, ${scope} h3 { font-family: var(--tt-heading-font); }\n${scope} code, ${scope} pre { font-family: var(--tt-mono-font); }\n${scope} .tt-card { background: var(--tt-surface); border: 1px solid var(--tt-border); border-radius: var(--tt-radius); padding: var(--tt-card-padding); box-shadow: var(--tt-shadow); transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }\n${scope} .tt-muted { color: var(--tt-muted); }\n${glass}\n${hover}\n${btn}\n${custom}`;
+
+	// Reglas de "scope" — compiten directamente con clases Tailwind de igual
+	// especificidad (bg-background, text-foreground) aplicadas en el mismo
+	// elemento en $username.tsx. Con !important garantizamos que el tema del
+	// creador siempre gane, sin depender del orden de carga del CSS.
+	const scopeBase = `${scope} { background-color: var(--tt-bg) !important; background-image: var(--tt-bg-image) !important; background-repeat: repeat !important; background-position: 0 0 !important; background-size: var(--tt-bg-size) !important; color: var(--tt-fg) !important; font-family: var(--tt-body-font) !important; letter-spacing: var(--tt-tracking); }`;
+	const headings = `${scope} h1, ${scope} h2, ${scope} h3 { font-family: var(--tt-heading-font) !important; }`;
+	const monoEls = `${scope} code, ${scope} pre { font-family: var(--tt-mono-font) !important; }`;
+
+	const card = `${scope} .tt-card { background: var(--tt-surface); border: 1px solid var(--tt-border); border-radius: var(--tt-radius); padding: var(--tt-card-padding); box-shadow: var(--tt-shadow); font-size: calc(0.9375rem * var(--tt-font-scale)); transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }`;
+
+	// Utilidades genéricas para que TODAS las secciones del perfil (no solo
+	// los links) puedan pedir explícitamente los colores del tema en vez de
+	// heredar por cascada.
+	const muted = `${scope} .tt-muted { color: var(--tt-muted) !important; }`;
+	const surface = `${scope} .tt-surface { background: var(--tt-surface) !important; }`;
+	const borderC = `${scope} .tt-border-c { border-color: var(--tt-border) !important; }`;
+	const panel = `${scope} .tt-panel { background: var(--tt-surface) !important; border-color: var(--tt-border) !important; }`;
+
+	const container = `${scope} .tt-container { max-width: var(--tt-max-width); margin-inline: auto; }`;
+
+	return `${scope} {\n${body}\n}\n${scopeBase}\n${headings}\n${monoEls}\n${card}\n${muted}\n${surface}\n${borderC}\n${panel}\n${container}\n${glass}\n${hover}\n${btn}\n${custom}`;
 }
 
 function hoverCss(kind: ThemeV2["hover"], scope: string): string {
@@ -236,7 +297,7 @@ function hoverCss(kind: ThemeV2["hover"], scope: string): string {
 }
 
 function buttonCss(t: ThemeV2, scope: string): string {
-	const base = `${scope} .tt-btn { display:flex; align-items:center; gap:.75rem; padding: calc(var(--tt-card-padding) * .8) var(--tt-card-padding); border-radius: var(--tt-radius); font-weight:500; transition: all .18s ease; text-decoration:none; }`;
+	const base = `${scope} .tt-btn { display:flex; align-items:center; gap:.75rem; padding: calc(var(--tt-card-padding) * .8) var(--tt-card-padding); border-radius: var(--tt-radius); font-weight:500; font-size: calc(0.9375rem * var(--tt-font-scale)); transition: all .18s ease; text-decoration:none; }`;
 	switch (t.buttonStyle) {
 		case "solid":
 			return `${base}\n${scope} .tt-btn { background: var(--tt-accent); color: ${contrastOn(t.accent)}; border: var(--tt-btn-border) solid transparent; }\n${scope} .tt-btn:hover { opacity: .92; }`;

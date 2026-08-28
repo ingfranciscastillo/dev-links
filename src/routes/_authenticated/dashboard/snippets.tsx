@@ -3,11 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Code2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+
 import { ModalShell } from "@/components/dashboard/ModalShell";
-import {
-	EmptyState,
-	SectionHeader,
-} from "@/components/dashboard/SectionHeader";
+import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -46,71 +44,78 @@ function SnippetsPage() {
 
 	return (
 		<>
-			<SectionHeader
-				eyebrow="Content"
-				title="Snippets"
-				description="Small pieces of code you reach for often, shared on your public page."
-				action={
-					<Button onClick={() => setEditing("new")}>
-						<Plus className="h-4 w-4" /> New snippet
+			<header className="border-b border-border pb-8">
+				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+					05 / Snippets
+				</p>
+
+				<div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+					<div className="min-w-0">
+						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+							Snippets.
+						</h1>
+
+						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+							Small pieces of code you reach for often, shared on your public
+							page.
+						</p>
+					</div>
+
+					<Button
+						onClick={() => setEditing("new")}
+						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					>
+						<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+						New snippet
 					</Button>
-				}
-			/>
+				</div>
+			</header>
 
 			{data.snippets.length === 0 ? (
-				<EmptyState
-					icon={Code2}
-					title="No snippets yet"
-					description="Save that one-liner you always forget."
-					action={
-						<Button onClick={() => setEditing("new")}>
-							<Plus className="h-4 w-4" /> Add your first snippet
-						</Button>
-					}
-				/>
+				<div className="mt-8">
+					<EmptyState
+						icon={Code2}
+						title="No snippets yet"
+						description="Save that one-liner you always forget."
+						action={
+							<Button
+								onClick={() => setEditing("new")}
+								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+							>
+								<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+								Add your first snippet
+							</Button>
+						}
+					/>
+				</div>
 			) : (
-				<div className="grid gap-3">
-					{data.snippets.map((s) => (
-						<article
-							key={s.id}
-							className="overflow-hidden rounded-xl border border-hairline bg-surface/40"
-						>
-							<header className="flex items-center justify-between border-b border-hairline px-4 py-2.5">
-								<div className="flex items-center gap-2">
-									<span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-										{s.language}
-									</span>
-									<span className="text-sm font-medium">{s.title}</span>
-								</div>
-								<div className="flex gap-1">
-									<button
-										type="button"
-										onClick={() => setEditing(s)}
-										className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
-										title="Edit"
-									>
-										<Pencil className="h-4 w-4" />
-									</button>
-									<button
-										type="button"
-										onClick={() => {
-											removeSnippet.mutate(s.id, {
-												onSuccess: () => toast.success("Snippet removed"),
-												onError: () => toast.error("Couldn't remove snippet"),
-											});
-										}}
-										className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-destructive"
-										title="Delete"
-									>
-										<Trash2 className="h-4 w-4" />
-									</button>
-								</div>
-							</header>
-							<pre className="overflow-x-auto bg-background/60 p-4 font-mono text-xs leading-relaxed">
-								<code>{s.code}</code>
-							</pre>
-						</article>
-					))}
+				<div className="mt-8 space-y-8">
+					<div className="flex items-center justify-between border-t border-border pt-3">
+						<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+							{data.snippets.length.toString().padStart(2, "0")} snippets
+						</p>
+
+						<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+							Code library
+						</p>
+					</div>
+
+					<div className="space-y-8">
+						{data.snippets.map((snippet, index) => (
+							<SnippetEntry
+								key={snippet.id}
+								snippet={snippet}
+								index={index}
+								onEdit={() => setEditing(snippet)}
+								onRemove={() => {
+									removeSnippet.mutate(snippet.id, {
+										onSuccess: () => toast.success("Snippet removed"),
+										onError: () => toast.error("Couldn't remove snippet"),
+									});
+								}}
+							/>
+						))}
+					</div>
 				</div>
 			)}
 
@@ -129,7 +134,10 @@ function SnippetsPage() {
 							});
 						} else {
 							updateSnippet.mutate(
-								{ id: editing.id, ...values },
+								{
+									id: editing.id,
+									...values,
+								},
 								{
 									onSuccess: () => {
 										toast.success("Snippet updated");
@@ -147,6 +155,66 @@ function SnippetsPage() {
 	);
 }
 
+function SnippetEntry({
+	snippet,
+	index,
+	onEdit,
+	onRemove,
+}: {
+	snippet: SnippetItem;
+	index: number;
+	onEdit: () => void;
+	onRemove: () => void;
+}) {
+	return (
+		<article className="border-b border-border pb-8">
+			<header className="flex flex-col gap-4 border-t border-border py-4 sm:flex-row sm:items-center sm:justify-between">
+				<div className="flex min-w-0 items-baseline gap-3">
+					<span className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">
+						{String(index + 1).padStart(2, "0")}
+					</span>
+
+					<h2 className="truncate font-display text-2xl tracking-tight sm:text-3xl">
+						{snippet.title}
+					</h2>
+
+					<span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.08em] text-brand">
+						{snippet.language}
+					</span>
+				</div>
+
+				<div className="flex items-center gap-1 self-end sm:self-auto">
+					<button
+						type="button"
+						onClick={onEdit}
+						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+						title="Edit"
+						aria-label={`Edit ${snippet.title}`}
+					>
+						<Pencil className="h-4 w-4" strokeWidth={1.5} />
+					</button>
+
+					<button
+						type="button"
+						onClick={onRemove}
+						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
+						title="Delete"
+						aria-label={`Delete ${snippet.title}`}
+					>
+						<Trash2 className="h-4 w-4" strokeWidth={1.5} />
+					</button>
+				</div>
+			</header>
+
+			<div className="overflow-hidden border border-border bg-surface">
+				<pre className="overflow-x-auto p-5 font-mono text-xs leading-relaxed text-foreground sm:p-6">
+					<code>{snippet.code}</code>
+				</pre>
+			</div>
+		</article>
+	);
+}
+
 function SnippetDialog({
 	initial,
 	onClose,
@@ -155,7 +223,7 @@ function SnippetDialog({
 }: {
 	initial: SnippetItem | null;
 	onClose: () => void;
-	onSubmit: (v: SnippetFormValues) => void;
+	onSubmit: (value: SnippetFormValues) => void;
 	pending?: boolean;
 }) {
 	const form = useForm({
@@ -175,16 +243,16 @@ function SnippetDialog({
 			onClose={onClose}
 		>
 			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
+				onSubmit={(event) => {
+					event.preventDefault();
+					event.stopPropagation();
 					form.handleSubmit();
 				}}
-				className="flex flex-col gap-4"
+				className="flex flex-col"
 				noValidate
 			>
-				<FieldGroup>
-					<div className="grid grid-cols-[1fr_120px] gap-3">
+				<FieldGroup className="gap-5">
+					<div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_8rem]">
 						<form.Field
 							name="title"
 							validators={{
@@ -195,17 +263,28 @@ function SnippetDialog({
 								const invalid =
 									field.state.meta.isTouched &&
 									field.state.meta.errors.length > 0;
+
 								return (
 									<Field data-invalid={invalid}>
-										<FieldLabel htmlFor={field.name}>Title</FieldLabel>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Title
+										</FieldLabel>
+
 										<Input
 											id={field.name}
 											name={field.name}
 											value={field.state.value}
 											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
 											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 										/>
+
 										{invalid ? (
 											<FieldError>
 												{field.state.meta.errors.join(", ")}
@@ -219,14 +298,21 @@ function SnippetDialog({
 						<form.Field name="language">
 							{(field) => (
 								<Field>
-									<FieldLabel htmlFor={field.name}>Language</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Language
+									</FieldLabel>
+
 									<Input
 										id={field.name}
 										name={field.name}
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(event) => field.handleChange(event.target.value)}
 										placeholder="ts"
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 								</Field>
 							)}
@@ -243,19 +329,27 @@ function SnippetDialog({
 							const invalid =
 								field.state.meta.isTouched &&
 								field.state.meta.errors.length > 0;
+
 							return (
 								<Field data-invalid={invalid}>
-									<FieldLabel htmlFor={field.name}>Code</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Code
+									</FieldLabel>
+
 									<Textarea
 										id={field.name}
 										name={field.name}
-										rows={10}
+										rows={12}
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										className="font-mono text-xs"
+										onChange={(event) => field.handleChange(event.target.value)}
+										className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-xs leading-relaxed shadow-none focus-visible:border-brand focus-visible:ring-0"
 										aria-invalid={invalid || undefined}
 									/>
+
 									{invalid ? (
 										<FieldError>
 											{field.state.meta.errors.join(", ")}
@@ -267,12 +361,25 @@ function SnippetDialog({
 					</form.Field>
 				</FieldGroup>
 
-				<div className="flex justify-end gap-2 pt-2">
-					<Button type="button" variant="ghost" onClick={onClose}>
+				<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+					<button
+						type="button"
+						onClick={onClose}
+						className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+					>
 						Cancel
-					</Button>
-					<Button type="submit" disabled={pending || !form.state.canSubmit}>
-						{initial ? "Save" : "Create"}
+					</button>
+
+					<Button
+						type="submit"
+						disabled={pending || !form.state.canSubmit}
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					>
+						{pending
+							? "Saving..."
+							: initial
+								? "Save snippet"
+								: "Create snippet"}
 					</Button>
 				</div>
 			</form>

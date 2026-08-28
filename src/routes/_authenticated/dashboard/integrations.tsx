@@ -2,14 +2,13 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
 	AlertCircle,
 	CheckCircle2,
-	Plug,
 	RefreshCw,
 	Save,
 	Trash2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { SectionHeader } from "@/components/dashboard/SectionHeader";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,11 +39,19 @@ export const Route = createFileRoute("/_authenticated/dashboard/integrations")({
 	component: IntegrationsPage,
 });
 
-type ConfigField = { key: string; label: string; placeholder: string };
+type ConfigField = {
+	key: string;
+	label: string;
+	placeholder: string;
+};
 
 const PROVIDER_HELP: Record<
 	Provider,
-	{ placeholder: string; helper: string; configField?: ConfigField }
+	{
+		placeholder: string;
+		helper: string;
+		configField?: ConfigField;
+	}
 > = {
 	github: {
 		placeholder: "octocat",
@@ -98,18 +105,38 @@ function IntegrationsPage() {
 
 	return (
 		<>
-			<SectionHeader
-				eyebrow="Live"
-				title="Integrations"
-				description="Pull in real activity from GitHub, Dev.to, Medium, Stack Overflow, WakaTime, LeetCode, npm, Bluesky, Mastodon, Docker Hub and YouTube. Refreshed every 6h."
-			/>
-			<div className="grid gap-4">
-				{PROVIDERS.map((provider) => {
+			<header className="border-b border-border pb-8">
+				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+					07 / Integrations
+				</p>
+
+				<div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+					<div className="min-w-0">
+						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+							Integrations.
+						</h1>
+
+						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+							Connect the services you use and keep your DevLinks profile
+							updated automatically.
+						</p>
+					</div>
+
+					<p className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+						Sync every 6h
+					</p>
+				</div>
+			</header>
+
+			<div className="mt-8 border-t border-border">
+				{PROVIDERS.map((provider, index) => {
 					const account =
-						accounts?.find((a) => a.provider === provider) ?? null;
+						accounts?.find((item) => item.provider === provider) ?? null;
+
 					return (
-						<IntegrationCard
+						<IntegrationRow
 							key={provider}
+							index={index}
 							provider={provider}
 							account={account}
 						/>
@@ -120,16 +147,19 @@ function IntegrationsPage() {
 	);
 }
 
-function IntegrationCard({
+function IntegrationRow({
 	provider,
 	account,
+	index,
 }: {
 	provider: Provider;
 	account: IntegrationAccount | null;
+	index: number;
 }) {
 	const help = PROVIDER_HELP[provider];
+
 	const [handle, setHandle] = useState(account?.handle ?? "");
-	const [configValue, setConfigValue] = useState<string>(
+	const [configValue, setConfigValue] = useState(
 		help.configField
 			? String((account?.config?.[help.configField.key] as string) ?? "")
 			: "",
@@ -138,6 +168,7 @@ function IntegrationCard({
 	const upsertAccount = useUpsertIntegrationAccount();
 	const deleteAccount = useDeleteIntegrationAccount();
 	const refreshAccount = useRefreshIntegration();
+
 	const busy =
 		upsertAccount.isPending ||
 		refreshAccount.isPending ||
@@ -145,6 +176,7 @@ function IntegrationCard({
 
 	useEffect(() => {
 		setHandle(account?.handle ?? "");
+
 		if (help.configField) {
 			setConfigValue(
 				String((account?.config?.[help.configField.key] as string) ?? ""),
@@ -179,9 +211,10 @@ function IntegrationCard({
 
 	async function handleSync() {
 		try {
-			const res = await refreshAccount.mutateAsync(provider);
+			const result = await refreshAccount.mutateAsync(provider);
+
 			toast.success(
-				`Synced ${PROVIDER_LABEL[provider]} (${res.kinds.join(", ")})`,
+				`Synced ${PROVIDER_LABEL[provider]} (${result.kinds.join(", ")})`,
 			);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Sync failed");
@@ -189,7 +222,10 @@ function IntegrationCard({
 	}
 
 	async function handleDelete() {
-		if (!window.confirm(`Disconnect ${PROVIDER_LABEL[provider]}?`)) return;
+		if (!window.confirm(`Disconnect ${PROVIDER_LABEL[provider]}?`)) {
+			return;
+		}
+
 		try {
 			await deleteAccount.mutateAsync(provider);
 			toast.success(`${PROVIDER_LABEL[provider]} disconnected`);
@@ -199,82 +235,140 @@ function IntegrationCard({
 	}
 
 	return (
-		<div className="rounded-xl border border-hairline bg-surface p-5">
-			<div className="flex flex-wrap items-start justify-between gap-3">
-				<div>
-					<h3 className="flex items-center gap-2 text-base font-semibold">
-						<Plug className="h-4 w-4 text-muted-foreground" />
-						{PROVIDER_LABEL[provider]}
-					</h3>
-					<p className="mt-1 text-xs text-muted-foreground">{help.helper}</p>
-				</div>
-				<div className="text-right text-[11px] text-muted-foreground">
-					{account?.lastSyncedAt ? (
-						<span className="inline-flex items-center gap-1">
-							<CheckCircle2 className="h-3 w-3 text-emerald-500" />
-							Synced {new Date(account.lastSyncedAt).toLocaleString()}
+		<article className="border-b border-border py-7 sm:py-8">
+			<div className="grid min-w-0 gap-7 lg:grid-cols-[minmax(11rem,15rem)_minmax(0,1fr)_auto] lg:items-start lg:gap-10">
+				{/* Provider */}
+				<div className="min-w-0">
+					<div className="flex items-start gap-3">
+						<span className="mt-1 shrink-0 font-mono text-[9px] tabular-nums text-muted-foreground">
+							{String(index + 1).padStart(2, "0")}
 						</span>
-					) : (
-						<span>Not synced yet</span>
-					)}
-					{account?.lastError && (
-						<p className="mt-1 inline-flex items-center gap-1 text-amber-500">
-							<AlertCircle className="h-3 w-3" /> {account.lastError}
-						</p>
-					)}
-				</div>
-			</div>
 
-			<div className="mt-4 grid gap-3 sm:grid-cols-2">
-				<div>
-					<Label className="text-xs">Handle</Label>
-					<Input
-						value={handle}
-						onChange={(e) => setHandle(e.target.value)}
-						placeholder={help.placeholder}
-					/>
+						<h2 className="min-w-0 wrap-break-word font-display text-2xl leading-tight tracking-tight sm:text-3xl">
+							{PROVIDER_LABEL[provider]}
+						</h2>
+					</div>
+
+					<p className="mt-3 max-w-[30ch] text-sm leading-relaxed text-muted-foreground">
+						{help.helper}
+					</p>
+
+					<div className="mt-4">
+						{account?.lastSyncedAt ? (
+							<p className="flex items-start gap-2 font-mono text-[9px] uppercase leading-relaxed tracking-[0.07em] text-brand">
+								<CheckCircle2
+									className="mt-0.5 h-3 w-3 shrink-0"
+									strokeWidth={1.5}
+								/>
+								<span>
+									Synced {new Date(account.lastSyncedAt).toLocaleString()}
+								</span>
+							</p>
+						) : (
+							<p className="font-mono text-[9px] uppercase tracking-[0.07em] text-muted-foreground">
+								Not synced yet
+							</p>
+						)}
+
+						{account?.lastError && (
+							<p className="mt-2 flex items-start gap-2 text-xs leading-relaxed text-destructive">
+								<AlertCircle
+									className="mt-0.5 h-3.5 w-3.5 shrink-0"
+									strokeWidth={1.5}
+								/>
+								<span className="min-w-0 wrap-break-word">
+									{account.lastError}
+								</span>
+							</p>
+						)}
+					</div>
 				</div>
-				{help.configField && (
-					<div>
-						<Label className="text-xs">{help.configField.label}</Label>
+
+				{/* Configuration */}
+				<div
+					className={`grid min-w-0 gap-5 ${
+						help.configField ? "sm:grid-cols-2" : "sm:grid-cols-1"
+					}`}
+				>
+					<div className="min-w-0">
+						<Label
+							htmlFor={`${provider}-handle`}
+							className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground"
+						>
+							Handle
+						</Label>
+
 						<Input
-							value={configValue}
-							onChange={(e) => setConfigValue(e.target.value)}
-							placeholder={help.configField.placeholder}
+							id={`${provider}-handle`}
+							value={handle}
+							onChange={(event) => setHandle(event.target.value)}
+							placeholder={help.placeholder}
+							className="mt-2 h-10 min-w-0 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 						/>
 					</div>
-				)}
-			</div>
 
-			<div className="mt-4 flex flex-wrap gap-2">
-				<Button onClick={handleSave} disabled={busy} size="sm">
-					<Save className="mr-1.5 h-3.5 w-3.5" />
-					{account ? "Update" : "Connect"}
-				</Button>
-				<Button
-					onClick={handleSync}
-					disabled={busy || !account}
-					size="sm"
-					variant="outline"
-				>
-					<RefreshCw
-						className={`mr-1.5 h-3.5 w-3.5 ${refreshAccount.isPending ? "animate-spin" : ""}`}
-					/>
-					Sync now
-				</Button>
-				{account && (
+					{help.configField && (
+						<div className="min-w-0">
+							<Label
+								htmlFor={`${provider}-${help.configField.key}`}
+								className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground"
+							>
+								{help.configField.label}
+							</Label>
+
+							<Input
+								id={`${provider}-${help.configField.key}`}
+								value={configValue}
+								onChange={(event) => setConfigValue(event.target.value)}
+								placeholder={help.configField.placeholder}
+								className="mt-2 h-10 min-w-0 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+							/>
+						</div>
+					)}
+				</div>
+
+				{/* Actions */}
+				<div className="flex flex-wrap items-center gap-3 lg:justify-end">
 					<Button
-						onClick={handleDelete}
+						onClick={handleSave}
 						disabled={busy}
-						size="sm"
-						variant="ghost"
-						className="text-muted-foreground"
+						className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
-						<Trash2 className="mr-1.5 h-3.5 w-3.5" />
-						Disconnect
+						<Save className="h-3.5 w-3.5" strokeWidth={1.5} />
+						{account ? "Update" : "Connect"}
 					</Button>
-				)}
+
+					<Button
+						onClick={handleSync}
+						disabled={busy || !account}
+						variant="outline"
+						className="h-9 rounded-none border-border px-3 font-mono text-[9px] uppercase tracking-[0.08em]"
+					>
+						<RefreshCw
+							className={
+								refreshAccount.isPending
+									? "h-3.5 w-3.5 animate-spin"
+									: "h-3.5 w-3.5"
+							}
+							strokeWidth={1.5}
+						/>
+						Sync
+					</Button>
+
+					{account && (
+						<button
+							type="button"
+							onClick={handleDelete}
+							disabled={busy}
+							className="inline-flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+							title="Disconnect"
+							aria-label={`Disconnect ${PROVIDER_LABEL[provider]}`}
+						>
+							<Trash2 size={15} strokeWidth={1.5} />
+						</button>
+					)}
+				</div>
 			</div>
-		</div>
+		</article>
 	);
 }

@@ -3,11 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { FileText, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+
 import { ModalShell } from "@/components/dashboard/ModalShell";
-import {
-	EmptyState,
-	SectionHeader,
-} from "@/components/dashboard/SectionHeader";
+import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -42,73 +40,74 @@ function ArticlesPage() {
 
 	return (
 		<>
-			<SectionHeader
-				eyebrow="Content"
-				title="Articles"
-				description="Posts and writing you want on your page. Add manually for now."
-				action={
-					<Button onClick={() => setEditing("new")}>
-						<Plus className="h-4 w-4" /> New article
+			<header className="border-b border-border pb-8">
+				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+					06 / Articles
+				</p>
+
+				<div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+					<div className="min-w-0">
+						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+							Articles.
+						</h1>
+
+						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+							Posts and writing you want visitors to discover on your profile.
+						</p>
+					</div>
+
+					<Button
+						onClick={() => setEditing("new")}
+						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					>
+						<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+						New article
 					</Button>
-				}
-			/>
+				</div>
+			</header>
 
 			{sorted.length === 0 ? (
-				<EmptyState
-					icon={FileText}
-					title="No articles yet"
-					description="Blog posts, talks, gists — anything with a URL."
-					action={
-						<Button onClick={() => setEditing("new")}>
-							<Plus className="h-4 w-4" /> Add your first article
-						</Button>
-					}
-				/>
+				<div className="mt-8">
+					<EmptyState
+						icon={FileText}
+						title="No articles yet"
+						description="Blog posts, talks, gists — anything with a URL."
+						action={
+							<Button
+								onClick={() => setEditing("new")}
+								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+							>
+								<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+								Add your first article
+							</Button>
+						}
+					/>
+				</div>
 			) : (
-				<div className="divide-y divide-hairline overflow-hidden rounded-xl border border-hairline bg-surface/40">
-					{sorted.map((a) => (
-						<div key={a.id} className="flex items-center gap-4 p-4">
-							<div className="min-w-0 flex-1">
-								<p className="truncate text-sm font-medium">{a.title}</p>
-								<p className="mt-1 truncate text-xs text-muted-foreground">
-									{a.source ? `${a.source} · ` : ""}
-									{new Date(a.date).toLocaleDateString()}
-									{a.summary ? ` · ${a.summary}` : ""}
-								</p>
-							</div>
-							<div className="flex gap-1">
-								<a
-									href={a.url}
-									target="_blank"
-									rel="noreferrer"
-									className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
-								>
-									Open ↗
-								</a>
-								<button
-									type="button"
-									onClick={() => setEditing(a)}
-									className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
-									title="Edit"
-								>
-									<Pencil className="h-4 w-4" />
-								</button>
-								<button
-									type="button"
-									onClick={() => {
-										removeArticle.mutate(a.id, {
-											onSuccess: () => toast.success("Article removed"),
-											onError: () => toast.error("Couldn't remove article"),
-										});
-									}}
-									className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-destructive"
-									title="Delete"
-								>
-									<Trash2 className="h-4 w-4" />
-								</button>
-							</div>
-						</div>
-					))}
+				<div className="mt-8">
+					<div className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[5rem_minmax(0,1fr)_9rem_auto]">
+						<span>Date</span>
+						<span>Article</span>
+						<span className="hidden sm:block">Source</span>
+						<span className="text-right">Actions</span>
+					</div>
+
+					<div>
+						{sorted.map((article, index) => (
+							<ArticleRow
+								key={article.id}
+								article={article}
+								index={index}
+								onEdit={() => setEditing(article)}
+								onRemove={() => {
+									removeArticle.mutate(article.id, {
+										onSuccess: () => toast.success("Article removed"),
+										onError: () => toast.error("Couldn't remove article"),
+									});
+								}}
+							/>
+						))}
+					</div>
 				</div>
 			)}
 
@@ -116,9 +115,9 @@ function ArticlesPage() {
 				<ArticleDialog
 					initial={editing === "new" ? null : editing}
 					onClose={() => setEditing(null)}
-					onSubmit={(v) => {
+					onSubmit={(values) => {
 						if (editing === "new") {
-							addArticle.mutate(v, {
+							addArticle.mutate(values, {
 								onSuccess: () => {
 									toast.success("Article added");
 									setEditing(null);
@@ -127,7 +126,10 @@ function ArticlesPage() {
 							});
 						} else {
 							updateArticle.mutate(
-								{ id: editing.id, ...v },
+								{
+									id: editing.id,
+									...values,
+								},
 								{
 									onSuccess: () => {
 										toast.success("Article updated");
@@ -142,6 +144,111 @@ function ArticlesPage() {
 				/>
 			) : null}
 		</>
+	);
+}
+
+function ArticleRow({
+	article,
+	index,
+	onEdit,
+	onRemove,
+}: {
+	article: ArticleItem;
+	index: number;
+	onEdit: () => void;
+	onRemove: () => void;
+}) {
+	const date = new Date(article.date);
+
+	return (
+		<article className="group border-b border-border py-6 sm:py-7">
+			<div className="grid gap-4 sm:grid-cols-[5rem_minmax(0,1fr)_9rem_auto] sm:items-center">
+				<div>
+					<p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+						{date.toLocaleDateString(undefined, {
+							month: "short",
+							day: "2-digit",
+						})}
+					</p>
+
+					<p className="mt-1 font-mono text-[9px] tabular-nums text-muted-foreground">
+						{date.getFullYear()}
+					</p>
+				</div>
+
+				<div className="min-w-0">
+					<div className="flex items-start gap-3">
+						<span className="shrink-0 font-mono text-[9px] tabular-nums text-muted-foreground">
+							{String(index + 1).padStart(2, "0")}
+						</span>
+
+						<h2 className="min-w-0 truncate font-display text-2xl tracking-tight sm:text-3xl">
+							{article.title}
+						</h2>
+					</div>
+
+					<div className="mt-2 pl-7">
+						{article.summary && (
+							<p className="line-clamp-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+								{article.summary}
+							</p>
+						)}
+
+						<div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground sm:hidden">
+							{article.source && <span>{article.source}</span>}
+							{article.source && <span>/</span>}
+							<a
+								href={article.url}
+								target="_blank"
+								rel="noreferrer"
+								className="transition-colors hover:text-brand"
+							>
+								Open ↗
+							</a>
+						</div>
+					</div>
+				</div>
+
+				<div className="hidden min-w-0 sm:block">
+					{article.source && (
+						<p className="truncate font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground">
+							{article.source}
+						</p>
+					)}
+				</div>
+
+				<div className="flex items-center justify-end gap-2">
+					<a
+						href={article.url}
+						target="_blank"
+						rel="noreferrer"
+						className="hidden font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-brand sm:inline-flex"
+					>
+						Open ↗
+					</a>
+
+					<button
+						type="button"
+						onClick={onEdit}
+						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+						title="Edit"
+						aria-label={`Edit ${article.title}`}
+					>
+						<Pencil className="h-4 w-4" strokeWidth={1.5} />
+					</button>
+
+					<button
+						type="button"
+						onClick={onRemove}
+						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
+						title="Delete"
+						aria-label={`Delete ${article.title}`}
+					>
+						<Trash2 className="h-4 w-4" strokeWidth={1.5} />
+					</button>
+				</div>
+			</div>
+		</article>
 	);
 }
 
@@ -161,7 +268,7 @@ function ArticleDialog({
 }: {
 	initial: ArticleItem | null;
 	onClose: () => void;
-	onSubmit: (v: ArticleFormValues) => void;
+	onSubmit: (value: ArticleFormValues) => void;
 	pending?: boolean;
 }) {
 	const today = new Date().toISOString().slice(0, 10);
@@ -185,15 +292,15 @@ function ArticleDialog({
 			onClose={onClose}
 		>
 			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
+				onSubmit={(event) => {
+					event.preventDefault();
+					event.stopPropagation();
 					form.handleSubmit();
 				}}
-				className="flex flex-col gap-4"
+				className="flex flex-col"
 				noValidate
 			>
-				<FieldGroup>
+				<FieldGroup className="gap-5">
 					<form.Field
 						name="title"
 						validators={{
@@ -204,17 +311,26 @@ function ArticleDialog({
 							const invalid =
 								field.state.meta.isTouched &&
 								field.state.meta.errors.length > 0;
+
 							return (
 								<Field data-invalid={invalid}>
-									<FieldLabel htmlFor={field.name}>Title</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Title
+									</FieldLabel>
+
 									<Input
 										id={field.name}
 										name={field.name}
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(event) => field.handleChange(event.target.value)}
 										aria-invalid={invalid || undefined}
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
+
 									{invalid ? (
 										<FieldError>
 											{field.state.meta.errors.join(", ")}
@@ -227,24 +343,35 @@ function ArticleDialog({
 
 					<form.Field
 						name="url"
-						validators={{ onChange: zodField(articleSchema.shape.url) }}
+						validators={{
+							onChange: zodField(articleSchema.shape.url),
+						}}
 					>
 						{(field) => {
 							const invalid =
 								field.state.meta.isTouched &&
 								field.state.meta.errors.length > 0;
+
 							return (
 								<Field data-invalid={invalid}>
-									<FieldLabel htmlFor={field.name}>URL</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										URL
+									</FieldLabel>
+
 									<Input
 										id={field.name}
 										name={field.name}
 										type="url"
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(event) => field.handleChange(event.target.value)}
 										aria-invalid={invalid || undefined}
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
+
 									{invalid ? (
 										<FieldError>
 											{field.state.meta.errors.join(", ")}
@@ -255,18 +382,25 @@ function ArticleDialog({
 						}}
 					</form.Field>
 
-					<div className="grid grid-cols-2 gap-3">
+					<div className="grid gap-5 sm:grid-cols-2">
 						<form.Field name="source">
 							{(field) => (
 								<Field>
-									<FieldLabel htmlFor={field.name}>Source</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Source
+									</FieldLabel>
+
 									<Input
 										id={field.name}
 										name={field.name}
 										placeholder="Dev.to"
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(event) => field.handleChange(event.target.value)}
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 								</Field>
 							)}
@@ -275,14 +409,21 @@ function ArticleDialog({
 						<form.Field name="date">
 							{(field) => (
 								<Field>
-									<FieldLabel htmlFor={field.name}>Date</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Date
+									</FieldLabel>
+
 									<Input
 										id={field.name}
 										name={field.name}
 										type="date"
 										value={field.state.value}
 										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(event) => field.handleChange(event.target.value)}
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 								</Field>
 							)}
@@ -292,26 +433,42 @@ function ArticleDialog({
 					<form.Field name="summary">
 						{(field) => (
 							<Field>
-								<FieldLabel htmlFor={field.name}>Summary</FieldLabel>
+								<FieldLabel
+									htmlFor={field.name}
+									className="font-mono text-[10px] uppercase tracking-[0.08em]"
+								>
+									Summary
+								</FieldLabel>
+
 								<Textarea
 									id={field.name}
 									name={field.name}
 									rows={3}
 									value={field.state.value}
 									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={(event) => field.handleChange(event.target.value)}
+									className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 								/>
 							</Field>
 						)}
 					</form.Field>
 				</FieldGroup>
 
-				<div className="flex justify-end gap-2 pt-2">
-					<Button type="button" variant="ghost" onClick={onClose}>
+				<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+					<button
+						type="button"
+						onClick={onClose}
+						className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+					>
 						Cancel
-					</Button>
-					<Button type="submit" disabled={pending || !form.state.canSubmit}>
-						{initial ? "Save" : "Add"}
+					</button>
+
+					<Button
+						type="submit"
+						disabled={pending || !form.state.canSubmit}
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					>
+						{pending ? "Saving..." : initial ? "Save article" : "Add article"}
 					</Button>
 				</div>
 			</form>

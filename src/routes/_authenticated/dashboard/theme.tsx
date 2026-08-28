@@ -1,17 +1,9 @@
 import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
-import {
-	CodeIcon,
-	LayersMinimalisticIcon,
-	MagicWand3Icon,
-	Palette2Icon,
-	RestartIcon,
-	TextFormatIcon,
-	Widget4Icon,
-} from "@solar-icons/react/linear";
+import { RestartIcon } from "@solar-icons/react/linear";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { SectionHeader } from "@/components/dashboard/SectionHeader";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,9 +31,11 @@ function ThemePage() {
 	const { user } = useRouteContext({ from: "/_authenticated/dashboard" });
 	const data = useProfileData();
 	const core = useProfileCore();
+
 	const updateTheme = useUpdateTheme();
 	const applyTemplate = useApplyThemeTemplate();
 	const resetTheme = useResetTheme();
+
 	const [tab, setTab] = useState<Tab>("templates");
 
 	const theme = data.theme;
@@ -55,12 +49,24 @@ function ThemePage() {
 	};
 
 	return (
-		<>
-			<SectionHeader
-				eyebrow="Appearance"
-				title="Theme builder"
-				description="Design your public page. Every change previews live and is saved as you go."
-				action={
+		<div className="mx-auto w-full max-w-350">
+			<header className="border-b border-border pb-8">
+				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+					08 / Theme
+				</p>
+
+				<div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+					<div className="min-w-0">
+						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+							Theme.
+						</h1>
+
+						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+							Design your public page. Changes are previewed live and saved
+							automatically.
+						</p>
+					</div>
+
 					<Button
 						variant="ghost"
 						onClick={() => {
@@ -72,92 +78,90 @@ function ThemePage() {
 									),
 							});
 						}}
+						className="h-9 self-start rounded-none px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground hover:bg-transparent hover:text-foreground lg:self-auto"
 					>
-						<RestartIcon size={16} /> Reset
+						<RestartIcon size={14} />
+						Reset
 					</Button>
-				}
-			/>
+				</div>
+			</header>
 
-			<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-				<div className="space-y-4">
-					<div className="flex flex-wrap gap-1 rounded-lg border border-hairline bg-surface/40 p-1">
-						<TabBtn
-							active={tab === "templates"}
-							onClick={() => setTab("templates")}
-							icon={<LayersMinimalisticIcon className="h-3.5 w-3.5" />}
-						>
-							Templates
-						</TabBtn>
-						<TabBtn
-							active={tab === "colors"}
-							onClick={() => setTab("colors")}
-							icon={<Palette2Icon className="h-3.5 w-3.5" />}
-						>
-							Colors
-						</TabBtn>
-						<TabBtn
-							active={tab === "type"}
-							onClick={() => setTab("type")}
-							icon={<TextFormatIcon className="h-3.5 w-3.5" />}
-						>
-							Type
-						</TabBtn>
-						<TabBtn
-							active={tab === "layout"}
-							onClick={() => setTab("layout")}
-							icon={<Widget4Icon className="h-3.5 w-3.5" />}
-						>
-							Layout
-						</TabBtn>
-						<TabBtn
-							active={tab === "effects"}
-							onClick={() => setTab("effects")}
-							icon={<MagicWand3Icon className="h-3.5 w-3.5" />}
-						>
-							Effects
-						</TabBtn>
-						<TabBtn
-							active={tab === "css"}
-							onClick={() => setTab("css")}
-							icon={<CodeIcon className="h-3.5 w-3.5" />}
-						>
-							CSS
-						</TabBtn>
+			<div className="mt-8 grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.85fr)] xl:gap-14">
+				<div className="min-w-0">
+					<nav
+						className="grid min-w-0 grid-cols-6 border-b border-border"
+						aria-label="Theme sections"
+					>
+						{(
+							[
+								["templates", "Templates"],
+								["colors", "Colors"],
+								["type", "Type"],
+								["layout", "Layout"],
+								["effects", "Effects"],
+								["css", "CSS"],
+							] as const
+						).map(([value, label]) => (
+							<TabBtn
+								key={value}
+								active={tab === value}
+								onClick={() => setTab(value)}
+							>
+								{label}
+							</TabBtn>
+						))}
+					</nav>
+
+					<div className="pt-8">
+						{tab === "templates" && (
+							<TemplatesPane
+								currentTemplateId={data.templateId}
+								onApply={(templateId) =>
+									applyTemplate.mutate(templateId, {
+										onSuccess: () => toast.success("Template applied"),
+										onError: (err) =>
+											toast.error(
+												err instanceof Error ? err.message : "Couldn't apply",
+											),
+									})
+								}
+							/>
+						)}
+
+						{tab === "colors" && <ColorsPane theme={theme} set={set} />}
+
+						{tab === "type" && <TypePane theme={theme} set={set} />}
+
+						{tab === "layout" && <LayoutPane theme={theme} set={set} />}
+
+						{tab === "effects" && <EffectsPane theme={theme} set={set} />}
+
+						{tab === "css" && <CssPane theme={theme} set={set} />}
 					</div>
 
-					{tab === "templates" && (
-						<TemplatesPane
-							currentTemplateId={data.templateId}
-							onApply={(templateId) =>
-								applyTemplate.mutate(templateId, {
-									onSuccess: () => toast.success("Template applied"),
-									onError: (err) =>
-										toast.error(
-											err instanceof Error ? err.message : "Couldn't apply",
-										),
-								})
-							}
-						/>
-					)}
-					{tab === "colors" && <ColorsPane theme={theme} set={set} />}
-					{tab === "type" && <TypePane theme={theme} set={set} />}
-					{tab === "layout" && <LayoutPane theme={theme} set={set} />}
-					{tab === "effects" && <EffectsPane theme={theme} set={set} />}
-					{tab === "css" && <CssPane theme={theme} set={set} />}
-
-					<div className="pt-2">
+					<div className="mt-8 border-t border-border pt-5">
 						<a
 							href={`/${user.username ?? ""}`}
 							target="_blank"
 							rel="noreferrer"
-							className="text-sm underline underline-offset-4 hover:text-foreground"
+							className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground underline decoration-border underline-offset-4 transition-colors hover:text-foreground hover:decoration-brand"
 						>
-							Open my public page →
+							Open my public page ↗
 						</a>
 					</div>
 				</div>
 
-				<div className="lg:sticky lg:top-24 lg:self-start">
+				<div className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+					<div className="mb-4 flex items-center justify-between border-b border-border pb-3">
+						<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+							Live preview
+						</p>
+
+						<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+							/{user.username ?? "preview"}
+						</p>
+					</div>
+
 					<ThemePreview
 						theme={theme}
 						username={user.username ?? ""}
@@ -166,19 +170,17 @@ function ThemePage() {
 					/>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 }
 
 function TabBtn({
 	active,
 	onClick,
-	icon,
 	children,
 }: {
 	active: boolean;
 	onClick: () => void;
-	icon: React.ReactNode;
 	children: React.ReactNode;
 }) {
 	return (
@@ -186,24 +188,21 @@ function TabBtn({
 			type="button"
 			onClick={onClick}
 			className={cn(
-				"inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors",
+				"relative min-w-0 whitespace-nowrap overflow-hidden px-0.5 pb-3 font-mono text-[8px] uppercase tracking-[0.02em] transition-colors sm:px-1 sm:text-[10px] sm:tracking-wider",
 				active
-					? "bg-surface-elevated text-foreground"
+					? "text-foreground"
 					: "text-muted-foreground hover:text-foreground",
 			)}
 		>
-			{icon}
 			{children}
+
+			{active && <span className="absolute inset-x-0 bottom-0 h-px bg-brand" />}
 		</button>
 	);
 }
 
 function Pane({ children }: { children: React.ReactNode }) {
-	return (
-		<section className="space-y-5 rounded-xl border border-hairline bg-surface/40 p-5">
-			{children}
-		</section>
-	);
+	return <section className="min-w-0 space-y-7">{children}</section>;
 }
 
 function Row({
@@ -216,13 +215,19 @@ function Row({
 	children: React.ReactNode;
 }) {
 	return (
-		<div className="space-y-1.5">
-			<div className="flex items-baseline justify-between">
-				<Label className="text-xs">{label}</Label>
+		<div className="min-w-0 border-b border-border pb-6">
+			<div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+				<Label className="font-mono text-[10px] uppercase tracking-[0.08em]">
+					{label}
+				</Label>
+
 				{hint && (
-					<span className="text-[10px] text-muted-foreground">{hint}</span>
+					<span className="font-mono text-[9px] text-muted-foreground">
+						{hint}
+					</span>
 				)}
 			</div>
+
 			{children}
 		</div>
 	);
@@ -235,22 +240,23 @@ function ColorField({
 }: {
 	label: string;
 	value: string;
-	onChange: (v: string) => void;
+	onChange: (value: string) => void;
 }) {
 	return (
 		<Row label={label}>
-			<div className="flex items-center gap-2">
+			<div className="flex min-w-0 items-center gap-3">
 				<input
 					type="color"
 					value={value}
-					onChange={(e) => onChange(e.target.value)}
-					className="h-9 w-12 cursor-pointer rounded-md border border-hairline bg-transparent"
+					onChange={(event) => onChange(event.target.value)}
+					className="h-10 w-12 shrink-0 cursor-pointer rounded-none border border-border bg-background p-1"
 					aria-label={label}
 				/>
+
 				<Input
 					value={value}
-					onChange={(e) => onChange(e.target.value)}
-					className="max-w-32.5 font-mono text-xs"
+					onChange={(event) => onChange(event.target.value)}
+					className="h-10 min-w-0 flex-1 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-xs shadow-none focus-visible:border-brand focus-visible:ring-0"
 				/>
 			</div>
 		</Row>
@@ -266,49 +272,78 @@ function TemplatesPane({
 }) {
 	return (
 		<Pane>
-			<p className="text-xs text-muted-foreground">
-				Start from a preset. You can keep tweaking after.
-			</p>
-			<div className="grid grid-cols-2 gap-2">
-				{templates.map((tpl) => {
-					const active = currentTemplateId === tpl.id;
+			<div>
+				<p className="font-display text-2xl tracking-tight">
+					Start with a direction.
+				</p>
+
+				<p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+					Choose a preset, then continue shaping every detail to your taste.
+				</p>
+			</div>
+
+			<div className="grid gap-px border border-border bg-border sm:grid-cols-2">
+				{templates.map((template) => {
+					const active = currentTemplateId === template.id;
+
 					return (
 						<button
 							type="button"
-							key={tpl.id}
-							onClick={() => onApply(tpl.id)}
+							key={template.id}
+							onClick={() => onApply(template.id)}
 							className={cn(
-								"group relative overflow-hidden rounded-lg border p-3 text-left transition-colors",
+								"group relative min-w-0 border-0 p-5 text-left transition-all",
 								active
-									? "border-foreground"
-									: "border-hairline hover:border-border",
+									? "ring-1 ring-inset ring-foreground"
+									: "hover:opacity-85",
 							)}
-							style={{ background: tpl.config.bg, color: tpl.config.fg }}
+							style={{
+								background: template.config.bg,
+								color: template.config.fg,
+							}}
 						>
-							<div className="flex items-center justify-between">
-								<span className="text-sm font-medium">{tpl.name}</span>
-								{active && <CheckCircleIcon size={14} secondaryOpacity={0} />}
+							<div className="flex min-w-0 items-start justify-between gap-4">
+								<div className="min-w-0">
+									<p className="truncate font-display text-xl tracking-tight">
+										{template.name}
+									</p>
+
+									<p className="mt-2 max-w-sm text-xs leading-relaxed opacity-70">
+										{template.description}
+									</p>
+								</div>
+
+								{active && (
+									<CheckCircleIcon
+										size={16}
+										secondaryOpacity={0}
+										className="shrink-0"
+									/>
+								)}
 							</div>
-							<div className="mt-2 flex gap-1">
+
+							<div className="mt-5 flex gap-1.5">
 								<span
 									className="h-4 w-4 rounded-full"
-									style={{ background: tpl.config.accent }}
+									style={{ background: template.config.accent }}
 								/>
+
 								<span
 									className="h-4 w-4 rounded-full"
 									style={{
-										background: tpl.config.accent2 ?? tpl.config.accent,
+										background:
+											template.config.accent2 ?? template.config.accent,
 									}}
 								/>
+
 								<span
 									className="h-4 w-4 rounded-full border"
 									style={{
-										background: tpl.config.surface,
-										borderColor: tpl.config.border,
+										background: template.config.surface,
+										borderColor: template.config.border,
 									}}
 								/>
 							</div>
-							<p className="mt-2 text-[10px] opacity-70">{tpl.description}</p>
 						</button>
 					);
 				})}
@@ -322,68 +357,70 @@ function ColorsPane({
 	set,
 }: {
 	theme: ThemeV2;
-	set: (p: Partial<ThemeV2>) => void;
+	set: (patch: Partial<ThemeV2>) => void;
 }) {
 	return (
 		<Pane>
-			<div className="grid grid-cols-2 gap-3">
+			<div className="grid gap-6 sm:grid-cols-2">
 				<ColorField
 					label="Background"
 					value={theme.bg}
-					onChange={(v) => set({ bg: v })}
+					onChange={(value) => set({ bg: value })}
 				/>
+
 				<ColorField
 					label="Text"
 					value={theme.fg}
-					onChange={(v) => set({ fg: v })}
+					onChange={(value) => set({ fg: value })}
 				/>
+
 				<ColorField
 					label="Muted text"
 					value={theme.muted}
-					onChange={(v) => set({ muted: v })}
+					onChange={(value) => set({ muted: value })}
 				/>
+
 				<ColorField
 					label="Surface"
 					value={theme.surface}
-					onChange={(v) => set({ surface: v })}
+					onChange={(value) => set({ surface: value })}
 				/>
+
 				<ColorField
 					label="Border"
 					value={theme.border}
-					onChange={(v) => set({ border: v })}
+					onChange={(value) => set({ border: value })}
 				/>
+
 				<ColorField
 					label="Accent"
 					value={theme.accent}
-					onChange={(v) => set({ accent: v })}
+					onChange={(value) => set({ accent: value })}
 				/>
+
 				<ColorField
 					label="Accent 2"
 					value={theme.accent2 ?? theme.accent}
-					onChange={(v) => set({ accent2: v })}
+					onChange={(value) => set({ accent2: value })}
 				/>
 			</div>
+
 			<Row label="Background style">
-				<div className="flex flex-wrap gap-1.5">
+				<div className="flex flex-wrap gap-x-5 gap-y-3">
 					{(
 						["solid", "gradient", "radial", "mesh", "grid", "dots"] as const
-					).map((s) => (
-						<button
-							type="button"
-							key={s}
-							onClick={() => set({ bgStyle: s })}
-							className={cn(
-								"rounded-md border px-2.5 py-1 text-xs capitalize",
-								theme.bgStyle === s
-									? "border-foreground"
-									: "border-hairline hover:border-border",
-							)}
+					).map((style) => (
+						<ChoiceButton
+							key={style}
+							active={theme.bgStyle === style}
+							onClick={() => set({ bgStyle: style })}
 						>
-							{s}
-						</button>
+							{style}
+						</ChoiceButton>
 					))}
 				</div>
 			</Row>
+
 			{theme.bgStyle === "gradient" && (
 				<Row label="Gradient angle" hint={`${theme.bgAngle}°`}>
 					<Slider
@@ -391,7 +428,7 @@ function ColorsPane({
 						min={0}
 						max={360}
 						step={5}
-						onValueChange={([v]) => set({ bgAngle: v })}
+						onValueChange={([value]) => set({ bgAngle: value })}
 					/>
 				</Row>
 			)}
@@ -404,25 +441,28 @@ function TypePane({
 	set,
 }: {
 	theme: ThemeV2;
-	set: (p: Partial<ThemeV2>) => void;
+	set: (patch: Partial<ThemeV2>) => void;
 }) {
 	return (
 		<Pane>
 			<FontPicker
 				label="Heading font"
 				value={theme.headingFont}
-				onChange={(v) => set({ headingFont: v })}
+				onChange={(value) => set({ headingFont: value })}
 			/>
+
 			<FontPicker
 				label="Body font"
 				value={theme.bodyFont}
-				onChange={(v) => set({ bodyFont: v })}
+				onChange={(value) => set({ bodyFont: value })}
 			/>
+
 			<FontPicker
 				label="Mono font"
 				value={theme.monoFont}
-				onChange={(v) => set({ monoFont: v })}
+				onChange={(value) => set({ monoFont: value })}
 			/>
+
 			<Row
 				label="Font size scale"
 				hint={`${Math.round(theme.fontSizeScale * 100)}%`}
@@ -432,16 +472,17 @@ function TypePane({
 					min={0.85}
 					max={1.25}
 					step={0.05}
-					onValueChange={([v]) => set({ fontSizeScale: v })}
+					onValueChange={([value]) => set({ fontSizeScale: value })}
 				/>
 			</Row>
+
 			<Row label="Letter spacing" hint={`${theme.letterSpacing}`}>
 				<Slider
 					value={[theme.letterSpacing]}
 					min={-2}
 					max={4}
 					step={0.5}
-					onValueChange={([v]) => set({ letterSpacing: v })}
+					onValueChange={([value]) => set({ letterSpacing: value })}
 				/>
 			</Row>
 		</Pane>
@@ -455,25 +496,29 @@ function FontPicker({
 }: {
 	label: string;
 	value: string;
-	onChange: (v: string) => void;
+	onChange: (value: string) => void;
 }) {
 	return (
 		<Row label={label}>
-			<div className="grid grid-cols-2 gap-1.5">
-				{fontOptions.map((f) => (
+			<div className="grid gap-px border border-border bg-border sm:grid-cols-2">
+				{fontOptions.map((font) => (
 					<button
 						type="button"
-						key={f.value}
-						onClick={() => onChange(f.value)}
+						key={font.value}
+						onClick={() => onChange(font.value)}
 						className={cn(
-							"rounded-md border px-3 py-2 text-left text-sm",
-							value === f.value
-								? "border-foreground"
-								: "border-hairline hover:border-border",
+							"min-w-0 border-0 bg-background px-4 py-3 text-left transition-colors",
+							value === font.value
+								? "bg-surface-elevated text-foreground"
+								: "text-muted-foreground hover:text-foreground",
 						)}
-						style={{ fontFamily: f.stack }}
+						style={{ fontFamily: font.stack }}
 					>
-						{f.label}
+						<span className="block truncate text-sm">{font.label}</span>
+
+						<span className="mt-1 block font-mono text-[8px] uppercase tracking-[0.08em] text-muted-foreground">
+							{font.value}
+						</span>
 					</button>
 				))}
 			</div>
@@ -486,7 +531,7 @@ function LayoutPane({
 	set,
 }: {
 	theme: ThemeV2;
-	set: (p: Partial<ThemeV2>) => void;
+	set: (patch: Partial<ThemeV2>) => void;
 }) {
 	return (
 		<Pane>
@@ -496,74 +541,67 @@ function LayoutPane({
 					min={0}
 					max={32}
 					step={1}
-					onValueChange={([v]) => set({ radius: v })}
+					onValueChange={([value]) => set({ radius: value })}
 				/>
 			</Row>
+
 			<Row label="Card padding" hint={`${theme.cardPadding}px`}>
 				<Slider
 					value={[theme.cardPadding]}
 					min={8}
 					max={40}
 					step={1}
-					onValueChange={([v]) => set({ cardPadding: v })}
+					onValueChange={([value]) => set({ cardPadding: value })}
 				/>
 			</Row>
+
 			<Row label="Spacing scale" hint={`${theme.spacing.toFixed(2)}×`}>
 				<Slider
 					value={[theme.spacing]}
 					min={0.75}
 					max={1.5}
 					step={0.05}
-					onValueChange={([v]) => set({ spacing: v })}
+					onValueChange={([value]) => set({ spacing: value })}
 				/>
 			</Row>
+
 			<Row label="Content width">
-				<div className="flex gap-1.5">
-					{(["narrow", "default", "wide"] as const).map((w) => (
-						<button
-							type="button"
-							key={w}
-							onClick={() => set({ cardWidth: w })}
-							className={cn(
-								"rounded-md border px-2.5 py-1 text-xs capitalize",
-								theme.cardWidth === w
-									? "border-foreground"
-									: "border-hairline hover:border-border",
-							)}
+				<div className="flex flex-wrap gap-x-5 gap-y-3">
+					{(["narrow", "default", "wide"] as const).map((width) => (
+						<ChoiceButton
+							key={width}
+							active={theme.cardWidth === width}
+							onClick={() => set({ cardWidth: width })}
 						>
-							{w}
-						</button>
+							{width}
+						</ChoiceButton>
 					))}
 				</div>
 			</Row>
+
 			<Row label="Button style">
-				<div className="flex flex-wrap gap-1.5">
+				<div className="flex flex-wrap gap-x-5 gap-y-3">
 					{(["solid", "outline", "ghost", "gradient", "glass"] as const).map(
-						(b) => (
-							<button
-								type="button"
-								key={b}
-								onClick={() => set({ buttonStyle: b })}
-								className={cn(
-									"rounded-md border px-2.5 py-1 text-xs capitalize",
-									theme.buttonStyle === b
-										? "border-foreground"
-										: "border-hairline hover:border-border",
-								)}
+						(style) => (
+							<ChoiceButton
+								key={style}
+								active={theme.buttonStyle === style}
+								onClick={() => set({ buttonStyle: style })}
 							>
-								{b}
-							</button>
+								{style}
+							</ChoiceButton>
 						),
 					)}
 				</div>
 			</Row>
+
 			<Row label="Button border" hint={`${theme.buttonBorder}px`}>
 				<Slider
 					value={[theme.buttonBorder]}
 					min={0}
 					max={3}
 					step={1}
-					onValueChange={([v]) => set({ buttonBorder: v })}
+					onValueChange={([value]) => set({ buttonBorder: value })}
 				/>
 			</Row>
 		</Pane>
@@ -575,63 +613,79 @@ function EffectsPane({
 	set,
 }: {
 	theme: ThemeV2;
-	set: (p: Partial<ThemeV2>) => void;
+	set: (patch: Partial<ThemeV2>) => void;
 }) {
 	return (
 		<Pane>
 			<Row label="Shadow">
-				<div className="flex flex-wrap gap-1.5">
-					{(["none", "sm", "md", "lg", "glow"] as const).map((s) => (
-						<button
-							type="button"
-							key={s}
-							onClick={() => set({ shadow: s })}
-							className={cn(
-								"rounded-md border px-2.5 py-1 text-xs capitalize",
-								theme.shadow === s
-									? "border-foreground"
-									: "border-hairline hover:border-border",
-							)}
+				<div className="flex flex-wrap gap-x-5 gap-y-3">
+					{(["none", "sm", "md", "lg", "glow"] as const).map((shadow) => (
+						<ChoiceButton
+							key={shadow}
+							active={theme.shadow === shadow}
+							onClick={() => set({ shadow })}
 						>
-							{s}
-						</button>
+							{shadow}
+						</ChoiceButton>
 					))}
 				</div>
 			</Row>
+
 			<Row label="Hover effect">
-				<div className="flex flex-wrap gap-1.5">
-					{(["none", "lift", "glow", "scale", "shift"] as const).map((h) => (
-						<button
-							type="button"
-							key={h}
-							onClick={() => set({ hover: h })}
-							className={cn(
-								"rounded-md border px-2.5 py-1 text-xs capitalize",
-								theme.hover === h
-									? "border-foreground"
-									: "border-hairline hover:border-border",
-							)}
-						>
-							{h}
-						</button>
-					))}
+				<div className="flex flex-wrap gap-x-5 gap-y-3">
+					{(["none", "lift", "glow", "scale", "shift"] as const).map(
+						(hover) => (
+							<ChoiceButton
+								key={hover}
+								active={theme.hover === hover}
+								onClick={() => set({ hover })}
+							>
+								{hover}
+							</ChoiceButton>
+						),
+					)}
 				</div>
 			</Row>
+
 			<Row label="Glass on cards">
 				<button
 					type="button"
 					onClick={() => set({ glass: !theme.glass })}
 					className={cn(
-						"rounded-md border px-3 py-1.5 text-xs",
+						"font-mono text-[10px] uppercase tracking-[0.08em] transition-colors",
 						theme.glass
-							? "border-foreground"
-							: "border-hairline hover:border-border",
+							? "text-brand"
+							: "text-muted-foreground hover:text-foreground",
 					)}
 				>
-					{theme.glass ? "Enabled" : "Disabled"}
+					{theme.glass ? "/ Enabled" : "Disabled"}
 				</button>
 			</Row>
 		</Pane>
+	);
+}
+
+function ChoiceButton({
+	active,
+	onClick,
+	children,
+}: {
+	active: boolean;
+	onClick: () => void;
+	children: React.ReactNode;
+}) {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			className={cn(
+				"font-mono text-[10px] uppercase tracking-wider transition-colors",
+				active ? "text-brand" : "text-muted-foreground hover:text-foreground",
+			)}
+		>
+			{active && <span className="mr-1.5">/</span>}
+			{children}
+		</button>
 	);
 }
 
@@ -640,9 +694,10 @@ function CssPane({
 	set,
 }: {
 	theme: ThemeV2;
-	set: (p: Partial<ThemeV2>) => void;
+	set: (patch: Partial<ThemeV2>) => void;
 }) {
 	const [draft, setDraft] = useState(theme.customCss);
+
 	return (
 		<Pane>
 			<Row
@@ -651,35 +706,39 @@ function CssPane({
 			>
 				<Textarea
 					value={draft}
-					onChange={(e) => setDraft(e.target.value)}
-					rows={12}
+					onChange={(event) => setDraft(event.target.value)}
+					rows={14}
 					spellCheck={false}
-					className="font-mono text-xs"
+					className="resize-none rounded-none border-border bg-surface font-mono text-xs leading-relaxed shadow-none focus-visible:border-brand focus-visible:ring-0"
 					placeholder={`.tt-card { border-width: 2px; }\n.tt-btn:hover { transform: rotate(-1deg); }`}
 				/>
 			</Row>
-			<div className="flex gap-2">
+
+			<div className="flex flex-wrap gap-5">
 				<Button
 					size="sm"
 					onClick={() => {
 						set({ customCss: draft });
 						toast.success("Custom CSS applied");
 					}}
+					className="h-9 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 				>
 					Apply CSS
 				</Button>
-				<Button
-					size="sm"
-					variant="ghost"
+
+				<button
+					type="button"
 					onClick={() => {
 						setDraft("");
 						set({ customCss: "" });
 					}}
+					className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
 				>
 					Clear
-				</Button>
+				</button>
 			</div>
-			<p className="text-[10px] text-muted-foreground">
+
+			<p className="text-[10px] leading-relaxed text-muted-foreground">
 				Scoped selectors: <code>.tt-card</code>, <code>.tt-btn</code>,{" "}
 				<code>.tt-muted</code>. Vars: <code>--tt-bg</code>, <code>--tt-fg</code>
 				, <code>--tt-accent</code>, <code>--tt-radius</code>…
@@ -703,52 +762,63 @@ function ThemePreview({
 		() => themeToStyleTag(theme, ".tt-preview"),
 		[theme],
 	);
+
 	return (
-		<div className="overflow-hidden rounded-xl border border-hairline shadow-2xl">
+		<div className="min-w-0 overflow-hidden border border-border bg-background">
 			{/* biome-ignore lint/security/noDangerouslySetInnerHtml: theme styles are generated server-side from user-controlled config and scoped to .tt-preview */}
 			<style dangerouslySetInnerHTML={{ __html: styleTag }} />
-			<div className="tt-preview" style={{ minHeight: 520 }}>
+
+			<div
+				className="tt-preview min-h-130 overflow-auto"
+				style={{ minHeight: 520 }}
+			>
 				<div
 					style={{
 						padding: `calc(var(--tt-card-padding) * 1.5)`,
-						maxWidth: `var(--tt-max-width)`,
+						maxWidth: "var(--tt-max-width)",
 						margin: "0 auto",
 					}}
 				>
 					<div className="flex items-center gap-3">
 						<div
-							className="grid h-14 w-14 place-items-center rounded-full font-semibold"
-							style={{ background: theme.accent, color: theme.bg }}
+							className="grid h-14 w-14 shrink-0 place-items-center rounded-full font-semibold"
+							style={{
+								background: theme.accent,
+								color: theme.bg,
+							}}
 						>
 							{name.slice(0, 1).toUpperCase()}
 						</div>
-						<div>
+
+						<div className="min-w-0">
 							<h1
 								style={{
-									fontSize: `calc(1.35rem * var(--tt-font-scale))`,
+									fontSize: "calc(1.35rem * var(--tt-font-scale))",
 									fontWeight: 600,
 									margin: 0,
 								}}
 							>
 								{name}
 							</h1>
+
 							<p
 								className="tt-muted"
 								style={{
 									margin: 0,
-									fontSize: `calc(.85rem * var(--tt-font-scale))`,
+									fontSize: "calc(.85rem * var(--tt-font-scale))",
 								}}
 							>
 								@{username}
 							</p>
 						</div>
 					</div>
+
 					{bio && (
 						<p
 							className="tt-muted"
 							style={{
 								marginTop: 12,
-								fontSize: `calc(.9rem * var(--tt-font-scale))`,
+								fontSize: "calc(.9rem * var(--tt-font-scale))",
 							}}
 						>
 							{bio}
@@ -759,7 +829,7 @@ function ThemePreview({
 						style={{
 							marginTop: 20,
 							display: "grid",
-							gap: `calc(.5rem * var(--tt-spacing))`,
+							gap: "calc(.5rem * var(--tt-spacing))",
 						}}
 					>
 						{["My portfolio", "GitHub", "Latest blog post"].map((label) => (
@@ -767,7 +837,7 @@ function ThemePreview({
 								type="button"
 								key={label}
 								className="tt-btn"
-								onClick={(e) => e.preventDefault()}
+								onClick={(event) => event.preventDefault()}
 							>
 								<span style={{ opacity: 0.8 }}>→</span>
 								<span style={{ flex: 1 }}>{label}</span>
@@ -779,24 +849,33 @@ function ThemePreview({
 						style={{
 							marginTop: 20,
 							display: "grid",
-							gap: `calc(.5rem * var(--tt-spacing))`,
+							gap: "calc(.5rem * var(--tt-spacing))",
 							gridTemplateColumns: "1fr 1fr",
 						}}
 					>
 						<div className="tt-card">
 							<p style={{ fontWeight: 600, margin: 0 }}>Sample project</p>
+
 							<p
 								className="tt-muted"
-								style={{ margin: "4px 0 0", fontSize: ".8rem" }}
+								style={{
+									margin: "4px 0 0",
+									fontSize: ".8rem",
+								}}
 							>
 								An example card so you can feel the theme.
 							</p>
 						</div>
+
 						<div className="tt-card">
 							<p style={{ fontWeight: 600, margin: 0 }}>Another card</p>
+
 							<p
 								className="tt-muted"
-								style={{ margin: "4px 0 0", fontSize: ".8rem" }}
+								style={{
+									margin: "4px 0 0",
+									fontSize: ".8rem",
+								}}
 							>
 								Hover me to test the effect.
 							</p>

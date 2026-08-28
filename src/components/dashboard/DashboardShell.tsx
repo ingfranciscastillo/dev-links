@@ -15,15 +15,20 @@ import {
 	Palette,
 	Plug,
 	Settings,
-	Sparkles,
 	User,
 } from "lucide-react";
 import type { ReactNode } from "react";
+
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { authClient } from "@/lib/auth-client";
-import { hueFromString } from "@/lib/user";
 
-type NavItem = { label: string; to: string; icon: typeof Home; end?: boolean };
+type NavItem = {
+	label: string;
+	to: string;
+	icon: typeof Home;
+	end?: boolean;
+};
+
 const nav: NavItem[] = [
 	{ label: "Overview", to: "/dashboard", icon: Home, end: true },
 	{ label: "Profile", to: "/dashboard/profile", icon: User },
@@ -38,7 +43,6 @@ const nav: NavItem[] = [
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
-	// El user ya viene garantizado (no-null) desde el beforeLoad de /_authenticated
 	const { user } = useRouteContext({ from: "/_authenticated" });
 	const navigate = useNavigate();
 	const router = useRouter();
@@ -47,101 +51,144 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 	async function handleSignOut() {
 		await authClient.signOut();
 		await router.invalidate();
-		navigate({ to: "/" });
+		await navigate({ to: "/" });
 	}
-
-	const avatarHue = hueFromString(user.id);
 
 	return (
 		<div className="min-h-dvh bg-background text-foreground">
-			<div className="mx-auto flex max-w-7xl">
-				<aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-hairline bg-surface/40 px-3 py-5 md:flex">
-					<Link
-						to="/"
-						className="mb-6 flex items-center gap-2 px-2 font-semibold tracking-tight"
-					>
-						<span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-foreground text-background">
-							<Sparkles className="h-3.5 w-3.5" />
-						</span>
-						DevLinks
-					</Link>
+			<div className="mx-auto flex min-h-dvh max-w-[1440px]">
+				<aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-background md:flex">
+					<div className="flex h-16 items-center border-b border-border px-6">
+						<Link to="/" className="flex items-center gap-2.5">
+							<span className="font-display text-xl leading-none tracking-[-0.03em]">
+								DevLinks
+							</span>
 
-					<nav className="flex-1 space-y-0.5">
-						{nav.map((item) => {
-							const active = item.end
-								? pathname === item.to
-								: pathname.startsWith(item.to);
-							const Icon = item.icon;
-							const className =
-								"flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors " +
-								(active
-									? "bg-surface-elevated text-foreground"
-									: "text-muted-foreground hover:bg-surface-elevated hover:text-foreground");
-							return (
-								<Link key={item.to} to={item.to} className={className}>
-									<Icon className="h-4 w-4" />
-									{item.label}
-								</Link>
-							);
-						})}
-					</nav>
-
-					<div className="mt-4 rounded-lg border border-hairline bg-background/40 p-3">
-						<p className="text-xs font-medium">Free plan</p>
-						<p className="mt-1 text-xs text-muted-foreground">
-							10 links · 5 projects · 5 snippets
-						</p>
-						<Link
-							to="/dashboard"
-							className="mt-2 inline-flex h-7 items-center justify-center rounded-md bg-foreground px-2.5 text-xs font-medium text-background"
-						>
-							Upgrade to Pro
+							<span className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+								01
+							</span>
 						</Link>
+					</div>
+
+					<div className="flex flex-1 flex-col px-4 py-5">
+						<p className="px-2 font-mono text-[9px] uppercase tracking-[0.14em] text-brand">
+							Workspace
+						</p>
+
+						<nav className="mt-4 space-y-0.5">
+							{nav.map((item) => {
+								const active = item.end
+									? pathname === item.to
+									: pathname.startsWith(item.to);
+
+								const Icon = item.icon;
+
+								return (
+									<Link
+										key={item.to}
+										to={item.to}
+										className={`group relative flex items-center gap-3 px-2 py-2.5 text-sm transition-colors ${
+											active
+												? "text-foreground"
+												: "text-muted-foreground hover:text-foreground"
+										}`}
+									>
+										<span
+											className={`absolute -left-4 top-0 h-full w-px transition-colors ${
+												active ? "bg-brand" : "bg-transparent"
+											}`}
+										/>
+
+										<Icon
+											className={`h-4 w-4 transition-colors ${
+												active
+													? "text-brand"
+													: "text-muted-foreground group-hover:text-foreground"
+											}`}
+											strokeWidth={1.7}
+										/>
+
+										<span>{item.label}</span>
+									</Link>
+								);
+							})}
+						</nav>
+
+						<div className="mt-auto border-t border-border pt-5">
+							<div className="flex items-start justify-between gap-4">
+								<div>
+									<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
+										Current plan
+									</p>
+
+									<p className="mt-2 font-display text-2xl tracking-[-0.02em]">
+										Free
+									</p>
+
+									<p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+										5 links · 5 projects · 3 snippets
+									</p>
+								</div>
+
+								<Link
+									to="/dashboard"
+									className="font-mono text-[9px] uppercase tracking-[0.08em] text-brand transition-colors hover:text-foreground"
+								>
+									Upgrade
+								</Link>
+							</div>
+						</div>
 					</div>
 				</aside>
 
 				<div className="flex min-w-0 flex-1 flex-col">
-					<header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-hairline bg-background/80 px-4 backdrop-blur sm:px-6">
-						<div className="flex items-center gap-3 text-sm">
-							<span className="hidden text-muted-foreground sm:inline">
-								devlinks.com/
-							</span>
+					<header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b border-border bg-background/95 px-5 backdrop-blur-sm sm:px-8">
+						<div className="min-w-0">
 							<Link
 								to="/$username"
 								params={{ username: user.username ?? "" }}
-								className="font-medium hover:underline"
+								className="group flex min-w-0 items-center gap-2"
 							>
-								{user.username}
+								<span className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+									devlinks.com/
+								</span>
+
+								<span className="truncate font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors group-hover:text-brand">
+									{user.username}
+								</span>
 							</Link>
 						</div>
 
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-3">
 							<Link
 								to="/$username"
 								params={{ username: user.username ?? "" }}
-								className="hidden h-8 items-center rounded-md border border-border bg-surface px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-surface-elevated hover:text-foreground sm:inline-flex"
+								className="hidden border border-border px-3 py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-foreground hover:text-foreground sm:inline-flex"
 							>
 								View public page
 							</Link>
+
 							<ThemeToggle />
+
 							<button
 								type="button"
 								onClick={handleSignOut}
 								title="Sign out"
-								className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-muted-foreground transition-colors hover:bg-surface-elevated hover:text-foreground"
+								aria-label="Sign out"
+								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 							>
-								<LogOut className="h-4 w-4" />
+								<LogOut className="h-4 w-4" strokeWidth={1.7} />
 							</button>
-							<div
-								className="ml-1 inline-flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-background"
-								style={{ background: `oklch(0.7 0.18 ${avatarHue})` }}
-							>
+
+							<div className="ml-1 flex h-8 w-8 items-center justify-center border border-border bg-surface font-display text-sm text-foreground">
 								{user.name.slice(0, 1).toUpperCase()}
 							</div>
 						</div>
 					</header>
 
-					<main className="flex-1 px-4 py-6 sm:px-8 sm:py-10">{children}</main>
+					<main className="flex-1 px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+						{children}
+					</main>
 				</div>
 			</div>
 		</div>
@@ -158,18 +205,21 @@ export function EmptyState({
 	description: string;
 }) {
 	return (
-		<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-hairline bg-surface/40 py-16 text-center">
-			<div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-surface-elevated text-muted-foreground">
-				<Icon className="h-5 w-5" />
+		<div className="border-t border-b border-border py-16 text-center">
+			<div className="mx-auto flex h-10 w-10 items-center justify-center text-muted-foreground">
+				<Icon className="h-5 w-5" strokeWidth={1.5} />
 			</div>
-			<h3 className="text-base font-semibold">{title}</h3>
-			<p className="mt-1 max-w-sm text-sm text-muted-foreground">
+
+			<h3 className="mt-5 font-display text-2xl tracking-[-0.02em]">{title}</h3>
+
+			<p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
 				{description}
 			</p>
+
 			<button
 				type="button"
 				disabled
-				className="mt-4 inline-flex h-8 items-center rounded-md border border-border bg-surface px-3 text-xs font-medium text-muted-foreground opacity-70"
+				className="mt-5 border border-border px-4 py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground opacity-70"
 			>
 				Coming soon
 			</button>

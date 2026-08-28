@@ -24,31 +24,33 @@ function DashboardHome() {
 	const core = useProfileCore();
 	const analytics = useAnalyticsSummary(7);
 
-	const activeLinks = data.links.filter((l) => l.active).length;
-	const t = analytics.data ?? { views: 0, clicks: 0 };
+	const activeLinks = data.links.filter((link) => link.active).length;
+	const totals = analytics.data ?? { views: 0, clicks: 0 };
+
 	const stats = [
 		{
-			label: "Page views (7d)",
-			value: t.views.toLocaleString(),
-			delta: "last 7 days",
+			label: "Page views",
+			value: totals.views.toLocaleString(),
+			meta: "Last 7 days",
 			icon: Eye,
 		},
 		{
-			label: "Total clicks (7d)",
-			value: t.clicks.toLocaleString(),
-			delta: "last 7 days",
+			label: "Total clicks",
+			value: totals.clicks.toLocaleString(),
+			meta: "Last 7 days",
 			icon: MousePointerClick,
 		},
 		{
 			label: "Active links",
-			value: `${activeLinks}`,
-			delta: `of ${data.links.length}`,
+			value: activeLinks.toString(),
+			meta: `of ${data.links.length}`,
 			icon: LinkIcon,
 		},
 	];
 
 	async function share() {
 		const url = `${window.location.origin}/${user.username ?? ""}`;
+
 		try {
 			await navigator.clipboard.writeText(url);
 			toast.success("Link copied to clipboard");
@@ -58,155 +60,196 @@ function DashboardHome() {
 	}
 
 	return (
-		<>
-			<div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+		<div className="mx-auto w-full max-w-6xl">
+			<header className="flex flex-col gap-8 border-b border-border pb-8 sm:flex-row sm:items-end sm:justify-between">
 				<div>
-					<p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-						Overview
+					<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+						01 / Overview
 					</p>
-					<h1 className="mt-1 text-3xl font-semibold tracking-tight">
+
+					<h1 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 						Welcome back, {user.name.split(" ")[0]}.
 					</h1>
-					<p className="mt-1 text-sm text-muted-foreground">
-						Here's how your DevLinks page is doing this week.
+
+					<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+						Here&apos;s how your DevLinks page is doing this week.
 					</p>
 				</div>
+
 				<button
 					type="button"
 					onClick={share}
-					className="inline-flex h-9 items-center gap-2 rounded-md bg-foreground px-3.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+					className="group inline-flex w-fit items-center gap-2 border border-foreground px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
 				>
-					<Share2 className="h-4 w-4" />
+					<Share2 className="h-3.5 w-3.5" />
 					Share my page
 				</button>
-			</div>
+			</header>
 
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{stats.map((s) => {
-					const Icon = s.icon;
-					return (
-						<div
-							key={s.label}
-							className="rounded-xl border border-hairline bg-surface/40 p-5"
-						>
-							<div className="flex items-center justify-between text-muted-foreground">
-								<p className="text-sm">{s.label}</p>
-								<Icon className="h-4 w-4" />
+			<section className="border-b border-border" aria-label="Analytics">
+				<div className="grid sm:grid-cols-3">
+					{stats.map((stat, index) => {
+						const Icon = stat.icon;
+
+						return (
+							<div
+								key={stat.label}
+								className={`py-7 sm:px-6 ${
+									index > 0
+										? "border-t border-border sm:border-l sm:border-t-0"
+										: ""
+								}`}
+							>
+								<div className="flex items-center gap-2 text-muted-foreground">
+									<Icon className="h-3.5 w-3.5" strokeWidth={1.7} />
+									<p className="font-mono text-[9px] uppercase tracking-widest">
+										{stat.label}
+									</p>
+								</div>
+
+								<p className="mt-4 font-display text-4xl tracking-[-0.03em]">
+									{stat.value}
+								</p>
+
+								<p className="mt-1 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+									{stat.meta}
+								</p>
 							</div>
-							<p className="mt-3 text-3xl font-semibold tracking-tight">
-								{s.value}
-							</p>
-							<p className="mt-1 text-xs text-muted-foreground">{s.delta}</p>
-						</div>
-					);
-				})}
-			</div>
+						);
+					})}
+				</div>
+			</section>
 
-			<div className="mt-4 grid gap-4 sm:grid-cols-3">
-				<MiniStat
-					icon={Folder}
-					label="Projects"
-					value={data.projects.length}
-					to="/dashboard/projects"
-				/>
-				<MiniStat
-					icon={Code2}
-					label="Snippets"
-					value={data.snippets.length}
-					to="/dashboard/snippets"
-				/>
-				<MiniStat
-					icon={FileText}
-					label="Articles"
-					value={data.articles.length}
-					to="/dashboard/articles"
-				/>
-			</div>
+			<section className="border-b border-border py-8">
+				<div className="grid sm:grid-cols-3">
+					<MiniStat
+						icon={Folder}
+						label="Projects"
+						value={data.projects.length}
+						to="/dashboard/projects"
+					/>
 
-			<div className="mt-8 grid gap-4 lg:grid-cols-3">
-				<div className="lg:col-span-2 rounded-xl border border-hairline bg-surface/40 p-6">
-					<div className="flex items-center justify-between">
+					<MiniStat
+						icon={Code2}
+						label="Snippets"
+						value={data.snippets.length}
+						to="/dashboard/snippets"
+					/>
+
+					<MiniStat
+						icon={FileText}
+						label="Articles"
+						value={data.articles.length}
+						to="/dashboard/articles"
+					/>
+				</div>
+			</section>
+
+			<div className="grid gap-0 lg:grid-cols-[minmax(0,1.5fr)_minmax(18rem,0.7fr)]">
+				<section className="border-b border-border py-8 lg:border-b-0 lg:border-r lg:pr-10">
+					<div className="flex items-start justify-between gap-6">
 						<div>
-							<h2 className="text-base font-semibold">Your public page</h2>
-							<p className="mt-1 text-sm text-muted-foreground">
+							<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+								02 / Public page
+							</p>
+
+							<h2 className="mt-4 font-display text-3xl tracking-[-0.03em]">
+								Your public page
+							</h2>
+
+							<p className="mt-2 text-sm text-muted-foreground">
 								Shared at{" "}
-								<span className="font-mono text-xs text-foreground">
+								<span className="font-mono text-[11px] text-foreground">
 									devlinks.com/{user.username}
 								</span>
 							</p>
 						</div>
+
 						<Link
 							to="/$username"
 							params={{ username: user.username ?? "" }}
-							className="inline-flex h-8 items-center gap-1.5 rounded-md border border-border bg-surface px-3 text-xs font-medium hover:bg-surface-elevated"
+							className="group inline-flex shrink-0 items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-brand"
 						>
-							Open <ArrowUpRight className="h-3.5 w-3.5" />
+							Open
+							<ArrowUpRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
 						</Link>
 					</div>
 
-					<div className="mt-5 rounded-lg border border-hairline bg-background p-6">
-						<div className="flex items-center gap-4">
-							<div
-								className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-semibold text-background"
-								style={{
-									background: `oklch(0.7 0.18 ${hueFor(user.id)})`,
-								}}
-							>
+					<div className="mt-8 border-t border-border pt-6">
+						<div className="flex items-start gap-4">
+							<div className="flex h-14 w-14 shrink-0 items-center justify-center border border-border bg-surface font-display text-xl">
 								{user.name.slice(0, 1).toUpperCase()}
 							</div>
+
 							<div className="min-w-0">
-								<p className="truncate text-base font-semibold">{user.name}</p>
-								<p className="truncate text-sm text-muted-foreground">
+								<p className="font-display text-2xl tracking-tight">
+									{user.name}
+								</p>
+
+								<p className="mt-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
 									@{user.username}
 								</p>
 							</div>
 						</div>
-						<p className="mt-4 text-sm text-muted-foreground">
+
+						<p className="mt-6 max-w-2xl text-sm leading-relaxed text-muted-foreground">
 							{core.data?.bio ||
 								"Add a short bio in your profile to help visitors know what you build."}
 						</p>
 					</div>
-				</div>
+				</section>
 
-				<div className="rounded-xl border border-hairline bg-surface/40 p-6">
-					<h2 className="text-base font-semibold">Setup checklist</h2>
-					<ul className="mt-4 space-y-3 text-sm">
+				<section className="py-8 lg:pl-10">
+					<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+						03 / Setup
+					</p>
+
+					<h2 className="mt-4 font-display text-3xl tracking-[-0.03em]">
+						Setup checklist
+					</h2>
+
+					<ul className="mt-6 border-t border-border">
 						{[
 							["Create your account", true],
 							["Add a bio and avatar", false],
 							["Connect GitHub", false],
 							["Add your first link", false],
 							["Share your page", false],
-						].map(([label, done]) => (
-							<li key={label as string} className="flex items-center gap-2.5">
+						].map(([label, done], index) => (
+							<li
+								key={label as string}
+								className="flex items-center gap-3 border-b border-border py-4"
+							>
 								<span
-									className={
-										"inline-flex h-4 w-4 items-center justify-center rounded-full border " +
-										(done
-											? "border-foreground bg-foreground text-background"
-											: "border-hairline text-transparent")
-									}
+									className={`font-mono text-[9px] ${
+										done ? "text-brand" : "text-muted-foreground"
+									}`}
 								>
-									✓
+									{String(index + 1).padStart(2, "0")}
 								</span>
+
 								<span
-									className={done ? "text-muted-foreground line-through" : ""}
+									className={`h-1.5 w-1.5 rounded-full ${
+										done ? "bg-brand" : "border border-border"
+									}`}
+								/>
+
+								<span
+									className={`text-sm ${
+										done
+											? "text-muted-foreground line-through"
+											: "text-foreground"
+									}`}
 								>
 									{label}
 								</span>
 							</li>
 						))}
 					</ul>
-				</div>
+				</section>
 			</div>
-		</>
+		</div>
 	);
-}
-
-function hueFor(id: string): number {
-	let h = 0;
-	for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-	return h % 360;
 }
 
 function MiniStat({
@@ -215,7 +258,10 @@ function MiniStat({
 	value,
 	to,
 }: {
-	icon: React.ComponentType<{ className?: string }>;
+	icon: React.ComponentType<{
+		className?: string;
+		strokeWidth?: number;
+	}>;
 	label: string;
 	value: number;
 	to: string;
@@ -223,13 +269,22 @@ function MiniStat({
 	return (
 		<Link
 			to={to}
-			className="flex items-center justify-between rounded-xl border border-hairline bg-surface/40 p-4 transition-colors hover:bg-surface-elevated"
+			className="group flex items-center justify-between border-b border-border py-5 transition-colors hover:text-brand sm:border-b-0 sm:px-6 first:sm:pl-0 last:sm:pr-0"
 		>
-			<div className="flex items-center gap-2.5 text-sm text-muted-foreground">
-				<Icon className="h-4 w-4" />
-				{label}
+			<div className="flex items-center gap-3 text-sm text-muted-foreground">
+				<Icon className="h-4 w-4" strokeWidth={1.7} />
+				<span>{label}</span>
 			</div>
-			<span className="font-mono text-sm font-medium">{value}</span>
+
+			<div className="flex items-center gap-3">
+				<span className="font-mono text-sm tabular-nums text-foreground">
+					{value}
+				</span>
+
+				<span className="font-mono text-xs text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand">
+					↗
+				</span>
+			</div>
 		</Link>
 	);
 }

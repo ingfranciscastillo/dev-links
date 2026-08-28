@@ -1,13 +1,11 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
-import { Folder, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowUpRight, Folder, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+
 import { ModalShell } from "@/components/dashboard/ModalShell";
-import {
-	EmptyState,
-	SectionHeader,
-} from "@/components/dashboard/SectionHeader";
+import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -62,103 +60,76 @@ function ProjectsPage() {
 
 	return (
 		<>
-			<SectionHeader
-				eyebrow="Content"
-				title="Projects"
-				description="Highlight what you've built. Add repo, demo, and tech stack."
-				action={
-					<Button onClick={() => setEditing("new")}>
-						<Plus className="h-4 w-4" /> New project
+			<header className="border-b border-border pb-8">
+				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+					04 / Projects
+				</p>
+
+				<div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+					<div>
+						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+							Projects.
+						</h1>
+
+						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+							Highlight what you&apos;ve built. Add repositories, demos, and
+							your stack.
+						</p>
+					</div>
+
+					<Button
+						onClick={() => setEditing("new")}
+						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					>
+						<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+						New project
 					</Button>
-				}
-			/>
+				</div>
+			</header>
 
 			{data.projects.length === 0 ? (
-				<EmptyState
-					icon={Folder}
-					title="No projects yet"
-					description="Add the ones you're proud of — side-projects count too."
-					action={
-						<Button onClick={() => setEditing("new")}>
-							<Plus className="h-4 w-4" /> Add your first project
-						</Button>
-					}
-				/>
+				<div className="mt-8">
+					<EmptyState
+						icon={Folder}
+						title="No projects yet"
+						description="Add the ones you&apos;re proud of — side projects count too."
+						action={
+							<Button
+								onClick={() => setEditing("new")}
+								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+							>
+								<Plus className="h-3.5 w-3.5" strokeWidth={1.7} />
+								Add your first project
+							</Button>
+						}
+					/>
+				</div>
 			) : (
-				<div className="grid gap-3 sm:grid-cols-2">
-					{data.projects.map((p) => (
-						<article
-							key={p.id}
-							className="rounded-xl border border-hairline bg-surface/40 p-4"
-						>
-							<div className="flex items-start justify-between gap-2">
-								<div className="min-w-0">
-									<p className="truncate font-medium">{p.name}</p>
-									<p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-										{p.description}
-									</p>
-								</div>
-								<StatusBadge status={p.status} />
-							</div>
-							<div className="mt-3 flex flex-wrap gap-1.5">
-								{p.tech.map((t) => (
-									<span
-										key={t}
-										className="rounded-md bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
-									>
-										{t}
-									</span>
-								))}
-							</div>
-							<div className="mt-4 flex items-center justify-between">
-								<div className="flex gap-3 text-xs text-muted-foreground">
-									{p.github ? (
-										<a
-											href={p.github}
-											target="_blank"
-											rel="noreferrer"
-											className="hover:text-foreground"
-										>
-											GitHub →
-										</a>
-									) : null}
-									{p.demo ? (
-										<a
-											href={p.demo}
-											target="_blank"
-											rel="noreferrer"
-											className="hover:text-foreground"
-										>
-											Demo →
-										</a>
-									) : null}
-								</div>
-								<div className="flex gap-1">
-									<button
-										type="button"
-										onClick={() => setEditing(p)}
-										className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
-										title="Edit"
-									>
-										<Pencil className="h-4 w-4" />
-									</button>
-									<button
-										type="button"
-										onClick={() => {
-											removeProject.mutate(p.id, {
-												onSuccess: () => toast.success("Project removed"),
-												onError: () => toast.error("Couldn't remove project"),
-											});
-										}}
-										className="rounded-md p-1.5 text-muted-foreground hover:bg-surface-elevated hover:text-destructive"
-										title="Delete"
-									>
-										<Trash2 className="h-4 w-4" />
-									</button>
-								</div>
-							</div>
-						</article>
-					))}
+				<div className="mt-8">
+					<div className="grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[4rem_minmax(0,1.4fr)_12rem_8rem_auto]">
+						<span>#</span>
+						<span>Project</span>
+						<span className="hidden sm:block">Stack</span>
+						<span className="hidden sm:block">Status</span>
+						<span className="text-right">Actions</span>
+					</div>
+
+					<div>
+						{data.projects.map((project, index) => (
+							<ProjectRow
+								key={project.id}
+								project={project}
+								index={index}
+								onEdit={() => setEditing(project)}
+								onRemove={() => {
+									removeProject.mutate(project.id, {
+										onSuccess: () => toast.success("Project removed"),
+										onError: () => toast.error("Couldn't remove project"),
+									});
+								}}
+							/>
+						))}
+					</div>
 				</div>
 			)}
 
@@ -172,7 +143,7 @@ function ProjectsPage() {
 							description: values.description,
 							tech: values.tech
 								.split(",")
-								.map((s) => s.trim())
+								.map((value) => value.trim())
 								.filter(Boolean),
 							github: values.github || "",
 							demo: values.demo || "",
@@ -189,7 +160,10 @@ function ProjectsPage() {
 							});
 						} else {
 							updateProject.mutate(
-								{ id: editing.id, ...projectValues },
+								{
+									id: editing.id,
+									...projectValues,
+								},
 								{
 									onSuccess: () => {
 										toast.success("Project updated");
@@ -207,17 +181,144 @@ function ProjectsPage() {
 	);
 }
 
-function StatusBadge({ status }: { status: ProjectItem["status"] }) {
-	const map = {
-		shipped: "border-emerald-500/30 bg-emerald-500/10 text-emerald-500",
-		wip: "border-amber-500/30 bg-amber-500/10 text-amber-500",
-		archived: "border-muted-foreground/20 bg-muted text-muted-foreground",
-	} as const;
+function ProjectRow({
+	project,
+	index,
+	onEdit,
+	onRemove,
+}: {
+	project: ProjectItem;
+	index: number;
+	onEdit: () => void;
+	onRemove: () => void;
+}) {
+	return (
+		<article className="group grid gap-5 border-b border-border py-6 sm:grid-cols-[4rem_minmax(0,1.4fr)_12rem_8rem_auto] sm:items-center sm:px-3 sm:py-7">
+			<span className="font-mono text-[10px] tabular-nums text-muted-foreground">
+				{String(index + 1).padStart(2, "0")}
+			</span>
+
+			<div className="min-w-0">
+				<div className="flex items-start gap-3">
+					<h2 className="truncate font-display text-2xl tracking-tight sm:text-3xl">
+						{project.name}
+					</h2>
+
+					<div className="shrink-0 sm:hidden">
+						<StatusLabel status={project.status} />
+					</div>
+				</div>
+
+				<p className="mt-2 line-clamp-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+					{project.description}
+				</p>
+
+				<div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 sm:hidden">
+					{project.tech.map((technology) => (
+						<span
+							key={technology}
+							className="font-mono text-[9px] uppercase tracking-[0.04em] text-muted-foreground"
+						>
+							{technology}
+						</span>
+					))}
+				</div>
+			</div>
+
+			<div className="hidden flex-wrap gap-x-3 gap-y-1 sm:flex">
+				{project.tech.map((technology) => (
+					<span
+						key={technology}
+						className="font-mono text-[9px] uppercase tracking-[0.04em] text-muted-foreground"
+					>
+						{technology}
+					</span>
+				))}
+			</div>
+
+			<div className="hidden sm:block">
+				<StatusLabel status={project.status} />
+			</div>
+
+			<div className="flex items-center justify-end gap-1">
+				{project.github ? (
+					<a
+						href={project.github}
+						target="_blank"
+						rel="noreferrer"
+						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+						title="GitHub"
+						aria-label={`Open ${project.name} on GitHub`}
+					>
+						<ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
+					</a>
+				) : null}
+
+				{project.demo ? (
+					<a
+						href={project.demo}
+						target="_blank"
+						rel="noreferrer"
+						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-brand"
+						title="Demo"
+						aria-label={`Open ${project.name} demo`}
+					>
+						<ArrowUpRight className="h-4 w-4" strokeWidth={1.5} />
+					</a>
+				) : null}
+
+				<button
+					type="button"
+					onClick={onEdit}
+					className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+					title="Edit"
+					aria-label={`Edit ${project.name}`}
+				>
+					<Pencil className="h-4 w-4" strokeWidth={1.5} />
+				</button>
+
+				<button
+					type="button"
+					onClick={onRemove}
+					className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
+					title="Delete"
+					aria-label={`Delete ${project.name}`}
+				>
+					<Trash2 className="h-4 w-4" strokeWidth={1.5} />
+				</button>
+			</div>
+		</article>
+	);
+}
+
+function StatusLabel({ status }: { status: ProjectItem["status"] }) {
+	const label = {
+		shipped: "Shipped",
+		wip: "In progress",
+		archived: "Archived",
+	}[status];
+
+	const color = {
+		shipped: "text-brand",
+		wip: "text-foreground",
+		archived: "text-muted-foreground",
+	}[status];
+
 	return (
 		<span
-			className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${map[status]}`}
+			className={`inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.08em] ${color}`}
 		>
-			{status}
+			<span
+				className={`h-1.5 w-1.5 rounded-full ${
+					status === "shipped"
+						? "bg-brand"
+						: status === "wip"
+							? "border border-foreground"
+							: "border border-muted-foreground"
+				}`}
+			/>
+
+			{label}
 		</span>
 	);
 }
@@ -230,7 +331,7 @@ function ProjectDialog({
 }: {
 	initial: ProjectItem | null;
 	onClose: () => void;
-	onSubmit: (v: ProjectFormValues) => void;
+	onSubmit: (value: ProjectFormValues) => void;
 	pending?: boolean;
 }) {
 	const form = useForm({
@@ -240,7 +341,7 @@ function ProjectDialog({
 			tech: initial?.tech.join(", ") ?? "",
 			github: initial?.github ?? "",
 			demo: initial?.demo ?? "",
-			status: initial?.status ?? ("shipped" as const),
+			status: initial?.status ?? "shipped",
 		},
 		onSubmit: async ({ value }) => {
 			onSubmit(value);
@@ -258,10 +359,10 @@ function ProjectDialog({
 					e.stopPropagation();
 					form.handleSubmit();
 				}}
-				className="flex flex-col gap-4"
+				className="flex flex-col"
 				noValidate
 			>
-				<FieldGroup>
+				<FieldGroup className="gap-5">
 					<form.Field
 						name="name"
 						validators={{
@@ -272,9 +373,16 @@ function ProjectDialog({
 							const invalid =
 								field.state.meta.isTouched &&
 								field.state.meta.errors.length > 0;
+
 							return (
 								<Field data-invalid={invalid}>
-									<FieldLabel htmlFor={field.name}>Name</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Name
+									</FieldLabel>
+
 									<Input
 										id={field.name}
 										name={field.name}
@@ -282,7 +390,9 @@ function ProjectDialog({
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={invalid || undefined}
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
+
 									{invalid ? (
 										<FieldError>
 											{field.state.meta.errors.join(", ")}
@@ -303,9 +413,16 @@ function ProjectDialog({
 							const invalid =
 								field.state.meta.isTouched &&
 								field.state.meta.errors.length > 0;
+
 							return (
 								<Field data-invalid={invalid}>
-									<FieldLabel htmlFor={field.name}>Description</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Description
+									</FieldLabel>
+
 									<Textarea
 										id={field.name}
 										name={field.name}
@@ -314,7 +431,9 @@ function ProjectDialog({
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={invalid || undefined}
+										className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
+
 									{invalid ? (
 										<FieldError>
 											{field.state.meta.errors.join(", ")}
@@ -328,9 +447,16 @@ function ProjectDialog({
 					<form.Field name="tech">
 						{(field) => (
 							<Field>
-								<FieldLabel htmlFor={field.name}>
-									Tech (comma separated)
+								<FieldLabel
+									htmlFor={field.name}
+									className="font-mono text-[10px] uppercase tracking-[0.08em]"
+								>
+									Tech
+									<span className="ml-1 text-muted-foreground">
+										(comma separated)
+									</span>
 								</FieldLabel>
+
 								<Input
 									id={field.name}
 									name={field.name}
@@ -338,12 +464,13 @@ function ProjectDialog({
 									onBlur={field.handleBlur}
 									onChange={(e) => field.handleChange(e.target.value)}
 									placeholder="TypeScript, React, Postgres"
+									className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 								/>
 							</Field>
 						)}
 					</form.Field>
 
-					<div className="grid gap-4 sm:grid-cols-2">
+					<div className="grid gap-5 sm:grid-cols-2">
 						<form.Field
 							name="github"
 							validators={{
@@ -354,9 +481,16 @@ function ProjectDialog({
 								const invalid =
 									field.state.meta.isTouched &&
 									field.state.meta.errors.length > 0;
+
 								return (
 									<Field data-invalid={invalid}>
-										<FieldLabel htmlFor={field.name}>GitHub URL</FieldLabel>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											GitHub URL
+										</FieldLabel>
+
 										<Input
 											id={field.name}
 											name={field.name}
@@ -365,7 +499,9 @@ function ProjectDialog({
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
 											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
 										/>
+
 										{invalid ? (
 											<FieldError>
 												{field.state.meta.errors.join(", ")}
@@ -386,9 +522,16 @@ function ProjectDialog({
 								const invalid =
 									field.state.meta.isTouched &&
 									field.state.meta.errors.length > 0;
+
 								return (
 									<Field data-invalid={invalid}>
-										<FieldLabel htmlFor={field.name}>Demo URL</FieldLabel>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Demo URL
+										</FieldLabel>
+
 										<Input
 											id={field.name}
 											name={field.name}
@@ -397,7 +540,9 @@ function ProjectDialog({
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
 											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
 										/>
+
 										{invalid ? (
 											<FieldError>
 												{field.state.meta.errors.join(", ")}
@@ -412,20 +557,30 @@ function ProjectDialog({
 					<form.Field name="status">
 						{(field) => (
 							<Field>
-								<FieldLabel htmlFor="status-select">Status</FieldLabel>
+								<FieldLabel
+									htmlFor="status-select"
+									className="font-mono text-[10px] uppercase tracking-[0.08em]"
+								>
+									Status
+								</FieldLabel>
+
 								<Select
 									value={field.state.value}
-									onValueChange={(v) =>
-										field.handleChange(v as ProjectFormValues["status"])
+									onValueChange={(value) =>
+										field.handleChange(value as ProjectFormValues["status"])
 									}
 								>
-									<SelectTrigger id="status-select">
+									<SelectTrigger
+										id="status-select"
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
+									>
 										<SelectValue />
 									</SelectTrigger>
+
 									<SelectContent>
-										{STATUS_OPTIONS.map((opt) => (
-											<SelectItem key={opt.value} value={opt.value}>
-												{opt.label}
+										{STATUS_OPTIONS.map((option) => (
+											<SelectItem key={option.value} value={option.value}>
+												{option.label}
 											</SelectItem>
 										))}
 									</SelectContent>
@@ -435,12 +590,25 @@ function ProjectDialog({
 					</form.Field>
 				</FieldGroup>
 
-				<div className="flex justify-end gap-2 pt-2">
-					<Button type="button" variant="ghost" onClick={onClose}>
+				<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+					<button
+						type="button"
+						onClick={onClose}
+						className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+					>
 						Cancel
-					</Button>
-					<Button type="submit" disabled={pending || !form.state.canSubmit}>
-						{initial ? "Save" : "Create"}
+					</button>
+
+					<Button
+						type="submit"
+						disabled={pending || !form.state.canSubmit}
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					>
+						{pending
+							? "Saving..."
+							: initial
+								? "Save project"
+								: "Create project"}
 					</Button>
 				</div>
 			</form>

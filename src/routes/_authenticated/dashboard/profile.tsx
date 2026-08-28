@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { Camera } from "lucide-react";
 import toast from "react-hot-toast";
+
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -16,7 +17,6 @@ import {
 } from "@/lib/api/profile-data.functions";
 import { useProfileCore, useUpdateProfile } from "@/lib/queries/profile-data";
 import { zodField } from "@/lib/schemas/field";
-import { hueFromString } from "@/lib/user";
 
 export const Route = createFileRoute("/_authenticated/dashboard/profile")({
 	head: () => ({ meta: [{ title: "Profile — DevLinks" }] }),
@@ -27,46 +27,46 @@ function ProfilePage() {
 	const core = useProfileCore();
 
 	return (
-		<>
-			<div className="mb-6">
-				<p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-					Settings
+		<div className="mx-auto w-full max-w-4xl">
+			<header className="border-b border-border pb-8">
+				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+					02 / Profile
 				</p>
-				<h1 className="mt-1 text-3xl font-semibold tracking-tight">Profile</h1>
-				<p className="mt-1 text-sm text-muted-foreground">
-					How visitors will see you on your public page.
-				</p>
-			</div>
 
-			{/*
-				Gate según la guía oficial de TanStack Form (Async Initial Values):
-				el form se monta una sola vez con datos reales — sin efectos ni
-				form.reset(), que en el adaptador React v1 puede ser revertido por
-				el update() posterior con las defaultValues originales.
-			*/}
+				<h1 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+					Your profile.
+				</h1>
+
+				<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
+					The information people see when they visit your public DevLinks page.
+				</p>
+			</header>
+
 			{core.data ? (
 				<ProfileForm core={core.data} />
 			) : (
-				<div className="max-w-2xl grid gap-4" aria-busy="true">
+				<div className="grid max-w-3xl gap-8 pt-8" aria-busy="true">
 					<FormSkeleton />
 					<FormSkeleton />
 				</div>
 			)}
-		</>
+		</div>
 	);
 }
 
 function FormSkeleton() {
 	return (
-		<div className="h-44 animate-pulse rounded-xl border border-hairline bg-surface/40" />
+		<div className="animate-pulse border-t border-border pt-6">
+			<div className="h-5 w-32 bg-surface" />
+			<div className="mt-4 h-11 w-full bg-surface" />
+			<div className="mt-5 h-11 w-full bg-surface" />
+		</div>
 	);
 }
 
 function ProfileForm({ core }: { core: ProfileCore }) {
 	const { user } = useRouteContext({ from: "/_authenticated/dashboard" });
 	const updateProfile = useUpdateProfile();
-
-	const avatarHue = hueFromString(user.id);
 
 	const form = useForm({
 		defaultValues: {
@@ -93,36 +93,57 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 				e.stopPropagation();
 				form.handleSubmit();
 			}}
-			className="max-w-2xl flex flex-col gap-6"
+			className="max-w-3xl pt-8"
 			noValidate
 		>
-			<div className="rounded-xl border border-hairline bg-surface/40 p-6">
-				<div className="flex items-center gap-4">
-					<div
-						className="relative flex h-16 w-16 items-center justify-center rounded-full text-xl font-semibold text-background"
-						style={{ background: `oklch(0.7 0.18 ${avatarHue})` }}
-					>
-						{user.name.slice(0, 1).toUpperCase()}
-						<button
-							type="button"
-							title="Coming soon"
-							className="absolute -bottom-1 -right-1 inline-flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-muted-foreground"
-						>
-							<Camera className="h-3 w-3" />
-						</button>
+			<section className="border-b border-border pb-8">
+				<div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+					<div className="flex items-center gap-5">
+						<div className="relative flex h-20 w-20 shrink-0 items-center justify-center border border-border bg-surface font-display text-2xl">
+							{user.name.slice(0, 1).toUpperCase()}
+
+							<button
+								type="button"
+								title="Coming soon"
+								aria-label="Change avatar"
+								className="absolute -bottom-2 -right-2 inline-flex h-7 w-7 items-center justify-center border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
+							>
+								<Camera className="h-3.5 w-3.5" strokeWidth={1.5} />
+							</button>
+						</div>
+
+						<div>
+							<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+								Avatar
+							</p>
+
+							<p className="mt-2 text-sm">Your profile image</p>
+
+							<p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+								PNG or JPG, max 2MB. Upload coming soon.
+							</p>
+						</div>
 					</div>
-					<div>
-						<p className="text-sm font-medium">Avatar</p>
-						<p className="text-xs text-muted-foreground">
-							PNG or JPG, max 2MB. Upload coming soon.
-						</p>
+
+					<div className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+						Public profile
 					</div>
 				</div>
-			</div>
+			</section>
 
-			<div className="rounded-xl border border-hairline bg-surface/40 p-6">
+			<section className="border-b border-border py-8">
+				<div className="mb-6">
+					<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+						Identity
+					</p>
+
+					<p className="mt-2 text-sm text-muted-foreground">
+						How you are identified across DevLinks.
+					</p>
+				</div>
+
 				<FieldGroup>
-					<div className="grid gap-5 sm:grid-cols-2">
+					<div className="grid gap-6 sm:grid-cols-2">
 						<form.Field
 							name="name"
 							validators={{
@@ -133,9 +154,16 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								const invalid =
 									field.state.meta.isTouched &&
 									field.state.meta.errors.length > 0;
+
 								return (
 									<Field data-invalid={invalid}>
-										<FieldLabel htmlFor={field.name}>Name</FieldLabel>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Name
+										</FieldLabel>
+
 										<Input
 											id={field.name}
 											name={field.name}
@@ -143,7 +171,9 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
 											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 										/>
+
 										{invalid ? (
 											<FieldError>
 												{field.state.meta.errors.join(", ")}
@@ -164,19 +194,34 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								const invalid =
 									field.state.meta.isTouched &&
 									field.state.meta.errors.length > 0;
+
 								return (
 									<Field data-invalid={invalid}>
-										<FieldLabel htmlFor={field.name}>Username</FieldLabel>
-										<Input
-											id={field.name}
-											name={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) =>
-												field.handleChange(e.target.value.toLowerCase())
-											}
-											aria-invalid={invalid || undefined}
-										/>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Username
+										</FieldLabel>
+
+										<div className="mt-2 flex h-11 items-center border-b border-border">
+											<span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+												devlinks.com/
+											</span>
+
+											<Input
+												id={field.name}
+												name={field.name}
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) =>
+													field.handleChange(e.target.value.toLowerCase())
+												}
+												aria-invalid={invalid || undefined}
+												className="h-full rounded-none border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
+											/>
+										</div>
+
 										{invalid ? (
 											<FieldError>
 												{field.state.meta.errors.join(", ")}
@@ -187,29 +232,53 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 							}}
 						</form.Field>
 					</div>
+				</FieldGroup>
+			</section>
 
+			<section className="border-b border-border py-8">
+				<div className="mb-6">
+					<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+						About
+					</p>
+
+					<p className="mt-2 text-sm text-muted-foreground">
+						Give visitors a quick idea of who you are and what you build.
+					</p>
+				</div>
+
+				<FieldGroup>
 					<form.Field
 						name="bio"
-						validators={{ onChange: zodField(profileInput.shape.bio) }}
+						validators={{
+							onChange: zodField(profileInput.shape.bio),
+						}}
 					>
 						{(field) => {
 							const invalid =
 								field.state.meta.isTouched &&
 								field.state.meta.errors.length > 0;
+
 							return (
 								<Field data-invalid={invalid}>
-									<FieldLabel htmlFor={field.name}>Bio</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Bio
+									</FieldLabel>
+
 									<textarea
 										id={field.name}
 										name={field.name}
-										rows={3}
+										rows={4}
 										value={field.state.value ?? ""}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
-										placeholder="Full-stack engineer building developer tools…"
+										placeholder="Full-stack engineer building developer tools..."
 										aria-invalid={invalid || undefined}
-										className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+										className="mt-2 flex w-full resize-y border-b border-border bg-transparent px-0 py-3 text-sm leading-relaxed placeholder:text-muted-foreground focus:border-brand focus:outline-none"
 									/>
+
 									{invalid ? (
 										<FieldError>
 											{field.state.meta.errors.join(", ")}
@@ -219,12 +288,32 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 							);
 						}}
 					</form.Field>
+				</FieldGroup>
+			</section>
 
-					<div className="grid gap-5 sm:grid-cols-2">
+			<section className="border-b border-border py-8">
+				<div className="mb-6">
+					<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+						Details
+					</p>
+
+					<p className="mt-2 text-sm text-muted-foreground">
+						Optional information displayed on your public profile.
+					</p>
+				</div>
+
+				<FieldGroup>
+					<div className="grid gap-6 sm:grid-cols-2">
 						<form.Field name="location">
 							{(field) => (
 								<Field>
-									<FieldLabel htmlFor={field.name}>Location</FieldLabel>
+									<FieldLabel
+										htmlFor={field.name}
+										className="font-mono text-[10px] uppercase tracking-[0.08em]"
+									>
+										Location
+									</FieldLabel>
+
 									<Input
 										id={field.name}
 										name={field.name}
@@ -232,6 +321,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										placeholder="Madrid, Spain"
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 								</Field>
 							)}
@@ -247,9 +337,16 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								const invalid =
 									field.state.meta.isTouched &&
 									field.state.meta.errors.length > 0;
+
 								return (
 									<Field data-invalid={invalid}>
-										<FieldLabel htmlFor={field.name}>Website</FieldLabel>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Website
+										</FieldLabel>
+
 										<Input
 											id={field.name}
 											name={field.name}
@@ -259,7 +356,9 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 											onChange={(e) => field.handleChange(e.target.value)}
 											placeholder="https://your.dev"
 											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 										/>
+
 										{invalid ? (
 											<FieldError>
 												{field.state.meta.errors.join(", ")}
@@ -271,25 +370,32 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 						</form.Field>
 					</div>
 				</FieldGroup>
-			</div>
+			</section>
 
-			<form.Subscribe
-				selector={(state) => ({
-					canSubmit: state.canSubmit,
-					isSubmitting: state.isSubmitting,
-				})}
-			>
-				{({ canSubmit, isSubmitting }) => (
-					<Button
-						type="submit"
-						disabled={!canSubmit || updateProfile.isPending || isSubmitting}
-					>
-						{updateProfile.isPending || isSubmitting
-							? "Saving…"
-							: "Save changes"}
-					</Button>
-				)}
-			</form.Subscribe>
+			<div className="flex flex-col gap-3 py-6 sm:flex-row sm:items-center sm:justify-between">
+				<p className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+					Changes apply to your public page
+				</p>
+
+				<form.Subscribe
+					selector={(state) => ({
+						canSubmit: state.canSubmit,
+						isSubmitting: state.isSubmitting,
+					})}
+				>
+					{({ canSubmit, isSubmitting }) => (
+						<Button
+							type="submit"
+							disabled={!canSubmit || updateProfile.isPending || isSubmitting}
+							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						>
+							{updateProfile.isPending || isSubmitting
+								? "Saving…"
+								: "Save changes"}
+						</Button>
+					)}
+				</form.Subscribe>
+			</div>
 		</form>
 	);
 }

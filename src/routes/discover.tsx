@@ -108,7 +108,7 @@ function Discover() {
 
 				<div className="mt-14 border-t border-border pt-6 sm:mt-20">
 					<div className="flex items-center gap-4 border-b border-foreground pb-3">
-						<span className="font-mono text-[10px] uppercase tracking-[0.1em] text-brand">
+						<span className="font-mono text-[10px] uppercase tracking-widest text-brand">
 							Search
 						</span>
 
@@ -132,7 +132,7 @@ function Discover() {
 
 					<div className="mt-5 grid gap-5 border-b border-border pb-6 sm:grid-cols-[auto_1fr_auto] sm:items-start">
 						<div>
-							<p className="font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
+							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
 								Language
 							</p>
 
@@ -150,7 +150,7 @@ function Discover() {
 						</div>
 
 						<div>
-							<p className="font-mono text-[9px] uppercase tracking-[0.1em] text-muted-foreground">
+							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
 								Seniority
 							</p>
 
@@ -253,7 +253,7 @@ function FilterButton({
 		<button
 			type="button"
 			onClick={onClick}
-			className={`font-mono text-[10px] uppercase tracking-[0.05em] transition-colors ${
+			className={`font-mono text-[10px] uppercase tracking-wider transition-colors ${
 				active ? "text-brand" : "text-muted-foreground hover:text-foreground"
 			}`}
 		>
@@ -282,7 +282,7 @@ function ProfileRow({
 
 			<div className="min-w-0">
 				<div className="flex items-center gap-3">
-					<h2 className="truncate font-display text-2xl tracking-[-0.025em] sm:text-3xl">
+					<h2 className="truncate font-display text-2xl tracking-tight sm:text-3xl">
 						{p.name || p.username}
 					</h2>
 

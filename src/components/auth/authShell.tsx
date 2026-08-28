@@ -1,4 +1,3 @@
-import { LinkRoundIcon } from "@solar-icons/react/linear/link-round";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { GithubIcon, GoogleIcon } from "@/components/brand-icons";

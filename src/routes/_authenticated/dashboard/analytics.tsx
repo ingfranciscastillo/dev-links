@@ -577,7 +577,7 @@ function StatBlock({
 	return (
 		<div className="border-b border-border py-6 sm:px-6 sm:py-7 sm:first:pl-0 sm:last:pr-0 sm:border-b-0 sm:first:border-l-0 sm:not-first:border-l">
 			<div className="flex items-center gap-2 text-muted-foreground">
-				<Icon className="h-3.5 w-3.5" strokeWidth={1.5} />
+				<Icon className="h-3.5 w-3.5" />
 
 				<p className="font-mono text-[9px] uppercase tracking-widest">
 					{label}

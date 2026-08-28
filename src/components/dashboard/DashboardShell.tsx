@@ -56,7 +56,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
 	return (
 		<div className="min-h-dvh bg-background text-foreground">
-			<div className="mx-auto flex min-h-dvh max-w-[1440px]">
+			<div className="mx-auto flex min-h-dvh max-w-360">
 				<aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-background md:flex">
 					<div className="flex h-16 items-center border-b border-border px-6">
 						<Link to="/" className="flex items-center gap-2.5">

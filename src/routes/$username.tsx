@@ -140,12 +140,14 @@ function ProfilePage() {
 	const styleTag = theme ? themeToStyleTag(theme, ".tt-scope") : "";
 
 	return (
-		<div className="tt-scope min-h-dvh overflow-x-hidden bg-background text-foreground">
+		<div className="tt-scope min-h-dvh overflow-x-clip bg-background text-foreground">
 			{theme && (
-				/* biome-ignore lint/security/noDangerouslySetInnerHtml: theme styles are scoped to .tt-scope and generated server-side */
+				// biome-ignore lint/security/noDangerouslySetInnerHtml: theme styles are scoped to .tt-scope and generated server-side
 				<style dangerouslySetInnerHTML={{ __html: styleTag }} />
 			)}
+
 			<ProfileHeader username={live.username} themed={themed} />
+
 			<main
 				className={cx(
 					"mx-auto grid gap-8 px-4 pb-24 sm:px-6",
@@ -164,17 +166,22 @@ function ProfilePage() {
 					themed={themed}
 					stacked={isNarrow}
 				/>
-				<div className="space-y-10 min-w-0">
+
+				<div className="min-w-0 space-y-10">
 					<LinksSection
 						links={live.data.links}
 						themed={themed}
 						username={username}
 					/>
+
 					{live.data.snippets.length > 0 && (
 						<SnippetsSection snippets={live.data.snippets} themed={themed} />
 					)}
+
 					<ProjectsSection projects={live.data.projects} themed={themed} />
+
 					<ArticlesSection articles={live.data.articles} themed={themed} />
+
 					{live.data.talks.length > 0 && (
 						<TalksBlock talks={live.data.talks} themed={themed} />
 					)}
@@ -182,12 +189,14 @@ function ProfilePage() {
 					{live.data.supportLinks.length > 0 && (
 						<SupportBlock links={live.data.supportLinks} themed={themed} />
 					)}
+
 					{live.integrations.length > 0 && (
 						<IntegrationBlocks
 							integrations={live.integrations}
 							themed={themed}
 						/>
 					)}
+
 					<Watermark themed={themed} />
 				</div>
 			</main>
@@ -297,9 +306,12 @@ function ProfileHeader({
 	return (
 		<header
 			className={cx(
-				"sticky top-0 z-40 glass border-b",
+				"sticky top-0 z-40 border-b",
 				themed ? "tt-border-c" : "border-hairline",
 			)}
+			style={{
+				backgroundColor: themed ? "var(--tt-bg)" : "var(--color-background)",
+			}}
 		>
 			<div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
 				<Link
@@ -319,6 +331,7 @@ function ProfileHeader({
 						{username}
 					</span>
 				</Link>
+
 				<div className="flex items-center gap-2">
 					<button
 						type="button"
@@ -332,8 +345,7 @@ function ProfileHeader({
 					>
 						<Share2 className="h-4 w-4" />
 					</button>
-					{/* Si el creador definió un tema custom, el toggle de claro/oscuro
-					    no aplica: .tt-scope fija sus propios colores sin importar .dark. */}
+
 					{!themed && <ThemeToggle />}
 				</div>
 			</div>
@@ -364,7 +376,11 @@ function ProfileSidebar({
 }) {
 	return (
 		<aside
-			className={stacked ? undefined : "lg:sticky lg:top-20 lg:self-start"}
+			className={
+				stacked
+					? "min-w-0"
+					: "min-w-0 lg:sticky lg:top-20 lg:h-fit lg:self-start"
+			}
 		>
 			<div
 				className={cx(
@@ -382,7 +398,9 @@ function ProfileSidebar({
 						boxShadow: themed ? "0 0 0 4px var(--tt-bg)" : undefined,
 					}}
 				/>
+
 				<h1 className="mt-4 text-2xl font-semibold tracking-tight">{name}</h1>
+
 				<p
 					className={cx(
 						"text-sm",
@@ -402,7 +420,7 @@ function ProfileSidebar({
 				{bio && (
 					<p
 						className={cx(
-							"mt-4 max-w-sm text-sm",
+							"mt-4 max-w-sm text-sm leading-relaxed",
 							themed ? "tt-muted" : "text-muted-foreground",
 						)}
 					>
@@ -419,12 +437,15 @@ function ProfileSidebar({
 				>
 					{location && (
 						<li className="flex items-center gap-2">
-							<MapPin className="h-3.5 w-3.5" /> {location}
+							<MapPin className="h-3.5 w-3.5" />
+							{location}
 						</li>
 					)}
+
 					{website && (
 						<li className="flex items-center gap-2">
 							<Globe className="h-3.5 w-3.5" />
+
 							<a
 								href={website}
 								className={

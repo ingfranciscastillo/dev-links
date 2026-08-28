@@ -10,11 +10,19 @@ import {
 	Share2,
 } from "lucide-react";
 import { useEffect } from "react";
+import { BlueskyBlock } from "@/components/profile/BlueskyBlock";
 import { DevtoBlock } from "@/components/profile/DevtoBlock";
+import { DockerhubBlock } from "@/components/profile/DockerhubBlock";
 import { GithubBlock } from "@/components/profile/GithubBlock";
-import { HashnodeBlock } from "@/components/profile/HashnodeBlock";
+import { LeetcodeBlock } from "@/components/profile/LeetcodeBlock";
+import { MastodonBlock } from "@/components/profile/MastodonBlock";
 import { MediumBlock } from "@/components/profile/MediumBlock";
+import { NpmBlock } from "@/components/profile/NpmBlock";
 import { StackOverflowBlock } from "@/components/profile/StackOverflowBlock";
+import { SupportBlock } from "@/components/profile/SupportBlock";
+import { TalksBlock } from "@/components/profile/TalksBlock";
+import { WakatimeBlock } from "@/components/profile/WakatimeBlock";
+import { YoutubeBlock } from "@/components/profile/YoutubeBlock";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { trackClick, trackView } from "@/lib/analytics-track";
 import {
@@ -24,11 +32,17 @@ import {
 } from "@/lib/api/public-profile.functions";
 import { iconForUrl } from "@/lib/icons";
 import type {
+	BlueskyPayload,
 	DevtoPayload,
+	DockerhubPayload,
 	GithubPayload,
-	HashnodePayload,
+	LeetcodePayload,
+	MastodonPayload,
 	MediumPayload,
+	NpmPayload,
 	StackOverflowPayload,
+	WakatimePayload,
+	YoutubePayload,
 } from "@/lib/integrations/types";
 import type { ProfileData } from "@/lib/schemas";
 import { themeToStyleTag } from "@/lib/theme-config";
@@ -38,6 +52,11 @@ type LoaderData = {
 	live: NonNullable<PublicProfile>;
 	username: string;
 };
+
+// Helper mínimo para clases condicionales sin traer una dependencia nueva.
+function cx(...classes: Array<string | false | null | undefined>) {
+	return classes.filter(Boolean).join(" ");
+}
 
 export const Route = createFileRoute("/$username")({
 	loader: async ({ params }): Promise<LoaderData> => {
@@ -108,6 +127,10 @@ function NotFoundBlock() {
 function ProfilePage() {
 	const { live, username } = Route.useLoaderData();
 	const theme = live.data.theme;
+	const themed = Boolean(theme);
+	// "narrow" deja de ser el mismo grid de 2 columnas aplastado y pasa a ser
+	// un layout real de una sola columna (estilo link-in-bio clásico).
+	const isNarrow = themed && theme?.cardWidth === "narrow";
 	const avatarHue = hueFromString(live.id);
 
 	useEffect(() => {
@@ -122,8 +145,14 @@ function ProfilePage() {
 				/* biome-ignore lint/security/noDangerouslySetInnerHtml: theme styles are scoped to .tt-scope and generated server-side */
 				<style dangerouslySetInnerHTML={{ __html: styleTag }} />
 			)}
-			<ProfileHeader username={live.username} available={live.available} />
-			<main className="mx-auto grid max-w-6xl gap-8 px-4 pb-24 sm:px-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+			<ProfileHeader username={live.username} themed={themed} />
+			<main
+				className={cx(
+					"mx-auto grid gap-8 px-4 pb-24 sm:px-6",
+					themed ? "tt-container" : "max-w-6xl",
+					isNarrow ? "lg:grid-cols-1" : "lg:grid-cols-[320px_minmax(0,1fr)]",
+				)}
+			>
 				<ProfileSidebar
 					name={live.name}
 					username={live.username}
@@ -132,22 +161,34 @@ function ProfilePage() {
 					website={live.website}
 					available={live.available}
 					avatarHue={avatarHue}
+					themed={themed}
+					stacked={isNarrow}
 				/>
 				<div className="space-y-10 min-w-0">
 					<LinksSection
 						links={live.data.links}
-						themed={Boolean(theme)}
+						themed={themed}
 						username={username}
 					/>
 					{live.data.snippets.length > 0 && (
-						<SnippetsSection snippets={live.data.snippets} />
+						<SnippetsSection snippets={live.data.snippets} themed={themed} />
 					)}
-					<ProjectsSection projects={live.data.projects} />
-					<ArticlesSection articles={live.data.articles} />
+					<ProjectsSection projects={live.data.projects} themed={themed} />
+					<ArticlesSection articles={live.data.articles} themed={themed} />
+					{live.data.talks.length > 0 && (
+						<TalksBlock talks={live.data.talks} themed={themed} />
+					)}
+
+					{live.data.supportLinks.length > 0 && (
+						<SupportBlock links={live.data.supportLinks} themed={themed} />
+					)}
 					{live.integrations.length > 0 && (
-						<IntegrationBlocks integrations={live.integrations} />
+						<IntegrationBlocks
+							integrations={live.integrations}
+							themed={themed}
+						/>
 					)}
-					<Watermark />
+					<Watermark themed={themed} />
 				</div>
 			</main>
 		</div>
@@ -156,45 +197,87 @@ function ProfilePage() {
 
 function IntegrationBlocks({
 	integrations,
+	themed,
 }: {
 	integrations: PublicIntegration[];
+	themed: boolean;
 }) {
 	const by = (provider: string, kind: string) =>
 		integrations.find((i) => i.provider === provider && i.kind === kind)
 			?.payload;
+
 	const gh = by("github", "profile") as GithubPayload | undefined;
 	const dev = by("devto", "articles") as DevtoPayload | undefined;
-	const hn = by("hashnode", "posts") as HashnodePayload | undefined;
 	const md = by("medium", "posts") as MediumPayload | undefined;
 	const so = by("stackoverflow", "profile") as StackOverflowPayload | undefined;
+
+	const bluesky = by("bluesky", "feed") as BlueskyPayload | undefined;
+	const dockerhub = by("dockerhub", "repos") as DockerhubPayload | undefined;
+	const leetcode = by("leetcode", "stats") as LeetcodePayload | undefined;
+	const mastodon = by("mastodon", "feed") as MastodonPayload | undefined;
+	const npm = by("npm", "packages") as NpmPayload | undefined;
+	const wakatime = by("wakatime", "stats") as WakatimePayload | undefined;
+	const youtube = by("youtube", "videos") as YoutubePayload | undefined;
+
 	return (
 		<>
-			{gh && <GithubBlock payload={gh} />}
-			{dev && <DevtoBlock payload={dev} />}
-			{hn && <HashnodeBlock payload={hn} />}
-			{md && <MediumBlock payload={md} />}
-			{so && <StackOverflowBlock payload={so} />}
+			{gh && <GithubBlock payload={gh} themed={themed} />}
+			{dev && <DevtoBlock payload={dev} themed={themed} />}
+			{md && <MediumBlock payload={md} themed={themed} />}
+			{so && <StackOverflowBlock payload={so} themed={themed} />}
+
+			{bluesky && <BlueskyBlock payload={bluesky} themed={themed} />}
+			{dockerhub && <DockerhubBlock payload={dockerhub} themed={themed} />}
+			{leetcode && <LeetcodeBlock payload={leetcode} themed={themed} />}
+			{mastodon && <MastodonBlock payload={mastodon} themed={themed} />}
+			{npm && <NpmBlock payload={npm} themed={themed} />}
+			{wakatime && <WakatimeBlock payload={wakatime} themed={themed} />}
+			{youtube && <YoutubeBlock payload={youtube} themed={themed} />}
 		</>
 	);
 }
 
-function SnippetsSection({ snippets }: { snippets: ProfileData["snippets"] }) {
+function SnippetsSection({
+	snippets,
+	themed,
+}: {
+	snippets: ProfileData["snippets"];
+	themed: boolean;
+}) {
 	return (
 		<section>
-			<SectionTitle icon={Code2} title="Snippets" />
+			<SectionTitle icon={Code2} title="Snippets" themed={themed} />
 			<div className="grid gap-3">
 				{snippets.map((s) => (
 					<article
 						key={s.id}
-						className="overflow-hidden rounded-xl border border-hairline bg-surface"
+						className={cx(
+							"overflow-hidden rounded-xl border",
+							themed ? "tt-panel" : "border-hairline bg-surface",
+						)}
 					>
-						<header className="flex items-center justify-between border-b border-hairline px-4 py-2">
+						<header
+							className={cx(
+								"flex items-center justify-between border-b px-4 py-2",
+								themed ? "tt-border-c" : "border-hairline",
+							)}
+						>
 							<span className="text-sm font-medium">{s.title}</span>
-							<span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+							<span
+								className={cx(
+									"font-mono text-[10px] uppercase tracking-wider",
+									themed ? "tt-muted" : "text-muted-foreground",
+								)}
+							>
 								{s.language}
 							</span>
 						</header>
-						<pre className="overflow-x-auto bg-background/60 p-4 font-mono text-xs leading-relaxed">
+						<pre
+							className={cx(
+								"overflow-x-auto p-4 font-mono text-xs leading-relaxed",
+								themed ? "tt-surface" : "bg-background/60",
+							)}
+						>
 							<code>{s.code}</code>
 						</pre>
 					</article>
@@ -206,30 +289,52 @@ function SnippetsSection({ snippets }: { snippets: ProfileData["snippets"] }) {
 
 function ProfileHeader({
 	username,
-	available,
+	themed,
 }: {
 	username: string;
-	available: boolean;
+	themed: boolean;
 }) {
 	return (
-		<header className="sticky top-0 z-40 border-b border-hairline glass">
+		<header
+			className={cx(
+				"sticky top-0 z-40 glass border-b",
+				themed ? "tt-border-c" : "border-hairline",
+			)}
+		>
 			<div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
 				<Link
 					to="/"
-					className="font-mono text-xs text-muted-foreground hover:text-foreground"
+					className={cx(
+						"font-mono text-xs transition-opacity",
+						themed
+							? "tt-muted hover:opacity-100"
+							: "text-muted-foreground hover:text-foreground",
+					)}
 				>
 					devlinks.com/
-					<span className="text-foreground">{username}</span>
+					<span
+						className={themed ? undefined : "text-foreground"}
+						style={themed ? { color: "var(--tt-fg)" } : undefined}
+					>
+						{username}
+					</span>
 				</Link>
 				<div className="flex items-center gap-2">
 					<button
 						type="button"
 						aria-label="Share profile"
-						className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-muted-foreground hover:bg-surface-elevated hover:text-foreground"
+						className={cx(
+							"inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors",
+							themed
+								? "tt-panel tt-muted hover:opacity-80"
+								: "border-border bg-surface text-muted-foreground hover:bg-surface-elevated hover:text-foreground",
+						)}
 					>
 						<Share2 className="h-4 w-4" />
 					</button>
-					{available ? null : <ThemeToggle />}
+					{/* Si el creador definió un tema custom, el toggle de claro/oscuro
+					    no aplica: .tt-scope fija sus propios colores sin importar .dark. */}
+					{!themed && <ThemeToggle />}
 				</div>
 			</div>
 		</header>
@@ -244,6 +349,8 @@ function ProfileSidebar({
 	website,
 	available,
 	avatarHue,
+	themed,
+	stacked,
 }: {
 	name: string;
 	username: string;
@@ -252,18 +359,38 @@ function ProfileSidebar({
 	website: string;
 	available: boolean;
 	avatarHue: number;
+	themed: boolean;
+	stacked?: boolean;
 }) {
 	return (
-		<aside className="lg:sticky lg:top-20 lg:self-start">
-			<div className="pt-10">
+		<aside
+			className={stacked ? undefined : "lg:sticky lg:top-20 lg:self-start"}
+		>
+			<div
+				className={cx(
+					"pt-10",
+					stacked && "flex flex-col items-center text-center",
+				)}
+			>
 				<div
-					className="h-24 w-24 rounded-full ring-4 ring-background"
+					className={cx(
+						"h-24 w-24 rounded-full",
+						!themed && "ring-4 ring-background",
+					)}
 					style={{
 						background: `linear-gradient(135deg, oklch(0.7 0.2 ${avatarHue}), oklch(0.4 0.18 ${avatarHue}))`,
+						boxShadow: themed ? "0 0 0 4px var(--tt-bg)" : undefined,
 					}}
 				/>
 				<h1 className="mt-4 text-2xl font-semibold tracking-tight">{name}</h1>
-				<p className="text-sm text-muted-foreground">@{username}</p>
+				<p
+					className={cx(
+						"text-sm",
+						themed ? "tt-muted" : "text-muted-foreground",
+					)}
+				>
+					@{username}
+				</p>
 
 				{available && (
 					<span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-500">
@@ -272,9 +399,24 @@ function ProfileSidebar({
 					</span>
 				)}
 
-				{bio && <p className="mt-4 text-sm text-muted-foreground">{bio}</p>}
+				{bio && (
+					<p
+						className={cx(
+							"mt-4 max-w-sm text-sm",
+							themed ? "tt-muted" : "text-muted-foreground",
+						)}
+					>
+						{bio}
+					</p>
+				)}
 
-				<ul className="mt-5 space-y-2 text-sm text-muted-foreground">
+				<ul
+					className={cx(
+						"mt-5 space-y-2 text-sm",
+						themed ? "tt-muted" : "text-muted-foreground",
+						stacked && "mx-auto w-fit text-left",
+					)}
+				>
 					{location && (
 						<li className="flex items-center gap-2">
 							<MapPin className="h-3.5 w-3.5" /> {location}
@@ -285,7 +427,9 @@ function ProfileSidebar({
 							<Globe className="h-3.5 w-3.5" />
 							<a
 								href={website}
-								className="hover:text-foreground"
+								className={
+									themed ? "hover:opacity-80" : "hover:text-foreground"
+								}
 								target="_blank"
 								rel="noreferrer"
 							>
@@ -303,19 +447,33 @@ function SectionTitle({
 	icon: Icon,
 	title,
 	hint,
+	themed,
 }: {
 	icon: React.ComponentType<{ className?: string }>;
 	title: string;
 	hint?: string;
+	themed?: boolean;
 }) {
 	return (
 		<div className="mb-4 flex items-baseline justify-between">
-			<h2 className="flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-muted-foreground">
+			<h2
+				className={cx(
+					"flex items-center gap-2 text-sm font-medium uppercase tracking-widest",
+					themed ? "tt-muted" : "text-muted-foreground",
+				)}
+			>
 				<Icon className="h-3.5 w-3.5" />
 				{title}
 			</h2>
 			{hint && (
-				<span className="font-mono text-xs text-muted-foreground">{hint}</span>
+				<span
+					className={cx(
+						"font-mono text-xs",
+						themed ? "tt-muted" : "text-muted-foreground",
+					)}
+				>
+					{hint}
+				</span>
 			)}
 		</div>
 	);
@@ -333,7 +491,7 @@ function LinksSection({
 	if (links.length === 0) return null;
 	return (
 		<section className="pt-10">
-			<SectionTitle icon={LinkIcon} title="Links" />
+			<SectionTitle icon={LinkIcon} title="Links" themed={themed} />
 			<div className="grid gap-2">
 				{links.map((l) => {
 					const Icon = iconForUrl(l.url);
@@ -357,7 +515,12 @@ function LinksSection({
 									: "group flex items-center gap-4 rounded-xl border border-hairline bg-surface p-4 transition-colors hover:bg-surface-elevated"
 							}
 						>
-							<span className="grid h-10 w-10 place-items-center rounded-md border border-hairline bg-background text-lg">
+							<span
+								className={cx(
+									"grid h-10 w-10 place-items-center rounded-md border text-lg",
+									themed ? "tt-panel" : "border-hairline bg-background",
+								)}
+							>
 								<Icon className="h-4 w-4" />
 							</span>
 							<div className="min-w-0 flex-1">
@@ -375,39 +538,65 @@ function LinksSection({
 	);
 }
 
-function ProjectsSection({ projects }: { projects: ProfileData["projects"] }) {
+function ProjectsSection({
+	projects,
+	themed,
+}: {
+	projects: ProfileData["projects"];
+	themed: boolean;
+}) {
 	if (projects.length === 0) return null;
 	return (
 		<section>
-			<SectionTitle icon={Activity} title="Projects" />
+			<SectionTitle icon={Activity} title="Projects" themed={themed} />
 			<div className="grid gap-3 sm:grid-cols-2">
 				{projects.map((p) => (
 					<div
 						key={p.id}
-						className="rounded-xl border border-hairline bg-surface p-4"
+						className={cx(
+							"rounded-xl border p-4",
+							themed ? "tt-panel" : "border-hairline bg-surface",
+						)}
 					>
 						<div className="flex items-center justify-between">
 							<p className="font-medium">{p.name}</p>
 							<StatusBadge status={p.status} />
 						</div>
-						<p className="mt-1 text-sm text-muted-foreground">
+						<p
+							className={cx(
+								"mt-1 text-sm",
+								themed ? "tt-muted" : "text-muted-foreground",
+							)}
+						>
 							{p.description}
 						</p>
 						<div className="mt-3 flex flex-wrap gap-1.5">
 							{p.tech.map((t) => (
 								<span
 									key={t}
-									className="rounded-md bg-background px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+									className={cx(
+										"rounded-md px-2 py-0.5 font-mono text-[10px]",
+										themed
+											? "tt-surface tt-muted"
+											: "bg-background text-muted-foreground",
+									)}
 								>
 									{t}
 								</span>
 							))}
 						</div>
-						<div className="mt-3 flex gap-3 text-xs text-muted-foreground">
+						<div
+							className={cx(
+								"mt-3 flex gap-3 text-xs",
+								themed ? "tt-muted" : "text-muted-foreground",
+							)}
+						>
 							{p.github && (
 								<a
 									href={p.github}
-									className="hover:text-foreground"
+									className={
+										themed ? "hover:opacity-80" : "hover:text-foreground"
+									}
 									target="_blank"
 									rel="noreferrer"
 								>
@@ -417,7 +606,9 @@ function ProjectsSection({ projects }: { projects: ProfileData["projects"] }) {
 							{p.demo && (
 								<a
 									href={p.demo}
-									className="hover:text-foreground"
+									className={
+										themed ? "hover:opacity-80" : "hover:text-foreground"
+									}
 									target="_blank"
 									rel="noreferrer"
 								>
@@ -432,6 +623,8 @@ function ProjectsSection({ projects }: { projects: ProfileData["projects"] }) {
 	);
 }
 
+// Colores de estado fijos a propósito: son semánticos (verde = shipped,
+// ámbar = wip, gris = archived) y deben leerse igual sin importar el tema.
 function StatusBadge({ status }: { status: "shipped" | "wip" | "archived" }) {
 	const map = {
 		shipped: {
@@ -457,28 +650,54 @@ function StatusBadge({ status }: { status: "shipped" | "wip" | "archived" }) {
 	);
 }
 
-function ArticlesSection({ articles }: { articles: ProfileData["articles"] }) {
+function ArticlesSection({
+	articles,
+	themed,
+}: {
+	articles: ProfileData["articles"];
+	themed: boolean;
+}) {
 	if (articles.length === 0) return null;
 	return (
 		<section>
-			<SectionTitle icon={MessageSquare} title="Writing" />
-			<div className="divide-y divide-hairline overflow-hidden rounded-xl border border-hairline bg-surface">
+			<SectionTitle icon={MessageSquare} title="Writing" themed={themed} />
+			<div
+				className={cx(
+					"divide-y overflow-hidden rounded-xl border",
+					themed
+						? "tt-panel divide-(--tt-border)"
+						: "divide-hairline border-hairline bg-surface",
+				)}
+			>
 				{articles.map((a) => (
 					<a
 						key={a.id}
 						href={a.url}
-						className="flex items-center justify-between gap-4 p-4 transition-colors hover:bg-surface-elevated"
+						className={cx(
+							"flex items-center justify-between gap-4 p-4 transition-colors",
+							themed ? "hover:opacity-90" : "hover:bg-surface-elevated",
+						)}
 						target="_blank"
 						rel="noreferrer"
 					>
 						<div className="min-w-0">
 							<p className="truncate text-sm font-medium">{a.title}</p>
-							<p className="mt-1 text-xs text-muted-foreground">
+							<p
+								className={cx(
+									"mt-1 text-xs",
+									themed ? "tt-muted" : "text-muted-foreground",
+								)}
+							>
 								{a.source ? `${a.source} · ` : ""}
 								{new Date(a.date).toLocaleDateString()}
 							</p>
 						</div>
-						<ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+						<ArrowUpRight
+							className={cx(
+								"h-4 w-4 shrink-0",
+								themed ? "tt-muted" : "text-muted-foreground",
+							)}
+						/>
 					</a>
 				))}
 			</div>
@@ -486,11 +705,23 @@ function ArticlesSection({ articles }: { articles: ProfileData["articles"] }) {
 	);
 }
 
-function Watermark() {
+function Watermark({ themed }: { themed?: boolean }) {
 	return (
-		<p className="pt-4 text-center text-xs text-muted-foreground">
+		<p
+			className={cx(
+				"pt-4 text-center text-xs",
+				themed ? "tt-muted" : "text-muted-foreground",
+			)}
+		>
 			Made with{" "}
-			<Link to="/" className="font-medium text-foreground hover:underline">
+			<Link
+				to="/"
+				className={cx(
+					"font-medium hover:underline",
+					themed ? undefined : "text-foreground",
+				)}
+				style={themed ? { color: "var(--tt-fg)" } : undefined}
+			>
 				DevLinks
 			</Link>
 		</p>

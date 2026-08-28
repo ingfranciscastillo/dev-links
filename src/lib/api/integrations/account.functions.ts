@@ -8,8 +8,6 @@ import { ensureSession } from "@/lib/auth.functions";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
 import { PROVIDERS, type Provider } from "@/lib/integrations/types";
 
-// db.transaction no existe en el driver neon-http; los writes multi-statement
-// van por db.batch (endpoint batch de Neon: un roundtrip, atómico).
 type Batch = [BatchItem<"pg">, ...Array<BatchItem<"pg">>];
 
 const providerSchema = z.enum([...PROVIDERS] as [Provider, ...Provider[]]);

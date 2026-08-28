@@ -10,6 +10,8 @@ import {
 	profiles,
 	projects,
 	snippets,
+	supportLinks,
+	talks,
 	themes,
 } from "@/db/schema";
 import type { Json } from "@/lib/api/integrations/account.functions";
@@ -70,6 +72,8 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			articleRows,
 			themeRow,
 			integrationRows,
+			talkRows,
+			supportLinkRows,
 		] = await Promise.all([
 			db
 				.select()
@@ -101,6 +105,17 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				})
 				.from(integrationCache)
 				.where(eq(integrationCache.userId, userId)),
+			db
+				.select()
+				.from(talks)
+				.where(eq(talks.userId, userId))
+				.orderBy(desc(talks.date)),
+
+			db
+				.select()
+				.from(supportLinks)
+				.where(eq(supportLinks.userId, userId))
+				.orderBy(asc(supportLinks.position)),
 		]);
 
 		const profileData: ProfileData = {
@@ -133,6 +148,23 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				url: r.url,
 				source: r.source ?? "",
 				date: r.date.toISOString(),
+			})),
+			talks: talkRows.map((r) => ({
+				id: r.id,
+				title: r.title,
+				event: r.event,
+				description: r.description,
+				date: r.date,
+				slidesUrl: r.slidesUrl,
+				videoUrl: r.videoUrl,
+			})),
+			supportLinks: supportLinkRows.map((r) => ({
+				id: r.id,
+				category: r.category,
+				platform: r.platform,
+				label: r.label,
+				url: r.url,
+				serverId: r.serverId,
 			})),
 			theme: parseThemeConfig(themeRow[0]?.config),
 			templateId: themeRow[0]?.template ?? null,

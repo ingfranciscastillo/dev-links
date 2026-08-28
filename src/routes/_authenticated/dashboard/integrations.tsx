@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/integrations")({
 			{
 				name: "description",
 				content:
-					"Connect GitHub, Dev.to, Hashnode, Medium and Stack Overflow to your DevLinks profile.",
+					"Connect GitHub, Dev.to, Medium, Stack Overflow, WakaTime, LeetCode, npm, Bluesky, Mastodon, Docker Hub and YouTube to your DevLinks profile.",
 			},
 		],
 	}),
@@ -50,15 +50,9 @@ const PROVIDER_HELP: Record<
 		placeholder: "octocat",
 		helper: "Your public GitHub username.",
 	},
-	devto: { placeholder: "ben", helper: "Your Dev.to username." },
-	hashnode: {
-		placeholder: "you",
-		helper: "Any identifier.",
-		configField: {
-			key: "host",
-			label: "Publication host",
-			placeholder: "you.hashnode.dev",
-		},
+	devto: {
+		placeholder: "ben",
+		helper: "Your Dev.to username.",
 	},
 	medium: {
 		placeholder: "yourname",
@@ -68,6 +62,34 @@ const PROVIDER_HELP: Record<
 		placeholder: "22656",
 		helper:
 			"Your numeric Stack Overflow user id (find it in your profile URL).",
+	},
+	wakatime: {
+		placeholder: "yourusername",
+		helper: "Your WakaTime username.",
+	},
+	leetcode: {
+		placeholder: "yourusername",
+		helper: "Your LeetCode username.",
+	},
+	npm: {
+		placeholder: "yourusername",
+		helper: "Your npm username.",
+	},
+	bluesky: {
+		placeholder: "you.bsky.social",
+		helper: "Your Bluesky handle.",
+	},
+	mastodon: {
+		placeholder: "@you@mastodon.social",
+		helper: "Your Mastodon handle.",
+	},
+	dockerhub: {
+		placeholder: "yourusername",
+		helper: "Your Docker Hub username.",
+	},
+	youtube: {
+		placeholder: "@yourchannel",
+		helper: "Your YouTube channel handle.",
 	},
 };
 
@@ -79,7 +101,7 @@ function IntegrationsPage() {
 			<SectionHeader
 				eyebrow="Live"
 				title="Integrations"
-				description="Pull in real activity from GitHub, Dev.to, Hashnode, Medium and Stack Overflow. Refreshed every 6h."
+				description="Pull in real activity from GitHub, Dev.to, Medium, Stack Overflow, WakaTime, LeetCode, npm, Bluesky, Mastodon, Docker Hub and YouTube. Refreshed every 6h."
 			/>
 			<div className="grid gap-4">
 				{PROVIDERS.map((provider) => {
@@ -135,16 +157,20 @@ function IntegrationCard({
 			toast.error("Handle is required");
 			return;
 		}
+
 		try {
 			const config: Record<string, string> = {};
+
 			if (help.configField && configValue.trim()) {
 				config[help.configField.key] = configValue.trim();
 			}
+
 			await upsertAccount.mutateAsync({
 				provider,
 				handle: handle.trim(),
 				config,
 			});
+
 			toast.success(`${PROVIDER_LABEL[provider]} saved`);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Save failed");

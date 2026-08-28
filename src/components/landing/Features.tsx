@@ -1,3 +1,5 @@
+import { motion, useReducedMotion } from "motion/react";
+
 const items = [
 	{
 		title: "GitHub-native",
@@ -33,20 +35,63 @@ const items = [
 	},
 ];
 
+const ease = [0.16, 1, 0.3, 1] as const;
+
 export function Features() {
+	const reduceMotion = useReducedMotion();
+
 	return (
 		<section id="features" className="border-t border-border">
 			<div className="mx-auto max-w-editorial px-5 py-24 sm:px-8 sm:py-32">
-				<SectionHeader
-					eyebrow="02 / Features"
-					title="A developer profile, without the maintenance."
-					sub="Everything you normally wire together yourself, kept in one place and quietly updated."
-				/>
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					viewport={{ once: true, amount: 0.35 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.7,
+						ease,
+					}}
+				>
+					<SectionHeader
+						eyebrow="02 / Features"
+						title="A developer profile, without the maintenance."
+						sub="Everything you normally wire together yourself, kept in one place and quietly updated."
+					/>
+				</motion.div>
 
-				<div className="mt-16 border-t border-border sm:mt-20">
+				<motion.div
+					className="mt-16 border-t border-border sm:mt-20"
+					initial="hidden"
+					whileInView="visible"
+					viewport={{ once: true, amount: 0.12 }}
+					variants={{
+						hidden: {},
+						visible: {
+							transition: {
+								staggerChildren: reduceMotion ? 0 : 0.07,
+							},
+						},
+					}}
+				>
 					{items.map(({ title, desc }, index) => (
-						<div
+						<motion.div
 							key={title}
+							variants={{
+								hidden: reduceMotion
+									? {}
+									: {
+											opacity: 0,
+											y: 18,
+										},
+								visible: {
+									opacity: 1,
+									y: 0,
+									transition: {
+										duration: reduceMotion ? 0.01 : 0.55,
+										ease,
+									},
+								},
+							}}
 							className="group grid gap-5 border-b border-border py-7 transition-colors hover:bg-surface sm:grid-cols-[4rem_minmax(0,1fr)_minmax(16rem,24rem)_2rem] sm:items-start sm:px-3 sm:py-8"
 						>
 							<span className="font-mono text-[10px] tracking-[0.08em] text-muted-foreground">
@@ -67,9 +112,9 @@ export function Features() {
 							>
 								↗
 							</span>
-						</div>
+						</motion.div>
 					))}
-				</div>
+				</motion.div>
 			</div>
 		</section>
 	);

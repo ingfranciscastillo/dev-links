@@ -4,14 +4,18 @@ import {
 	MapPointIcon,
 	StarIcon,
 } from "@solar-icons/react/linear";
+import { motion, useReducedMotion } from "motion/react";
 import type { SVGProps } from "react";
 
 import { GithubIcon, XIcon } from "@/components/brand-icons";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 function GitBranchIcon(props: SVGProps<SVGSVGElement>) {
 	return (
 		<svg
 			viewBox="0 0 24 24"
+			aria-hidden="true"
 			fill="none"
 			stroke="currentColor"
 			strokeWidth="1.5"
@@ -49,10 +53,29 @@ const repositories = [
 ];
 
 export function ProfilePreview() {
+	const reduceMotion = useReducedMotion();
+
 	return (
-		<div className="overflow-hidden bg-background">
+		<motion.div
+			initial={reduceMotion ? false : { opacity: 0, y: 28, scale: 0.985 }}
+			animate={{ opacity: 1, y: 0, scale: 1 }}
+			transition={{
+				duration: reduceMotion ? 0.01 : 0.9,
+				ease,
+			}}
+			className="overflow-hidden bg-background"
+		>
 			{/* Browser chrome */}
-			<div className="flex items-center justify-between border-b border-border px-4 py-3">
+			<motion.div
+				initial={reduceMotion ? false : { opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{
+					duration: reduceMotion ? 0.01 : 0.4,
+					delay: reduceMotion ? 0 : 0.15,
+					ease,
+				}}
+				className="flex items-center justify-between border-b border-border px-4 py-3"
+			>
 				<div className="flex items-center gap-1.5">
 					<span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
 					<span className="h-2 w-2 rounded-full bg-muted-foreground/30" />
@@ -64,15 +87,33 @@ export function ProfilePreview() {
 				</span>
 
 				<span className="w-8" aria-hidden="true" />
-			</div>
+			</motion.div>
 
 			<div className="grid lg:grid-cols-[0.8fr_1.2fr]">
 				{/* Identity */}
-				<div className="border-b border-border p-6 sm:p-8 lg:border-b-0 lg:border-r">
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0, x: -18 }}
+					animate={{ opacity: 1, x: 0 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.65,
+						delay: reduceMotion ? 0 : 0.18,
+						ease,
+					}}
+					className="border-b border-border p-6 sm:p-8 lg:border-b-0 lg:border-r"
+				>
 					<div className="flex items-start gap-4">
-						<div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-display text-xl text-brand">
+						<motion.div
+							initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
+							animate={{ opacity: 1, scale: 1 }}
+							transition={{
+								duration: reduceMotion ? 0.01 : 0.5,
+								delay: reduceMotion ? 0 : 0.3,
+								ease,
+							}}
+							className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border border-border bg-surface font-display text-xl text-brand"
+						>
 							F
-						</div>
+						</motion.div>
 
 						<div className="min-w-0">
 							<h3 className="font-display text-2xl tracking-[-0.03em]">
@@ -85,17 +126,44 @@ export function ProfilePreview() {
 						</div>
 					</div>
 
-					<div className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-brand">
+					<motion.div
+						initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.45,
+							delay: reduceMotion ? 0 : 0.38,
+							ease,
+						}}
+						className="mt-5 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.08em] text-brand"
+					>
 						<span className="h-1.5 w-1.5 rounded-full bg-brand" />
 						Available for hire
-					</div>
+					</motion.div>
 
-					<p className="mt-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
+					<motion.p
+						initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.45,
+							delay: reduceMotion ? 0 : 0.44,
+							ease,
+						}}
+						className="mt-6 max-w-sm text-sm leading-relaxed text-muted-foreground"
+					>
 						Full-stack engineer building developer tools. Rust, TypeScript and
 						Postgres.
-					</p>
+					</motion.p>
 
-					<div className="mt-6 space-y-3 border-t border-border pt-5">
+					<motion.div
+						initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.45,
+							delay: reduceMotion ? 0 : 0.5,
+							ease,
+						}}
+						className="mt-6 space-y-3 border-t border-border pt-5"
+					>
 						<div className="flex items-center gap-2 text-xs text-muted-foreground">
 							<Buildings2Icon size={14} />
 							<span>Vercel</span>
@@ -110,11 +178,20 @@ export function ProfilePreview() {
 							<GlobeIcon size={14} />
 							<span>francis.dev</span>
 						</div>
-					</div>
+					</motion.div>
 
-					<div className="mt-6 flex items-center gap-4">
+					<motion.div
+						initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.45,
+							delay: reduceMotion ? 0 : 0.56,
+							ease,
+						}}
+						className="mt-6 flex items-center gap-4"
+					>
 						<a
-							href="#"
+							href="https://github.com"
 							aria-label="GitHub"
 							className="text-muted-foreground transition-colors hover:text-foreground"
 						>
@@ -122,17 +199,26 @@ export function ProfilePreview() {
 						</a>
 
 						<a
-							href="#"
+							href="https://x.com"
 							aria-label="X"
 							className="text-muted-foreground transition-colors hover:text-foreground"
 						>
 							<XIcon size={15} />
 						</a>
-					</div>
-				</div>
+					</motion.div>
+				</motion.div>
 
 				{/* Repositories */}
-				<div className="p-6 sm:p-8">
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0, x: 18 }}
+					animate={{ opacity: 1, x: 0 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.65,
+						delay: reduceMotion ? 0 : 0.24,
+						ease,
+					}}
+					className="p-6 sm:p-8"
+				>
 					<div className="mb-4 flex items-center justify-between border-b border-border pb-3">
 						<p className="font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
 							Selected repositories
@@ -145,8 +231,15 @@ export function ProfilePreview() {
 
 					<div>
 						{repositories.map((repo, index) => (
-							<div
+							<motion.div
 								key={repo.name}
+								initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								transition={{
+									duration: reduceMotion ? 0.01 : 0.5,
+									delay: reduceMotion ? 0 : 0.36 + index * 0.08,
+									ease,
+								}}
 								className="group border-b border-border py-4 last:border-b-0"
 							>
 								<div className="flex items-start gap-4">
@@ -183,11 +276,11 @@ export function ProfilePreview() {
 										</div>
 									</div>
 								</div>
-							</div>
+							</motion.div>
 						))}
 					</div>
-				</div>
+				</motion.div>
 			</div>
-		</div>
+		</motion.div>
 	);
 }

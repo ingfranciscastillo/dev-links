@@ -121,8 +121,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 						toastOptions={{
 							style: {
 								background: "var(--color-surface)",
-								color: "var(--color-fg)",
-								border: "1px solid var(--color-hairline)",
+								color: "var(--color-foreground)",
+								border: "1px solid var(--color-border)",
+								borderRadius: "0",
+								fontFamily: "var(--font-sans)",
+								fontSize: "13px",
 							},
 						}}
 					/>

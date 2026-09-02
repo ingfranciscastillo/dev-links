@@ -1156,11 +1156,15 @@ function ColorPickerFormatSelect(props: ColorPickerFormatSelectProps) {
 				<SelectValue />
 			</SelectTrigger>
 			<SelectContent>
-				{colorFormats.map((format) => (
-					<SelectItem key={format} value={format}>
-						{format.toUpperCase()}
-					</SelectItem>
-				))}
+				{colorFormats
+					// "hsb" isn't a valid CSS color function (unlike hex/rgb/hsl) —
+					// selecting it would produce a string the browser can't render.
+					.filter((format) => format !== "hsb")
+					.map((format) => (
+						<SelectItem key={format} value={format}>
+							{format.toUpperCase()}
+						</SelectItem>
+					))}
 			</SelectContent>
 		</Select>
 	);

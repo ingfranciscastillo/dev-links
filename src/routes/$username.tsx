@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { type ReactNode, useEffect } from "react";
+import toast from "react-hot-toast";
 import { BlueskyBlock } from "@/components/profile/BlueskyBlock";
 import { DevtoBlock } from "@/components/profile/DevtoBlock";
 import { DockerhubBlock } from "@/components/profile/DockerhubBlock";
@@ -249,9 +250,12 @@ function ProfilePage() {
 						<ArticlesSection articles={live.data.articles} themed={themed} />
 					</RevealSection>
 
-					{live.data.talks.length > 0 && (
+					{live.integrations.length > 0 && (
 						<RevealSection>
-							<TalksBlock talks={live.data.talks} themed={themed} />
+							<IntegrationBlocks
+								integrations={live.integrations}
+								themed={themed}
+							/>
 						</RevealSection>
 					)}
 
@@ -267,12 +271,9 @@ function ProfilePage() {
 						</RevealSection>
 					)}
 
-					{live.integrations.length > 0 && (
+					{live.data.talks.length > 0 && (
 						<RevealSection>
-							<IntegrationBlocks
-								integrations={live.integrations}
-								themed={themed}
-							/>
+							<TalksBlock talks={live.data.talks} themed={themed} />
 						</RevealSection>
 					)}
 
@@ -382,6 +383,15 @@ function ProfileHeader({
 	username: string;
 	themed: boolean;
 }) {
+	async function handleShare() {
+		try {
+			await navigator.clipboard.writeText(window.location.href);
+			toast.success("Link copied to clipboard");
+		} catch {
+			toast.error("Couldn't copy");
+		}
+	}
+
 	return (
 		<header
 			className={cx(
@@ -414,6 +424,7 @@ function ProfileHeader({
 				<div className="flex items-center gap-2">
 					<button
 						type="button"
+						onClick={handleShare}
 						aria-label="Share profile"
 						className={cx(
 							"inline-flex h-9 w-9 items-center justify-center rounded-md border transition-colors",

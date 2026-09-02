@@ -1,7 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { eq } from "drizzle-orm";
-import { user as authUser } from "@/db/auth-schema";
-import { db } from "@/db/index";
 import { ensureSession } from "@/lib/auth.functions";
 import { uploadAvatar } from "@/lib/r2.server";
 
@@ -33,10 +30,8 @@ export const uploadMyAvatar = createServerFn({ method: "POST" })
 		const buffer = Buffer.from(await file.arrayBuffer());
 		const image = await uploadAvatar(userId, buffer, file.type);
 
-		await db
-			.update(authUser)
-			.set({ image, updatedAt: new Date() })
-			.where(eq(authUser.id, userId));
-
+		// No escribe user.image acá — el caller hace authClient.updateUser()
+		// con la URL devuelta, para que better-auth reemita la cookie de
+		// sesión (ver comentario en useUploadAvatar).
 		return { image };
 	});

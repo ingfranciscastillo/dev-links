@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { uploadMyAvatar } from "@/lib/api/avatar.functions";
+import { authClient } from "@/lib/auth-client";
 import {
 	addArticle,
 	addLink,
@@ -82,10 +83,26 @@ export function useUpdateProfile() {
 
 export function useUploadAvatar() {
 	return useMutation({
-		mutationFn: (file: File) => {
+		mutationFn: async (file: File) => {
 			const formData = new FormData();
 			formData.append("file", file);
-			return uploadMyAvatar({ data: formData });
+			const result = await uploadMyAvatar({ data: formData });
+
+			// El upload sube a R2 y devuelve la URL, pero no toca la sesión.
+			// Pasa por authClient.updateUser para que better-auth reemita la
+			// cookie de sesión con la imagen nueva — si escribiéramos
+			// user.image directo en la DB, la cookie cacheada (5 min, jwe)
+			// seguiría sirviendo la vieja en /profile y el header del
+			// dashboard, aunque la página pública (que lee la DB directo)
+			// ya muestre la actualizada.
+			const { error } = await authClient.updateUser({
+				image: result.image,
+			});
+			if (error) {
+				throw new Error(error.message ?? "Couldn't save avatar");
+			}
+
+			return result;
 		},
 	});
 }

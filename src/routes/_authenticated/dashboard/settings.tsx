@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { ProfileCore } from "@/lib/api/profile-data.functions";
 import { authClient } from "@/lib/auth-client";
+import { openBillingPortal, startProCheckout } from "@/lib/billing";
 import {
 	useProfileCore,
 	useUpdateDiscovery,
@@ -45,9 +46,27 @@ function SettingsPage() {
 	const { user } = useRouteContext({ from: "/_authenticated/dashboard" });
 	const navigate = useNavigate();
 	const wipeProfileData = useWipeProfileData();
+	const core = useProfileCore();
+	const isPro = core.data?.plan === "pro";
 
 	const [confirm, setConfirm] = useState("");
 	const [pwLoading, setPwLoading] = useState(false);
+	const [billingLoading, setBillingLoading] = useState(false);
+
+	async function handleBilling() {
+		setBillingLoading(true);
+		try {
+			if (isPro) {
+				await openBillingPortal();
+			} else {
+				await startProCheckout();
+			}
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Couldn't open billing");
+		} finally {
+			setBillingLoading(false);
+		}
+	}
 
 	async function handleChangePassword(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -188,6 +207,31 @@ function SettingsPage() {
 							{pwLoading ? "Updating…" : "Update password"}
 						</Button>
 					</form>
+				</section>
+
+				<section className="py-8">
+					<SectionIntro
+						label="Billing"
+						title={isPro ? "Manage subscription" : "Upgrade to Pro"}
+						description={
+							isPro
+								? "View invoices, update your payment method, or cancel your subscription."
+								: "Unlimited links, projects and snippets, analytics, custom CSS, and no DevLinks branding — $5/month."
+						}
+					/>
+
+					<button
+						type="button"
+						onClick={handleBilling}
+						disabled={billingLoading}
+						className="mt-6 h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-colors hover:bg-brand hover:text-brand-foreground disabled:opacity-50"
+					>
+						{billingLoading
+							? "Loading…"
+							: isPro
+								? "Manage subscription"
+								: "Upgrade to Pro"}
+					</button>
 				</section>
 
 				<section className="py-8">

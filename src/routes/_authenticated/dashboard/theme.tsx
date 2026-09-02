@@ -1,6 +1,6 @@
 import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import { LockKeyholeIcon, RestartIcon } from "@solar-icons/react/linear";
-import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
+import { startProCheckout } from "@/lib/billing";
 import {
 	useApplyThemeTemplate,
 	useProfileCore,
@@ -701,6 +702,16 @@ function CssPane({
 }) {
 	const [draft, setDraft] = useState(theme.customCss);
 
+	async function handleUpgrade() {
+		try {
+			await startProCheckout();
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : "Couldn't start checkout",
+			);
+		}
+	}
+
 	if (!isPro) {
 		return (
 			<Pane>
@@ -724,12 +735,10 @@ function CssPane({
 						</p>
 
 						<Button
-							asChild
+							onClick={handleUpgrade}
 							className="mt-5 h-9 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 						>
-							<Link to="/" hash="pricing">
-								Upgrade to Pro
-							</Link>
+							Upgrade to Pro
 						</Button>
 					</div>
 				</div>

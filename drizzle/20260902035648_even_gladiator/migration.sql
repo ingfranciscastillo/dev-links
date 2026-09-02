@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "dodo_customer_id" text;

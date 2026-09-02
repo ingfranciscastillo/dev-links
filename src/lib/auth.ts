@@ -1,11 +1,62 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import {
+	checkout,
+	dodopayments,
+	portal,
+	webhooks,
+} from "@dodopayments/better-auth";
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins/admin";
 import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
+import DodoPayments from "dodopayments";
 import * as authSchema from "@/db/auth-schema";
 import { db } from "@/db/index";
+import { profiles } from "@/db/schema";
 import { sendEmail } from "@/lib/email";
+import { absoluteUrl } from "@/lib/site";
+
+// El SDK exige un bearerToken no vacío al construirse — sin fallback, no
+// tener DODO_PAYMENTS_API_KEY seteada tira abajo *todo* auth.ts (login
+// incluido), no solo billing. Con el placeholder, las llamadas a Dodo
+// simplemente fallan con un error de auth hasta que se configure la key real.
+const dodoClient = new DodoPayments({
+	bearerToken: process.env.DODO_PAYMENTS_API_KEY || "missing_dodo_api_key",
+	environment:
+		process.env.DODO_PAYMENTS_ENVIRONMENT === "live_mode"
+			? "live_mode"
+			: "test_mode",
+});
+
+// Distinto product ID entre sandbox y producción en el dashboard de Dodo,
+// por eso va por env var y no hardcodeado.
+const DODO_PRO_PRODUCT_ID = process.env.DODO_PRO_PRODUCT_ID || "pdt_REPLACE_ME";
+
+async function setPlan(userId: string, plan: "free" | "pro") {
+	await db
+		.insert(profiles)
+		.values({ id: userId, plan })
+		.onConflictDoUpdate({
+			target: profiles.id,
+			set: { plan, updatedAt: new Date() },
+		});
+}
+
+// Catálogo completo de eventos de suscripción de Dodo — cualquier tipo no
+// listado acá (pagos one-off, etc.) se ignora sin tocar el plan.
+const PRO_GRANT_EVENTS = new Set([
+	"subscription.active",
+	"subscription.renewed",
+	"subscription.plan_changed",
+	"subscription.unpaused",
+]);
+const PRO_REVOKE_EVENTS = new Set([
+	"subscription.cancelled",
+	"subscription.expired",
+	"subscription.failed",
+	"subscription.on_hold",
+	"subscription.paused",
+]);
 
 const trustedOrigins = (process.env.BETTER_AUTH_TRUSTED_ORIGINS ?? "")
 	.split(",")
@@ -91,6 +142,43 @@ export const auth = betterAuth({
 		admin({
 			defaultRole: "user",
 			adminRoles: ["admin"],
+		}),
+		dodopayments({
+			client: dodoClient,
+			createCustomerOnSignUp: true,
+			getCustomerParams: (user) => ({
+				metadata: { better_auth_user_id: user.id },
+			}),
+			use: [
+				checkout({
+					products: [{ productId: DODO_PRO_PRODUCT_ID, slug: "pro" }],
+					successUrl: absoluteUrl("/dashboard?upgraded=1"),
+					authenticatedUsersOnly: true,
+				}),
+				portal(),
+				webhooks({
+					webhookKey: process.env.DODO_PAYMENTS_WEBHOOK_KEY ?? "",
+					onPayload: async (payload) => {
+						const isGrant = PRO_GRANT_EVENTS.has(payload.type);
+						const isRevoke = PRO_REVOKE_EVENTS.has(payload.type);
+						if (!isGrant && !isRevoke) return;
+
+						const data = payload.data as {
+							customer?: { metadata?: Record<string, unknown> };
+						};
+						const userId = data.customer?.metadata?.better_auth_user_id;
+						if (typeof userId !== "string") {
+							console.warn(
+								"[dodo] webhook missing better_auth_user_id metadata",
+								payload.type,
+							);
+							return;
+						}
+
+						await setPlan(userId, isGrant ? "pro" : "free");
+					},
+				}),
+			],
 		}),
 		tanstackStartCookies(),
 	],

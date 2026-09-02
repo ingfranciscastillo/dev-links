@@ -5,7 +5,7 @@ import {
 	LockKeyholeIcon,
 	UsersGroupRoundedIcon,
 } from "@solar-icons/react/linear";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
 	Bar,
 	BarChart,
@@ -18,9 +18,11 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import type { AnalyticsSummary } from "@/lib/api/analytics.functions";
+import { startProCheckout } from "@/lib/billing";
 import { useMyAnalytics } from "@/lib/queries/analytics";
 
 export const Route = createFileRoute("/_authenticated/dashboard/analytics")({
@@ -130,6 +132,16 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 function UpgradeGate() {
+	async function handleUpgrade() {
+		try {
+			await startProCheckout();
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : "Couldn't start checkout",
+			);
+		}
+	}
+
 	return (
 		<div className="mt-8 border-y border-border py-16">
 			<div className="flex items-start gap-5">
@@ -152,10 +164,10 @@ function UpgradeGate() {
 					</p>
 
 					<Button
-						asChild
+						onClick={handleUpgrade}
 						className="mt-6 h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
-						<Link to="/">Upgrade to Pro</Link>
+						Upgrade to Pro
 					</Button>
 				</div>
 			</div>

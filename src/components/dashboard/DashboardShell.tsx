@@ -20,9 +20,11 @@ import {
 	useRouter,
 } from "@tanstack/react-router";
 import type { ComponentType, ReactNode, SVGProps } from "react";
+import toast from "react-hot-toast";
 
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { authClient } from "@/lib/auth-client";
+import { startProCheckout } from "@/lib/billing";
 import { PLAN_LIMITS } from "@/lib/plan-limits";
 import { useProfileCore } from "@/lib/queries/profile-data";
 
@@ -90,6 +92,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 		await authClient.signOut();
 		await router.invalidate();
 		await navigate({ to: "/" });
+	}
+
+	async function handleUpgrade() {
+		try {
+			await startProCheckout();
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : "Couldn't start checkout",
+			);
+		}
 	}
 
 	return (
@@ -171,13 +183,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 								</div>
 
 								{!isPro && (
-									<Link
-										to="/"
-										hash="pricing"
+									<button
+										type="button"
+										onClick={handleUpgrade}
 										className="font-mono text-[9px] uppercase tracking-[0.08em] text-brand transition-colors hover:text-foreground"
 									>
 										Upgrade
-									</Link>
+									</button>
 								)}
 							</div>
 						</div>

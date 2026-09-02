@@ -698,7 +698,7 @@ const supportLinkInput = z.object({
 	platform: z.string().min(1),
 	label: z.string().optional(),
 	url: z.string().min(1),
-	serverId: z.string().optional(),
+	serverId: z.string().nullable().optional(),
 });
 
 export const addSupportLink = createServerFn({ method: "POST" })

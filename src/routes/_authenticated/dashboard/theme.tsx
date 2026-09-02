@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import {
 	ColorPicker,
-	ColorPickerAlphaSlider,
 	ColorPickerArea,
 	ColorPickerContent,
 	ColorPickerEyeDropper,
@@ -291,10 +290,7 @@ function ColorField({
 					<div className="mt-4 flex items-center gap-3">
 						<ColorPickerEyeDropper className="h-8 w-8 shrink-0 rounded-none border-border p-0" />
 
-						<div className="flex flex-1 flex-col gap-2">
-							<ColorPickerHueSlider />
-							<ColorPickerAlphaSlider />
-						</div>
+						<ColorPickerHueSlider className="flex-1" />
 					</div>
 
 					<div className="mt-3 flex items-center gap-2">

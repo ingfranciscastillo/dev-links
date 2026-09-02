@@ -25,7 +25,7 @@ export function Header() {
 	return (
 		<header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-sm">
 			<motion.div
-				className="mx-auto flex h-16 max-w-editorial items-center justify-between border-b border-border px-5 sm:px-8"
+				className="mx-auto grid h-16 max-w-editorial grid-cols-[1fr_auto_1fr] items-center border-b border-border px-5 sm:px-8"
 				initial={reduceMotion ? false : { opacity: 0, y: -12 }}
 				animate={{ opacity: 1, y: 0 }}
 				transition={{
@@ -42,7 +42,7 @@ export function Header() {
 						ease,
 					}}
 				>
-					<Link to="/" className="group flex items-center gap-2.5">
+					<Link to="/" className="group flex w-fit items-center gap-2.5">
 						<span className="font-display text-xl leading-none tracking-[-0.03em] text-foreground">
 							DevLinks
 						</span>
@@ -54,7 +54,7 @@ export function Header() {
 				</motion.div>
 
 				<motion.nav
-					className="hidden items-center gap-7 md:flex"
+					className="col-start-2 hidden items-center justify-self-center gap-7 md:flex"
 					initial={reduceMotion ? false : { opacity: 0, y: -6 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{
@@ -82,7 +82,7 @@ export function Header() {
 				</motion.nav>
 
 				<motion.div
-					className="flex items-center gap-4"
+					className="col-start-3 flex items-center justify-self-end gap-4"
 					initial={reduceMotion ? false : { opacity: 0, x: 10 }}
 					animate={{ opacity: 1, x: 0 }}
 					transition={{

@@ -51,6 +51,7 @@ export function Footer() {
 								{ label: "Examples", href: "/#examples" },
 								{ label: "Pricing", href: "/#pricing" },
 								{ label: "Discover", href: "/discover" },
+								{ label: "Contact", href: "/contact" },
 							]}
 						/>
 					</motion.div>
@@ -68,11 +69,8 @@ export function Footer() {
 						<FooterCol
 							title="Elsewhere"
 							items={[
-								{ label: "Contact", href: "/contact" },
 								{ label: "GitHub", href: "https://github.com" },
 								{ label: "X", href: "https://x.com" },
-								{ label: "Changelog", href: "#" },
-								{ label: "Privacy", href: "#" },
 							]}
 						/>
 					</motion.div>

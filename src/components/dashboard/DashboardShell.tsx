@@ -2,6 +2,7 @@ import {
 	Chart2Icon,
 	CodeSquareIcon,
 	FolderWithFilesIcon,
+	HeartIcon,
 	Home2Icon,
 	LinkIcon,
 	Logout2Icon,
@@ -58,6 +59,11 @@ const nav: NavItem[] = [
 		label: "Analytics",
 		to: "/dashboard/analytics",
 		icon: Chart2Icon,
+	},
+	{
+		label: "Support",
+		to: "/dashboard/support",
+		icon: HeartIcon,
 	},
 	{
 		label: "Settings",

@@ -20,7 +20,10 @@ import { MastodonBlock } from "@/components/profile/MastodonBlock";
 import { MediumBlock } from "@/components/profile/MediumBlock";
 import { NpmBlock } from "@/components/profile/NpmBlock";
 import { StackOverflowBlock } from "@/components/profile/StackOverflowBlock";
-import { SupportBlock } from "@/components/profile/SupportBlock";
+import {
+	CommunityBlock,
+	SupportBlock,
+} from "@/components/profile/SupportBlock";
 import { TalksBlock } from "@/components/profile/TalksBlock";
 import { WakatimeBlock } from "@/components/profile/WakatimeBlock";
 import { YoutubeBlock } from "@/components/profile/YoutubeBlock";
@@ -252,9 +255,15 @@ function ProfilePage() {
 						</RevealSection>
 					)}
 
-					{live.data.supportLinks.length > 0 && (
+					{live.data.supportLinks.some((l) => l.category !== "community") && (
 						<RevealSection>
 							<SupportBlock links={live.data.supportLinks} themed={themed} />
+						</RevealSection>
+					)}
+
+					{live.data.supportLinks.some((l) => l.category === "community") && (
+						<RevealSection>
+							<CommunityBlock links={live.data.supportLinks} themed={themed} />
 						</RevealSection>
 					)}
 

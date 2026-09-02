@@ -10,6 +10,8 @@ import {
 	profiles,
 	projects,
 	snippets,
+	supportLinks,
+	talks,
 	themes,
 } from "@/db/schema";
 import { ensureSession } from "@/lib/auth.functions";
@@ -99,30 +101,47 @@ export const getMyProfileData = createServerFn({ method: "GET" }).handler(
 	async (): Promise<ProfileData> => {
 		const userId = await requireUserId();
 
-		const [linkRows, projectRows, snippetRows, articleRows, themeRow] =
-			await Promise.all([
-				db
-					.select()
-					.from(links)
-					.where(eq(links.userId, userId))
-					.orderBy(asc(links.position)),
-				db
-					.select()
-					.from(projects)
-					.where(eq(projects.userId, userId))
-					.orderBy(desc(projects.createdAt)),
-				db
-					.select()
-					.from(snippets)
-					.where(eq(snippets.userId, userId))
-					.orderBy(desc(snippets.createdAt)),
-				db
-					.select()
-					.from(articles)
-					.where(eq(articles.userId, userId))
-					.orderBy(desc(articles.date)),
-				db.select().from(themes).where(eq(themes.userId, userId)).limit(1),
-			]);
+		const [
+			linkRows,
+			projectRows,
+			snippetRows,
+			articleRows,
+			talkRows,
+			supportLinkRows,
+			themeRow,
+		] = await Promise.all([
+			db
+				.select()
+				.from(links)
+				.where(eq(links.userId, userId))
+				.orderBy(asc(links.position)),
+			db
+				.select()
+				.from(projects)
+				.where(eq(projects.userId, userId))
+				.orderBy(desc(projects.createdAt)),
+			db
+				.select()
+				.from(snippets)
+				.where(eq(snippets.userId, userId))
+				.orderBy(desc(snippets.createdAt)),
+			db
+				.select()
+				.from(articles)
+				.where(eq(articles.userId, userId))
+				.orderBy(desc(articles.date)),
+			db
+				.select()
+				.from(talks)
+				.where(eq(talks.userId, userId))
+				.orderBy(desc(talks.date)),
+			db
+				.select()
+				.from(supportLinks)
+				.where(eq(supportLinks.userId, userId))
+				.orderBy(asc(supportLinks.position)),
+			db.select().from(themes).where(eq(themes.userId, userId)).limit(1),
+		]);
 
 		return {
 			links: linkRows.map((r) => ({
@@ -154,6 +173,23 @@ export const getMyProfileData = createServerFn({ method: "GET" }).handler(
 				url: r.url,
 				source: r.source ?? "",
 				date: r.date.toISOString(),
+			})),
+			talks: talkRows.map((r) => ({
+				id: r.id,
+				title: r.title,
+				event: r.event,
+				description: r.description,
+				date: r.date,
+				slidesUrl: r.slidesUrl,
+				videoUrl: r.videoUrl,
+			})),
+			supportLinks: supportLinkRows.map((r) => ({
+				id: r.id,
+				category: r.category,
+				platform: r.platform,
+				label: r.label,
+				url: r.url,
+				serverId: r.serverId,
 			})),
 			theme: parseThemeConfig(themeRow[0]?.config),
 			templateId: themeRow[0]?.template ?? null,
@@ -585,6 +621,74 @@ export const removeArticle = createServerFn({ method: "POST" })
 		await db
 			.delete(articles)
 			.where(and(eq(articles.id, data.id), eq(articles.userId, userId)));
+	});
+
+// ---------- support links ----------
+
+const supportLinkInput = z.object({
+	category: z.enum(["support", "community"]),
+	platform: z.string().min(1),
+	label: z.string().optional(),
+	url: z.string().min(1),
+	serverId: z.string().optional(),
+});
+
+export const addSupportLink = createServerFn({ method: "POST" })
+	.validator((input) => supportLinkInput.parse(input))
+	.handler(async ({ data }) => {
+		const userId = await requireUserId();
+		const [row] = await db
+			.insert(supportLinks)
+			.values({
+				userId,
+				category: data.category,
+				platform: data.platform,
+				label: data.label || "",
+				url: data.url,
+				serverId: data.serverId || null,
+				// Subquery atómico: evita la carrera count-then-insert.
+				position: sql<number>`(SELECT COUNT(*)::int FROM ${supportLinks} WHERE ${supportLinks.userId} = ${userId})`,
+			})
+			.returning();
+		return {
+			id: row.id,
+			category: row.category,
+			platform: row.platform,
+			label: row.label,
+			url: row.url,
+			serverId: row.serverId,
+		};
+	});
+
+const updateSupportLinkInput = z.object({
+	id: z.string(),
+	category: z.enum(["support", "community"]).optional(),
+	platform: z.string().optional(),
+	label: z.string().optional(),
+	url: z.string().optional(),
+	serverId: z.string().nullable().optional(),
+});
+
+export const updateSupportLink = createServerFn({ method: "POST" })
+	.validator((input) => updateSupportLinkInput.parse(input))
+	.handler(async ({ data }) => {
+		const userId = await requireUserId();
+		const { id, ...patch } = data;
+		await db
+			.update(supportLinks)
+			.set(patch)
+			.where(and(eq(supportLinks.id, id), eq(supportLinks.userId, userId)));
+	});
+
+export const removeSupportLink = createServerFn({ method: "POST" })
+	.validator((input) => idInput.parse(input))
+	.handler(async ({ data }) => {
+		const userId = await requireUserId();
+		await db
+			.delete(supportLinks)
+			.where(
+				and(eq(supportLinks.id, data.id), eq(supportLinks.userId, userId)),
+			);
 	});
 
 // ---------- theme ----------

@@ -62,6 +62,15 @@ export type SupportLinkItem = {
 	serverId: string | null;
 };
 
+export const supportLinkSchema = z.object({
+	id: z.string(),
+	category: z.enum(["support", "community"]),
+	platform: z.string().min(1, "Choose a platform"),
+	label: z.string().max(60).optional().or(z.literal("")),
+	url: z.url("Must be a valid URL"),
+	serverId: z.string().max(40).optional().or(z.literal("")).nullable(),
+});
+
 export type ProfileData = {
 	links: LinkItem[];
 	projects: ProjectItem[];

@@ -108,7 +108,7 @@ function SettingsPage() {
 		<div className="mx-auto w-full max-w-6xl">
 			<header className="border-b border-border pb-8">
 				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
-					10 / Settings
+					11 / Settings
 				</p>
 
 				<h1 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">

@@ -5,6 +5,7 @@ import {
 	addLink,
 	addProject,
 	addSnippet,
+	addSupportLink,
 	applyThemeTemplate,
 	getMyProfileCore,
 	getMyProfileData,
@@ -12,6 +13,7 @@ import {
 	removeLink,
 	removeProject,
 	removeSnippet,
+	removeSupportLink,
 	reorderLinks,
 	resetTheme,
 	toggleLink,
@@ -20,6 +22,7 @@ import {
 	updateLink,
 	updateProject,
 	updateSnippet,
+	updateSupportLink,
 	updateTheme,
 	upsertMyProfile,
 	wipeProfileData,
@@ -32,6 +35,7 @@ import {
 	type ProfileData,
 	type ProjectItem,
 	type SnippetItem,
+	type SupportLinkItem,
 } from "@/lib/schemas";
 import type { ThemeV2 } from "@/lib/theme-config";
 
@@ -457,6 +461,90 @@ export function useRemoveArticle() {
 			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
 				const c = d ?? emptyProfileData;
 				return { ...c, articles: c.articles.filter((a) => a.id !== id) };
+			});
+			return { previous };
+		},
+		onError: (_e, _i, ctx) => rollback(queryClient, ctx?.previous),
+		onSettled: () =>
+			queryClient.invalidateQueries({ queryKey: profileDataKey }),
+	});
+}
+
+// ---------- support links ----------
+
+export function useAddSupportLink() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (input: Omit<SupportLinkItem, "id">) =>
+			addSupportLink({ data: input }),
+		onMutate: async (input) => {
+			await queryClient.cancelQueries({ queryKey: profileDataKey });
+			const previous = queryClient.getQueryData<ProfileData>(profileDataKey);
+			const tempId = `optimistic-${crypto.randomUUID()}`;
+			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
+				const c = d ?? emptyProfileData;
+				return {
+					...c,
+					supportLinks: [...c.supportLinks, { ...input, id: tempId }],
+				};
+			});
+			return { previous, tempId };
+		},
+		onSuccess: (result, _input, ctx) => {
+			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
+				const c = d ?? emptyProfileData;
+				return {
+					...c,
+					supportLinks: c.supportLinks.map((s) =>
+						s.id === ctx?.tempId ? result : s,
+					),
+				};
+			});
+		},
+		onError: (_e, _i, ctx) => rollback(queryClient, ctx?.previous),
+		onSettled: () =>
+			queryClient.invalidateQueries({ queryKey: profileDataKey }),
+	});
+}
+
+export function useUpdateSupportLink() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (input: { id: string } & Partial<SupportLinkItem>) =>
+			updateSupportLink({ data: input }),
+		onMutate: async ({ id, ...patch }) => {
+			await queryClient.cancelQueries({ queryKey: profileDataKey });
+			const previous = queryClient.getQueryData<ProfileData>(profileDataKey);
+			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
+				const c = d ?? emptyProfileData;
+				return {
+					...c,
+					supportLinks: c.supportLinks.map((s) =>
+						s.id === id ? { ...s, ...patch } : s,
+					),
+				};
+			});
+			return { previous };
+		},
+		onError: (_e, _i, ctx) => rollback(queryClient, ctx?.previous),
+		onSettled: () =>
+			queryClient.invalidateQueries({ queryKey: profileDataKey }),
+	});
+}
+
+export function useRemoveSupportLink() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (id: string) => removeSupportLink({ data: { id } }),
+		onMutate: async (id) => {
+			await queryClient.cancelQueries({ queryKey: profileDataKey });
+			const previous = queryClient.getQueryData<ProfileData>(profileDataKey);
+			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
+				const c = d ?? emptyProfileData;
+				return {
+					...c,
+					supportLinks: c.supportLinks.filter((s) => s.id !== id),
+				};
 			});
 			return { previous };
 		},

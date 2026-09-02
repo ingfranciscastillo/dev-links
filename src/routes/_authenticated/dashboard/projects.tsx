@@ -406,34 +406,109 @@ function ProjectDialog({
 			title={initial ? "Edit project" : "New project"}
 			onClose={onClose}
 		>
-			<form
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					form.handleSubmit();
-				}}
-				className="flex flex-col"
-				noValidate
-			>
-				<FieldGroup className="gap-5">
-					<form.Field
-						name="name"
-						validators={{
-							onChange: zodField(projectSchema.shape.name),
-						}}
-					>
-						{(field) => {
-							const invalid =
-								field.state.meta.isTouched &&
-								field.state.meta.errors.length > 0;
+			{(requestClose) => (
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						form.handleSubmit();
+					}}
+					className="flex flex-col"
+					noValidate
+				>
+					<FieldGroup className="gap-5">
+						<form.Field
+							name="name"
+							validators={{
+								onChange: zodField(projectSchema.shape.name),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
 
-							return (
-								<Field data-invalid={invalid}>
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Name
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
+
+						<form.Field
+							name="description"
+							validators={{
+								onChange: zodField(projectSchema.shape.description),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
+
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Description
+										</FieldLabel>
+
+										<Textarea
+											id={field.name}
+											name={field.name}
+											rows={3}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											aria-invalid={invalid || undefined}
+											className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
+
+						<form.Field name="tech">
+							{(field) => (
+								<Field>
 									<FieldLabel
 										htmlFor={field.name}
 										className="font-mono text-[10px] uppercase tracking-[0.08em]"
 									>
-										Name
+										Tech
+										<span className="ml-1 text-muted-foreground">
+											(comma separated)
+										</span>
 									</FieldLabel>
 
 									<Input
@@ -442,229 +517,156 @@ function ProjectDialog({
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
-										aria-invalid={invalid || undefined}
+										placeholder="TypeScript, React, Postgres"
 										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
-
-									{invalid ? (
-										<FieldError>
-											{field.state.meta.errors.join(", ")}
-										</FieldError>
-									) : null}
 								</Field>
-							);
-						}}
-					</form.Field>
+							)}
+						</form.Field>
 
-					<form.Field
-						name="description"
-						validators={{
-							onChange: zodField(projectSchema.shape.description),
-						}}
-					>
-						{(field) => {
-							const invalid =
-								field.state.meta.isTouched &&
-								field.state.meta.errors.length > 0;
+						<div className="grid gap-5 sm:grid-cols-2">
+							<form.Field
+								name="github"
+								validators={{
+									onChange: zodField(projectSchema.shape.github),
+								}}
+							>
+								{(field) => {
+									const invalid =
+										field.state.meta.isTouched &&
+										field.state.meta.errors.length > 0;
 
-							return (
-								<Field data-invalid={invalid}>
+									return (
+										<Field data-invalid={invalid}>
+											<FieldLabel
+												htmlFor={field.name}
+												className="font-mono text-[10px] uppercase tracking-[0.08em]"
+											>
+												GitHub URL
+											</FieldLabel>
+
+											<Input
+												id={field.name}
+												name={field.name}
+												type="url"
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												aria-invalid={invalid || undefined}
+												className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
+											/>
+
+											{invalid ? (
+												<FieldError>
+													{field.state.meta.errors.join(", ")}
+												</FieldError>
+											) : null}
+										</Field>
+									);
+								}}
+							</form.Field>
+
+							<form.Field
+								name="demo"
+								validators={{
+									onChange: zodField(projectSchema.shape.demo),
+								}}
+							>
+								{(field) => {
+									const invalid =
+										field.state.meta.isTouched &&
+										field.state.meta.errors.length > 0;
+
+									return (
+										<Field data-invalid={invalid}>
+											<FieldLabel
+												htmlFor={field.name}
+												className="font-mono text-[10px] uppercase tracking-[0.08em]"
+											>
+												Demo URL
+											</FieldLabel>
+
+											<Input
+												id={field.name}
+												name={field.name}
+												type="url"
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												aria-invalid={invalid || undefined}
+												className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
+											/>
+
+											{invalid ? (
+												<FieldError>
+													{field.state.meta.errors.join(", ")}
+												</FieldError>
+											) : null}
+										</Field>
+									);
+								}}
+							</form.Field>
+						</div>
+
+						<form.Field name="status">
+							{(field) => (
+								<Field>
 									<FieldLabel
-										htmlFor={field.name}
+										htmlFor="status-select"
 										className="font-mono text-[10px] uppercase tracking-[0.08em]"
 									>
-										Description
+										Status
 									</FieldLabel>
 
-									<Textarea
-										id={field.name}
-										name={field.name}
-										rows={3}
+									<Select
 										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										aria-invalid={invalid || undefined}
-										className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-									/>
-
-									{invalid ? (
-										<FieldError>
-											{field.state.meta.errors.join(", ")}
-										</FieldError>
-									) : null}
-								</Field>
-							);
-						}}
-					</form.Field>
-
-					<form.Field name="tech">
-						{(field) => (
-							<Field>
-								<FieldLabel
-									htmlFor={field.name}
-									className="font-mono text-[10px] uppercase tracking-[0.08em]"
-								>
-									Tech
-									<span className="ml-1 text-muted-foreground">
-										(comma separated)
-									</span>
-								</FieldLabel>
-
-								<Input
-									id={field.name}
-									name={field.name}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									placeholder="TypeScript, React, Postgres"
-									className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-								/>
-							</Field>
-						)}
-					</form.Field>
-
-					<div className="grid gap-5 sm:grid-cols-2">
-						<form.Field
-							name="github"
-							validators={{
-								onChange: zodField(projectSchema.shape.github),
-							}}
-						>
-							{(field) => {
-								const invalid =
-									field.state.meta.isTouched &&
-									field.state.meta.errors.length > 0;
-
-								return (
-									<Field data-invalid={invalid}>
-										<FieldLabel
-											htmlFor={field.name}
-											className="font-mono text-[10px] uppercase tracking-[0.08em]"
-										>
-											GitHub URL
-										</FieldLabel>
-
-										<Input
-											id={field.name}
-											name={field.name}
-											type="url"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											aria-invalid={invalid || undefined}
-											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
-										/>
-
-										{invalid ? (
-											<FieldError>
-												{field.state.meta.errors.join(", ")}
-											</FieldError>
-										) : null}
-									</Field>
-								);
-							}}
-						</form.Field>
-
-						<form.Field
-							name="demo"
-							validators={{
-								onChange: zodField(projectSchema.shape.demo),
-							}}
-						>
-							{(field) => {
-								const invalid =
-									field.state.meta.isTouched &&
-									field.state.meta.errors.length > 0;
-
-								return (
-									<Field data-invalid={invalid}>
-										<FieldLabel
-											htmlFor={field.name}
-											className="font-mono text-[10px] uppercase tracking-[0.08em]"
-										>
-											Demo URL
-										</FieldLabel>
-
-										<Input
-											id={field.name}
-											name={field.name}
-											type="url"
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											aria-invalid={invalid || undefined}
-											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
-										/>
-
-										{invalid ? (
-											<FieldError>
-												{field.state.meta.errors.join(", ")}
-											</FieldError>
-										) : null}
-									</Field>
-								);
-							}}
-						</form.Field>
-					</div>
-
-					<form.Field name="status">
-						{(field) => (
-							<Field>
-								<FieldLabel
-									htmlFor="status-select"
-									className="font-mono text-[10px] uppercase tracking-[0.08em]"
-								>
-									Status
-								</FieldLabel>
-
-								<Select
-									value={field.state.value}
-									onValueChange={(value) =>
-										field.handleChange(value as ProjectFormValues["status"])
-									}
-								>
-									<SelectTrigger
-										id="status-select"
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
+										onValueChange={(value) =>
+											field.handleChange(value as ProjectFormValues["status"])
+										}
 									>
-										<SelectValue />
-									</SelectTrigger>
+										<SelectTrigger
+											id="status-select"
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
+										>
+											<SelectValue />
+										</SelectTrigger>
 
-									<SelectContent>
-										{STATUS_OPTIONS.map((option) => (
-											<SelectItem key={option.value} value={option.value}>
-												{option.label}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</Field>
-						)}
-					</form.Field>
-				</FieldGroup>
+										<SelectContent>
+											{STATUS_OPTIONS.map((option) => (
+												<SelectItem key={option.value} value={option.value}>
+													{option.label}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</Field>
+							)}
+						</form.Field>
+					</FieldGroup>
 
-				<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-					<button
-						type="button"
-						onClick={onClose}
-						className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
-					>
-						Cancel
-					</button>
+					<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+						<button
+							type="button"
+							onClick={requestClose}
+							className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+						>
+							Cancel
+						</button>
 
-					<Button
-						type="submit"
-						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
-					>
-						{pending
-							? "Saving..."
-							: initial
-								? "Save project"
-								: "Create project"}
-					</Button>
-				</div>
-			</form>
+						<Button
+							type="submit"
+							disabled={pending || !form.state.canSubmit}
+							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						>
+							{pending
+								? "Saving..."
+								: initial
+									? "Save project"
+									: "Create project"}
+						</Button>
+					</div>
+				</form>
+			)}
 		</ModalShell>
 	);
 }

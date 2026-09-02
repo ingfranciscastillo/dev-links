@@ -249,7 +249,7 @@ function DashboardHome() {
 								className="flex items-center gap-3 border-b border-border py-4"
 							>
 								<span
-									className={`font-mono text-[9px] ${
+									className={`font-mono text-[9px] transition-colors duration-300 ${
 										done ? "text-brand" : "text-muted-foreground"
 									}`}
 								>
@@ -257,13 +257,13 @@ function DashboardHome() {
 								</span>
 
 								<span
-									className={`h-1.5 w-1.5 rounded-full ${
+									className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${
 										done ? "bg-brand" : "border border-border"
 									}`}
 								/>
 
 								<span
-									className={`text-sm ${
+									className={`text-sm transition-colors duration-300 ${
 										done
 											? "text-muted-foreground line-through"
 											: "text-foreground"

@@ -9,7 +9,8 @@ import {
 	MessageSquare,
 	Share2,
 } from "lucide-react";
-import { useEffect } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import { type ReactNode, useEffect } from "react";
 import { BlueskyBlock } from "@/components/profile/BlueskyBlock";
 import { DevtoBlock } from "@/components/profile/DevtoBlock";
 import { DockerhubBlock } from "@/components/profile/DockerhubBlock";
@@ -58,6 +59,27 @@ type LoaderData = {
 // Helper mínimo para clases condicionales sin traer una dependencia nueva.
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
+}
+
+// Mismo token de easing que ya usa el landing (Hero, Features, etc.) —
+// las secciones bajo el fold del perfil público entran igual, no LinksSection
+// (esa es el motivo por el que la gente llega a la página; debe ser
+// clickeable al instante, sin delay de entrada).
+const sectionEase = [0.16, 1, 0.3, 1] as const;
+
+function RevealSection({ children }: { children: ReactNode }) {
+	const reduceMotion = useReducedMotion();
+
+	return (
+		<motion.div
+			initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true, amount: 0.2 }}
+			transition={{ duration: reduceMotion ? 0.01 : 0.5, ease: sectionEase }}
+		>
+			{children}
+		</motion.div>
+	);
 }
 
 export const Route = createFileRoute("/$username")({
@@ -211,26 +233,38 @@ function ProfilePage() {
 					/>
 
 					{live.data.snippets.length > 0 && (
-						<SnippetsSection snippets={live.data.snippets} themed={themed} />
+						<RevealSection>
+							<SnippetsSection snippets={live.data.snippets} themed={themed} />
+						</RevealSection>
 					)}
 
-					<ProjectsSection projects={live.data.projects} themed={themed} />
+					<RevealSection>
+						<ProjectsSection projects={live.data.projects} themed={themed} />
+					</RevealSection>
 
-					<ArticlesSection articles={live.data.articles} themed={themed} />
+					<RevealSection>
+						<ArticlesSection articles={live.data.articles} themed={themed} />
+					</RevealSection>
 
 					{live.data.talks.length > 0 && (
-						<TalksBlock talks={live.data.talks} themed={themed} />
+						<RevealSection>
+							<TalksBlock talks={live.data.talks} themed={themed} />
+						</RevealSection>
 					)}
 
 					{live.data.supportLinks.length > 0 && (
-						<SupportBlock links={live.data.supportLinks} themed={themed} />
+						<RevealSection>
+							<SupportBlock links={live.data.supportLinks} themed={themed} />
+						</RevealSection>
 					)}
 
 					{live.integrations.length > 0 && (
-						<IntegrationBlocks
-							integrations={live.integrations}
-							themed={themed}
-						/>
+						<RevealSection>
+							<IntegrationBlocks
+								integrations={live.integrations}
+								themed={themed}
+							/>
+						</RevealSection>
 					)}
 
 					{live.plan !== "pro" && <Watermark themed={themed} />}

@@ -397,143 +397,151 @@ function LinkDialog({
 
 	return (
 		<ModalShell title={initial ? "Edit link" : "New link"} onClose={onClose}>
-			<form
-				onSubmit={(event) => {
-					event.preventDefault();
-					event.stopPropagation();
-					form.handleSubmit();
-				}}
-				className="flex flex-col"
-				noValidate
-			>
-				<FieldGroup className="gap-5">
-					<form.Field
-						name="title"
-						validators={{
-							onChange: zodField(linkSchema.shape.title),
-						}}
-					>
-						{(field) => {
-							const invalid =
-								field.state.meta.isTouched &&
-								field.state.meta.errors.length > 0;
+			{(requestClose) => (
+				<form
+					onSubmit={(event) => {
+						event.preventDefault();
+						event.stopPropagation();
+						form.handleSubmit();
+					}}
+					className="flex flex-col"
+					noValidate
+				>
+					<FieldGroup className="gap-5">
+						<form.Field
+							name="title"
+							validators={{
+								onChange: zodField(linkSchema.shape.title),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
 
-							return (
-								<Field data-invalid={invalid}>
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Title
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											placeholder="My portfolio"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
+											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
+
+						<form.Field
+							name="url"
+							validators={{
+								onChange: zodField(linkSchema.shape.url),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
+
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											URL
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											type="url"
+											placeholder="https://..."
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
+											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
+
+						<form.Field name="description">
+							{(field) => (
+								<Field>
 									<FieldLabel
 										htmlFor={field.name}
 										className="font-mono text-[10px] uppercase tracking-[0.08em]"
 									>
-										Title
+										Description
+										<span className="ml-1 text-muted-foreground">
+											(optional)
+										</span>
 									</FieldLabel>
 
-									<Input
+									<textarea
 										id={field.name}
 										name={field.name}
-										placeholder="My portfolio"
+										rows={3}
+										placeholder="Short line shown below the title"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(event) => field.handleChange(event.target.value)}
-										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										className="mt-2 w-full resize-none border-b border-border bg-transparent px-0 py-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
 									/>
-
-									{invalid ? (
-										<FieldError>
-											{field.state.meta.errors.join(", ")}
-										</FieldError>
-									) : null}
 								</Field>
-							);
-						}}
-					</form.Field>
+							)}
+						</form.Field>
+					</FieldGroup>
 
-					<form.Field
-						name="url"
-						validators={{
-							onChange: zodField(linkSchema.shape.url),
-						}}
-					>
-						{(field) => {
-							const invalid =
-								field.state.meta.isTouched &&
-								field.state.meta.errors.length > 0;
+					<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+						<button
+							type="button"
+							onClick={requestClose}
+							className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+						>
+							Cancel
+						</button>
 
-							return (
-								<Field data-invalid={invalid}>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										URL
-									</FieldLabel>
-
-									<Input
-										id={field.name}
-										name={field.name}
-										type="url"
-										placeholder="https://..."
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(event) => field.handleChange(event.target.value)}
-										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
-									/>
-
-									{invalid ? (
-										<FieldError>
-											{field.state.meta.errors.join(", ")}
-										</FieldError>
-									) : null}
-								</Field>
-							);
-						}}
-					</form.Field>
-
-					<form.Field name="description">
-						{(field) => (
-							<Field>
-								<FieldLabel
-									htmlFor={field.name}
-									className="font-mono text-[10px] uppercase tracking-[0.08em]"
-								>
-									Description
-									<span className="ml-1 text-muted-foreground">(optional)</span>
-								</FieldLabel>
-
-								<textarea
-									id={field.name}
-									name={field.name}
-									rows={3}
-									placeholder="Short line shown below the title"
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(event) => field.handleChange(event.target.value)}
-									className="mt-2 w-full resize-none border-b border-border bg-transparent px-0 py-3 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground focus:border-brand focus:outline-none"
-								/>
-							</Field>
-						)}
-					</form.Field>
-				</FieldGroup>
-
-				<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-					<button
-						type="button"
-						onClick={onClose}
-						className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
-					>
-						Cancel
-					</button>
-
-					<Button
-						type="submit"
-						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
-					>
-						{pending ? "Saving..." : initial ? "Save link" : "Create link"}
-					</Button>
-				</div>
-			</form>
+						<Button
+							type="submit"
+							disabled={pending || !form.state.canSubmit}
+							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						>
+							{pending ? "Saving..." : initial ? "Save link" : "Create link"}
+						</Button>
+					</div>
+				</form>
+			)}
 		</ModalShell>
 	);
 }

@@ -294,21 +294,90 @@ function SnippetDialog({
 			title={initial ? "Edit snippet" : "New snippet"}
 			onClose={onClose}
 		>
-			<form
-				onSubmit={(event) => {
-					event.preventDefault();
-					event.stopPropagation();
-					form.handleSubmit();
-				}}
-				className="flex flex-col"
-				noValidate
-			>
-				<FieldGroup className="gap-5">
-					<div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_8rem]">
+			{(requestClose) => (
+				<form
+					onSubmit={(event) => {
+						event.preventDefault();
+						event.stopPropagation();
+						form.handleSubmit();
+					}}
+					className="flex flex-col"
+					noValidate
+				>
+					<FieldGroup className="gap-5">
+						<div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_8rem]">
+							<form.Field
+								name="title"
+								validators={{
+									onChange: zodField(snippetSchema.shape.title),
+								}}
+							>
+								{(field) => {
+									const invalid =
+										field.state.meta.isTouched &&
+										field.state.meta.errors.length > 0;
+
+									return (
+										<Field data-invalid={invalid}>
+											<FieldLabel
+												htmlFor={field.name}
+												className="font-mono text-[10px] uppercase tracking-[0.08em]"
+											>
+												Title
+											</FieldLabel>
+
+											<Input
+												id={field.name}
+												name={field.name}
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(event) =>
+													field.handleChange(event.target.value)
+												}
+												aria-invalid={invalid || undefined}
+												className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+											/>
+
+											{invalid ? (
+												<FieldError>
+													{field.state.meta.errors.join(", ")}
+												</FieldError>
+											) : null}
+										</Field>
+									);
+								}}
+							</form.Field>
+
+							<form.Field name="language">
+								{(field) => (
+									<Field>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Language
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
+											placeholder="ts"
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+									</Field>
+								)}
+							</form.Field>
+						</div>
+
 						<form.Field
-							name="title"
+							name="code"
 							validators={{
-								onChange: zodField(snippetSchema.shape.title),
+								onChange: zodField(snippetSchema.shape.code),
 							}}
 						>
 							{(field) => {
@@ -322,19 +391,20 @@ function SnippetDialog({
 											htmlFor={field.name}
 											className="font-mono text-[10px] uppercase tracking-[0.08em]"
 										>
-											Title
+											Code
 										</FieldLabel>
 
-										<Input
+										<Textarea
 											id={field.name}
 											name={field.name}
+											rows={12}
 											value={field.state.value}
 											onBlur={field.handleBlur}
 											onChange={(event) =>
 												field.handleChange(event.target.value)
 											}
+											className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-xs leading-relaxed shadow-none focus-visible:border-brand focus-visible:ring-0"
 											aria-invalid={invalid || undefined}
-											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 										/>
 
 										{invalid ? (
@@ -346,95 +416,31 @@ function SnippetDialog({
 								);
 							}}
 						</form.Field>
+					</FieldGroup>
 
-						<form.Field name="language">
-							{(field) => (
-								<Field>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										Language
-									</FieldLabel>
+					<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+						<button
+							type="button"
+							onClick={requestClose}
+							className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+						>
+							Cancel
+						</button>
 
-									<Input
-										id={field.name}
-										name={field.name}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(event) => field.handleChange(event.target.value)}
-										placeholder="ts"
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
-									/>
-								</Field>
-							)}
-						</form.Field>
+						<Button
+							type="submit"
+							disabled={pending || !form.state.canSubmit}
+							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						>
+							{pending
+								? "Saving..."
+								: initial
+									? "Save snippet"
+									: "Create snippet"}
+						</Button>
 					</div>
-
-					<form.Field
-						name="code"
-						validators={{
-							onChange: zodField(snippetSchema.shape.code),
-						}}
-					>
-						{(field) => {
-							const invalid =
-								field.state.meta.isTouched &&
-								field.state.meta.errors.length > 0;
-
-							return (
-								<Field data-invalid={invalid}>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										Code
-									</FieldLabel>
-
-									<Textarea
-										id={field.name}
-										name={field.name}
-										rows={12}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(event) => field.handleChange(event.target.value)}
-										className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-xs leading-relaxed shadow-none focus-visible:border-brand focus-visible:ring-0"
-										aria-invalid={invalid || undefined}
-									/>
-
-									{invalid ? (
-										<FieldError>
-											{field.state.meta.errors.join(", ")}
-										</FieldError>
-									) : null}
-								</Field>
-							);
-						}}
-					</form.Field>
-				</FieldGroup>
-
-				<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-					<button
-						type="button"
-						onClick={onClose}
-						className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
-					>
-						Cancel
-					</button>
-
-					<Button
-						type="submit"
-						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
-					>
-						{pending
-							? "Saving..."
-							: initial
-								? "Save snippet"
-								: "Create snippet"}
-					</Button>
-				</div>
-			</form>
+				</form>
+			)}
 		</ModalShell>
 	);
 }

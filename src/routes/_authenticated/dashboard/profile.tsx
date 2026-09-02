@@ -145,12 +145,17 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 			<section className="border-b border-border pb-8">
 				<div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
 					<div className="flex items-center gap-5">
-						<div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden border border-border bg-surface font-display text-2xl">
+						<div
+							className={`relative flex h-20 w-20 shrink-0 items-center justify-center border border-border bg-surface font-display text-2xl transition-opacity duration-300 ${
+								uploadAvatar.isPending ? "opacity-60" : "opacity-100"
+							}`}
+						>
 							{avatarSrc ? (
 								<img
+									key={avatarSrc}
 									src={avatarSrc}
 									alt=""
-									className="h-full w-full object-cover"
+									className="h-full w-full object-cover opacity-100 transition-opacity duration-300 starting:opacity-0 motion-reduce:transition-none"
 								/>
 							) : (
 								user.name.slice(0, 1).toUpperCase()

@@ -322,187 +322,197 @@ function ArticleDialog({
 			title={initial ? "Edit article" : "New article"}
 			onClose={onClose}
 		>
-			<form
-				onSubmit={(event) => {
-					event.preventDefault();
-					event.stopPropagation();
-					form.handleSubmit();
-				}}
-				className="flex flex-col"
-				noValidate
-			>
-				<FieldGroup className="gap-5">
-					<form.Field
-						name="title"
-						validators={{
-							onChange: zodField(articleSchema.shape.title),
-						}}
-					>
-						{(field) => {
-							const invalid =
-								field.state.meta.isTouched &&
-								field.state.meta.errors.length > 0;
+			{(requestClose) => (
+				<form
+					onSubmit={(event) => {
+						event.preventDefault();
+						event.stopPropagation();
+						form.handleSubmit();
+					}}
+					className="flex flex-col"
+					noValidate
+				>
+					<FieldGroup className="gap-5">
+						<form.Field
+							name="title"
+							validators={{
+								onChange: zodField(articleSchema.shape.title),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
 
-							return (
-								<Field data-invalid={invalid}>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										Title
-									</FieldLabel>
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Title
+										</FieldLabel>
 
-									<Input
-										id={field.name}
-										name={field.name}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(event) => field.handleChange(event.target.value)}
-										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-									/>
+										<Input
+											id={field.name}
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
+											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
 
-									{invalid ? (
-										<FieldError>
-											{field.state.meta.errors.join(", ")}
-										</FieldError>
-									) : null}
-								</Field>
-							);
-						}}
-					</form.Field>
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
 
-					<form.Field
-						name="url"
-						validators={{
-							onChange: zodField(articleSchema.shape.url),
-						}}
-					>
-						{(field) => {
-							const invalid =
-								field.state.meta.isTouched &&
-								field.state.meta.errors.length > 0;
+						<form.Field
+							name="url"
+							validators={{
+								onChange: zodField(articleSchema.shape.url),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
 
-							return (
-								<Field data-invalid={invalid}>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										URL
-									</FieldLabel>
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											URL
+										</FieldLabel>
 
-									<Input
-										id={field.name}
-										name={field.name}
-										type="url"
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(event) => field.handleChange(event.target.value)}
-										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
-									/>
+										<Input
+											id={field.name}
+											name={field.name}
+											type="url"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
+											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-sm shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
 
-									{invalid ? (
-										<FieldError>
-											{field.state.meta.errors.join(", ")}
-										</FieldError>
-									) : null}
-								</Field>
-							);
-						}}
-					</form.Field>
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
 
-					<div className="grid gap-5 sm:grid-cols-2">
-						<form.Field name="source">
+						<div className="grid gap-5 sm:grid-cols-2">
+							<form.Field name="source">
+								{(field) => (
+									<Field>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Source
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											placeholder="Dev.to"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+									</Field>
+								)}
+							</form.Field>
+
+							<form.Field name="date">
+								{(field) => (
+									<Field>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Date
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											type="date"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(event) =>
+												field.handleChange(event.target.value)
+											}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+									</Field>
+								)}
+							</form.Field>
+						</div>
+
+						<form.Field name="summary">
 							{(field) => (
 								<Field>
 									<FieldLabel
 										htmlFor={field.name}
 										className="font-mono text-[10px] uppercase tracking-[0.08em]"
 									>
-										Source
+										Summary
 									</FieldLabel>
 
-									<Input
+									<Textarea
 										id={field.name}
 										name={field.name}
-										placeholder="Dev.to"
+										rows={3}
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(event) => field.handleChange(event.target.value)}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 								</Field>
 							)}
 						</form.Field>
+					</FieldGroup>
 
-						<form.Field name="date">
-							{(field) => (
-								<Field>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										Date
-									</FieldLabel>
+					<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+						<button
+							type="button"
+							onClick={requestClose}
+							className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+						>
+							Cancel
+						</button>
 
-									<Input
-										id={field.name}
-										name={field.name}
-										type="date"
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(event) => field.handleChange(event.target.value)}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-									/>
-								</Field>
-							)}
-						</form.Field>
+						<Button
+							type="submit"
+							disabled={pending || !form.state.canSubmit}
+							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						>
+							{pending ? "Saving..." : initial ? "Save article" : "Add article"}
+						</Button>
 					</div>
-
-					<form.Field name="summary">
-						{(field) => (
-							<Field>
-								<FieldLabel
-									htmlFor={field.name}
-									className="font-mono text-[10px] uppercase tracking-[0.08em]"
-								>
-									Summary
-								</FieldLabel>
-
-								<Textarea
-									id={field.name}
-									name={field.name}
-									rows={3}
-									value={field.state.value}
-									onBlur={field.handleBlur}
-									onChange={(event) => field.handleChange(event.target.value)}
-									className="mt-2 resize-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-								/>
-							</Field>
-						)}
-					</form.Field>
-				</FieldGroup>
-
-				<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-					<button
-						type="button"
-						onClick={onClose}
-						className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
-					>
-						Cancel
-					</button>
-
-					<Button
-						type="submit"
-						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
-					>
-						{pending ? "Saving..." : initial ? "Save article" : "Add article"}
-					</Button>
-				</div>
-			</form>
+				</form>
+			)}
 		</ModalShell>
 	);
 }

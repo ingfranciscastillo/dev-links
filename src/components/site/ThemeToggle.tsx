@@ -23,13 +23,22 @@ export function ThemeToggle() {
 			type="button"
 			onClick={toggle}
 			aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-			className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+			className="relative inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 		>
-			{theme === "dark" ? (
-				<SunIcon size={15} strokeWidth={1.5} />
-			) : (
-				<MoonIcon size={15} strokeWidth={1.5} />
-			)}
+			<SunIcon
+				size={15}
+				strokeWidth={1.5}
+				className={`absolute transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+					theme === "dark" ? "scale-100 opacity-100" : "scale-50 opacity-0"
+				}`}
+			/>
+			<MoonIcon
+				size={15}
+				strokeWidth={1.5}
+				className={`absolute transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+					theme === "dark" ? "scale-50 opacity-0" : "scale-100 opacity-100"
+				}`}
+			/>
 		</button>
 	);
 }

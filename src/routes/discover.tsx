@@ -514,12 +514,6 @@ function ProfileRow({
 								{COUNTRY_NAME_BY_CODE[p.country] ?? p.country}
 							</p>
 						)}
-
-						{p.location && (
-							<p className="mt-1 max-w-32 truncate text-xs text-muted-foreground">
-								{p.location}
-							</p>
-						)}
 					</div>
 
 					<span className="font-mono text-xs text-muted-foreground transition-all duration-200 group-hover:translate-x-1 group-hover:text-brand">

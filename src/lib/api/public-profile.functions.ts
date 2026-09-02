@@ -33,7 +33,7 @@ export type PublicProfile = {
 	image: string | null;
 	plan: string;
 	bio: string;
-	location: string;
+	country: string;
 	website: string;
 	available: boolean;
 	data: ProfileData;
@@ -51,7 +51,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			.select({
 				id: profiles.id,
 				bio: profiles.bio,
-				location: profiles.location,
+				country: profiles.country,
 				website: profiles.website,
 				available: profiles.available,
 				plan: profiles.plan,
@@ -181,7 +181,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			image: profile.image ?? null,
 			plan: profile.plan,
 			bio: profile.bio ?? "",
-			location: profile.location ?? "",
+			country: profile.country ?? "",
 			website: profile.website ?? "",
 			available: profile.available,
 			data: profileData,

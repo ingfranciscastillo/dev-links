@@ -10,7 +10,6 @@ export type DiscoverResult = {
 	username: string;
 	name: string | null;
 	bio: string | null;
-	location: string | null;
 	country: string | null;
 	available: boolean;
 	seniority: string | null;
@@ -38,7 +37,6 @@ export const searchProfiles = createServerFn({ method: "GET" })
 					username: userTable.username,
 					name: userTable.name,
 					bio: profiles.bio,
-					location: profiles.location,
 					country: profiles.country,
 					available: profiles.available,
 					seniority: profiles.seniority,
@@ -60,7 +58,6 @@ export const searchProfiles = createServerFn({ method: "GET" })
 					ilike(userTable.name, pattern),
 					ilike(userTable.username, pattern),
 					ilike(profiles.bio, pattern),
-					ilike(profiles.location, pattern),
 				);
 				if (textMatch) conditions.push(textMatch);
 			}
@@ -93,7 +90,6 @@ export const searchProfiles = createServerFn({ method: "GET" })
 				username: r.username ?? "",
 				name: r.name,
 				bio: r.bio,
-				location: r.location,
 				country: r.country,
 				available: r.available,
 				seniority: r.seniority,

@@ -89,7 +89,7 @@ function ProfilePage() {
 			{core.data ? (
 				<ProfileForm core={core.data} />
 			) : (
-				<div className="grid max-w-3xl gap-8 pt-8" aria-busy="true">
+				<div className="grid gap-8 pt-8" aria-busy="true">
 					<FormSkeleton />
 					<FormSkeleton />
 				</div>
@@ -153,7 +153,6 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 			name: user.name,
 			username: user.username ?? "",
 			bio: core.bio,
-			location: core.location,
 			website: core.website,
 		},
 		onSubmit: async ({ value }) => {
@@ -173,7 +172,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 				e.stopPropagation();
 				form.handleSubmit();
 			}}
-			className="max-w-3xl pt-8"
+			className="pt-8"
 			noValidate
 		>
 			<section className="border-b border-border pb-8">
@@ -248,7 +247,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 				</div>
 
 				<FieldGroup>
-					<div className="grid gap-6 sm:grid-cols-2">
+					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 						<form.Field
 							name="name"
 							validators={{
@@ -288,7 +287,6 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								);
 							}}
 						</form.Field>
-
 						<form.Field
 							name="username"
 							validators={{
@@ -326,6 +324,47 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 												className="h-full rounded-none border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
 											/>
 										</div>
+
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
+						<form.Field
+							name="website"
+							validators={{
+								onChange: zodField(profileInput.shape.website),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
+
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Website
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											type="url"
+											value={field.state.value ?? ""}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											placeholder="https://your.dev"
+											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
 
 										{invalid ? (
 											<FieldError>
@@ -393,87 +432,6 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 							);
 						}}
 					</form.Field>
-				</FieldGroup>
-			</section>
-
-			<section className="border-b border-border py-8">
-				<div className="mb-6">
-					<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
-						Details
-					</p>
-
-					<p className="mt-2 text-sm text-muted-foreground">
-						Optional information displayed on your public profile.
-					</p>
-				</div>
-
-				<FieldGroup>
-					<div className="grid gap-6 sm:grid-cols-2">
-						<form.Field name="location">
-							{(field) => (
-								<Field>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										Location
-									</FieldLabel>
-
-									<Input
-										id={field.name}
-										name={field.name}
-										value={field.state.value ?? ""}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										placeholder="Madrid, Spain"
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-									/>
-								</Field>
-							)}
-						</form.Field>
-
-						<form.Field
-							name="website"
-							validators={{
-								onChange: zodField(profileInput.shape.website),
-							}}
-						>
-							{(field) => {
-								const invalid =
-									field.state.meta.isTouched &&
-									field.state.meta.errors.length > 0;
-
-								return (
-									<Field data-invalid={invalid}>
-										<FieldLabel
-											htmlFor={field.name}
-											className="font-mono text-[10px] uppercase tracking-[0.08em]"
-										>
-											Website
-										</FieldLabel>
-
-										<Input
-											id={field.name}
-											name={field.name}
-											type="url"
-											value={field.state.value ?? ""}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="https://your.dev"
-											aria-invalid={invalid || undefined}
-											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-										/>
-
-										{invalid ? (
-											<FieldError>
-												{field.state.meta.errors.join(", ")}
-											</FieldError>
-										) : null}
-									</Field>
-								);
-							}}
-						</form.Field>
-					</div>
 				</FieldGroup>
 			</section>
 
@@ -613,14 +571,14 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 	}
 
 	return (
-		<form onSubmit={saveDiscovery} className="max-w-3xl">
-			<div className="grid gap-6 sm:grid-cols-2">
+		<form onSubmit={saveDiscovery}>
+			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 				<div>
 					<Label
-						htmlFor="country-select"
+						htmlFor="location-select"
 						className="font-mono text-[10px] uppercase tracking-[0.08em]"
 					>
-						Country
+						Location
 					</Label>
 
 					<Select
@@ -633,7 +591,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						}
 					>
 						<SelectTrigger
-							id="country-select"
+							id="location-select"
 							className="mt-2 h-11 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
 						>
 							<SelectValue />
@@ -724,7 +682,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 					</label>
 				</div>
 
-				<div className="sm:col-span-2">
+				<div className="sm:col-span-2 lg:col-span-4">
 					<Label
 						htmlFor="technologies"
 						className="font-mono text-[10px] uppercase tracking-[0.08em]"

@@ -36,6 +36,7 @@ import {
 	type PublicProfile,
 } from "@/lib/api/public-profile.functions";
 import { authClient } from "@/lib/auth-client";
+import { COUNTRY_NAME_BY_CODE } from "@/lib/countries";
 import { iconForUrl } from "@/lib/icons";
 import type {
 	BlueskyPayload,
@@ -228,7 +229,11 @@ function ProfilePage() {
 					username={live.username}
 					image={live.image}
 					bio={live.bio}
-					location={live.location}
+					location={
+						live.country
+							? (COUNTRY_NAME_BY_CODE[live.country] ?? live.country)
+							: ""
+					}
 					website={live.website}
 					available={live.available}
 					avatarHue={avatarHue}

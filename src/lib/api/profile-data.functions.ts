@@ -201,7 +201,6 @@ export const getMyProfileData = createServerFn({ method: "GET" }).handler(
 // más los campos de discovery que consume el dashboard.
 export type ProfileCore = {
 	bio: string;
-	location: string;
 	website: string;
 	available: boolean;
 	country: string;
@@ -217,7 +216,6 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 		const [row] = await db
 			.select({
 				bio: profiles.bio,
-				location: profiles.location,
 				website: profiles.website,
 				available: profiles.available,
 				country: profiles.country,
@@ -231,7 +229,6 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 			.limit(1);
 		return {
 			bio: row?.bio ?? "",
-			location: row?.location ?? "",
 			website: row?.website ?? "",
 			available: row?.available ?? false,
 			country: row?.country ?? "",
@@ -255,7 +252,6 @@ export const profileInput = z.object({
 		.max(24)
 		.regex(/^[a-z0-9_-]+$/, "Only a-z, 0-9, _ and -"),
 	bio: z.string().max(160).optional().or(z.literal("")),
-	location: z.string().max(60).optional().or(z.literal("")),
 	website: z.string().url().optional().or(z.literal("")),
 });
 
@@ -282,14 +278,12 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 					.values({
 						id: userId,
 						bio: data.bio || null,
-						location: data.location || null,
 						website: data.website || null,
 					})
 					.onConflictDoUpdate({
 						target: profiles.id,
 						set: {
 							bio: data.bio || null,
-							location: data.location || null,
 							website: data.website || null,
 							updatedAt: new Date(),
 						},

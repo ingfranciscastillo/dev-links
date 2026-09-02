@@ -287,7 +287,28 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    scrollbar-width: thin;
+		scrollbar-color: var(--color-border) transparent;
   }
+
+  	*::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+
+	*::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	*::-webkit-scrollbar-thumb {
+		background: var(--color-border);
+		border: 2px solid var(--color-background);
+		border-radius: 9999px;
+	}
+
+	*::-webkit-scrollbar-thumb:hover {
+		background: var(--color-muted-foreground);
+	}
 
   html {
     color-scheme: light;

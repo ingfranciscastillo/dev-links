@@ -1,8 +1,8 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="public/favicon-mark-on-ink.svg">
-    <source media="(prefers-color-scheme: light)" srcset="public/favicon-mark-on-paper.svg">
-    <img src="public/favicon-mark-on-paper.svg" alt="DevLinks logo" width="112" />
+    <source media="(prefers-color-scheme: dark)" srcset="public/favicon-mark-dark-theme.svg">
+    <source media="(prefers-color-scheme: light)" srcset="public/symbol-color-on-paper.svg">
+    <img src="public/symbol-color-on-paper.svg" alt="DevLinks logo" width="112" />
   </picture>
 
   # DevLinks

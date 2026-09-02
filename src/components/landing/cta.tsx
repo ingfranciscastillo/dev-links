@@ -1,10 +1,67 @@
 import { ArrowRightIcon } from "@solar-icons/react/linear";
+import { useNavigate } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { usernameSchema } from "@/lib/schemas/auth";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
+type Status = "idle" | "invalid" | "checking" | "available" | "taken";
+
+const STATUS_COPY: Record<Status, string | null> = {
+	idle: null,
+	invalid: "At least 3 characters, a-z 0-9 _ -",
+	checking: "Checking…",
+	available: "Available",
+	taken: "Already taken",
+};
+
 export function Cta() {
 	const reduceMotion = useReducedMotion();
+	const navigate = useNavigate();
+
+	const [username, setUsername] = useState("");
+	const [status, setStatus] = useState<Status>("idle");
+	const requestId = useRef(0);
+
+	useEffect(() => {
+		const value = username.trim().toLowerCase();
+
+		if (!value) {
+			setStatus("idle");
+			return;
+		}
+
+		if (!usernameSchema.safeParse(value).success) {
+			setStatus("invalid");
+			return;
+		}
+
+		setStatus("checking");
+		const id = ++requestId.current;
+
+		const timer = setTimeout(async () => {
+			try {
+				const { data } = await authClient.isUsernameAvailable({
+					username: value,
+				});
+				if (requestId.current !== id) return;
+				setStatus(data?.available ? "available" : "taken");
+			} catch {
+				if (requestId.current !== id) return;
+				setStatus("idle");
+			}
+		}, 400);
+
+		return () => clearTimeout(timer);
+	}, [username]);
+
+	function handleSubmit(e: FormEvent) {
+		e.preventDefault();
+		const value = username.trim().toLowerCase();
+		navigate({ to: "/signup", search: { username: value || undefined } });
+	}
 
 	return (
 		<section id="cta" className="border-t border-border">
@@ -46,7 +103,7 @@ export function Cta() {
 							everywhere.
 						</p>
 
-						<form onSubmit={(e) => e.preventDefault()} className="mt-8">
+						<form onSubmit={handleSubmit} className="mt-8">
 							<label htmlFor="cta-username" className="sr-only">
 								Your username
 							</label>
@@ -63,7 +120,11 @@ export function Cta() {
 									duration: 0.2,
 									ease,
 								}}
-								className="flex border-b border-foreground pb-2 focus-within:border-brand"
+								className={`flex border-b pb-2 transition-colors focus-within:border-brand ${
+									status === "taken"
+										? "border-destructive"
+										: "border-foreground"
+								}`}
 							>
 								<span className="shrink-0 font-mono text-[12px] text-muted-foreground">
 									devlinks.com/
@@ -72,6 +133,10 @@ export function Cta() {
 								<input
 									id="cta-username"
 									placeholder="your-handle"
+									value={username}
+									onChange={(e) => setUsername(e.target.value)}
+									autoComplete="off"
+									spellCheck={false}
 									className="min-w-0 flex-1 bg-transparent px-1 font-mono text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none"
 								/>
 
@@ -88,8 +153,16 @@ export function Cta() {
 								</button>
 							</motion.div>
 
-							<p className="mt-3 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
-								No credit card · Free forever
+							<p
+								className={`mt-3 font-mono text-[9px] uppercase tracking-[0.08em] ${
+									status === "taken"
+										? "text-destructive"
+										: status === "available"
+											? "text-brand"
+											: "text-muted-foreground"
+								}`}
+							>
+								{STATUS_COPY[status] ?? "No credit card · Free forever"}
 							</p>
 						</form>
 					</motion.div>

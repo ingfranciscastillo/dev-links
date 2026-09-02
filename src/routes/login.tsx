@@ -41,6 +41,7 @@ function LoginPage() {
 			footer={
 				<Link
 					to="/signup"
+					search={{ username: undefined }}
 					className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
 				>
 					Create account
@@ -167,6 +168,7 @@ function LoginPage() {
 				New to DevLinks?{" "}
 				<Link
 					to="/signup"
+					search={{ username: undefined }}
 					className="text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-brand hover:text-brand"
 				>
 					Create an account

@@ -126,6 +126,7 @@ export function Header() {
 
 							<Link
 								to="/signup"
+								search={{ username: undefined }}
 								className="group inline-flex items-center gap-2 border border-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
 							>
 								Get started

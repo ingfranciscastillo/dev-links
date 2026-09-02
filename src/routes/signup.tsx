@@ -25,18 +25,23 @@ import {
 import { zodField } from "@/lib/schemas/field";
 
 export const Route = createFileRoute("/signup")({
+	validateSearch: (s: Record<string, unknown>) => ({
+		username:
+			typeof s.username === "string" ? s.username.slice(0, 24) : undefined,
+	}),
 	head: () => ({ meta: [{ title: "Create your DevLinks" }] }),
 	component: SignupPage,
 });
 
 function SignupPage() {
 	const navigate = useNavigate();
+	const { username } = Route.useSearch();
 	const signUp = useSignUp({ redirectTo: "/dashboard" });
 
 	const form = useForm({
 		defaultValues: {
 			name: "",
-			username: "",
+			username: username?.toLowerCase() ?? "",
 			email: "",
 			password: "",
 		},

@@ -69,6 +69,12 @@ export const fontOptions = [
 		category: "mono",
 		stack: "'Geist Mono Variable', ui-monospace, monospace",
 	},
+	{
+		value: "space-mono",
+		label: "Space Mono",
+		category: "mono",
+		stack: "'Space Mono', ui-monospace, monospace",
+	},
 ] as const;
 
 export type FontKey = (typeof fontOptions)[number]["value"];

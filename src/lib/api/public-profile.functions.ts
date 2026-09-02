@@ -30,6 +30,7 @@ export type PublicProfile = {
 	id: string;
 	username: string;
 	name: string;
+	image: string | null;
 	bio: string;
 	location: string;
 	website: string;
@@ -54,6 +55,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				available: profiles.available,
 				username: authUserTable.username,
 				name: authUserTable.name,
+				image: authUserTable.image,
 			})
 			.from(profiles)
 			.innerJoin(authUserTable, eq(authUserTable.id, profiles.id))
@@ -174,6 +176,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			id: profile.id,
 			username: profile.username ?? data.username,
 			name: profile.name ?? profile.username ?? data.username,
+			image: profile.image ?? null,
 			bio: profile.bio ?? "",
 			location: profile.location ?? "",
 			website: profile.website ?? "",

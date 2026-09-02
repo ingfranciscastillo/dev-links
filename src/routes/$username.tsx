@@ -158,6 +158,7 @@ function ProfilePage() {
 				<ProfileSidebar
 					name={live.name}
 					username={live.username}
+					image={live.image}
 					bio={live.bio}
 					location={live.location}
 					website={live.website}
@@ -356,6 +357,7 @@ function ProfileHeader({
 function ProfileSidebar({
 	name,
 	username,
+	image,
 	bio,
 	location,
 	website,
@@ -366,6 +368,7 @@ function ProfileSidebar({
 }: {
 	name: string;
 	username: string;
+	image: string | null;
 	bio: string;
 	location: string;
 	website: string;
@@ -388,16 +391,30 @@ function ProfileSidebar({
 					stacked && "flex flex-col items-center text-center",
 				)}
 			>
-				<div
-					className={cx(
-						"h-24 w-24 rounded-full",
-						!themed && "ring-4 ring-background",
-					)}
-					style={{
-						background: `linear-gradient(135deg, oklch(0.7 0.2 ${avatarHue}), oklch(0.4 0.18 ${avatarHue}))`,
-						boxShadow: themed ? "0 0 0 4px var(--tt-bg)" : undefined,
-					}}
-				/>
+				{image ? (
+					<img
+						src={image}
+						alt=""
+						className={cx(
+							"h-24 w-24 rounded-full object-cover",
+							!themed && "ring-4 ring-background",
+						)}
+						style={{
+							boxShadow: themed ? "0 0 0 4px var(--tt-bg)" : undefined,
+						}}
+					/>
+				) : (
+					<div
+						className={cx(
+							"h-24 w-24 rounded-full",
+							!themed && "ring-4 ring-background",
+						)}
+						style={{
+							background: `linear-gradient(135deg, oklch(0.7 0.2 ${avatarHue}), oklch(0.4 0.18 ${avatarHue}))`,
+							boxShadow: themed ? "0 0 0 4px var(--tt-bg)" : undefined,
+						}}
+					/>
+				)}
 
 				<h1 className="mt-4 text-2xl font-semibold tracking-tight">{name}</h1>
 

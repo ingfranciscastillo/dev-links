@@ -202,8 +202,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 								<Logout2Icon className="h-4 w-4" strokeWidth={1.7} />
 							</button>
 
-							<div className="ml-1 flex h-8 w-8 items-center justify-center border border-border bg-surface font-display text-sm text-foreground">
-								{user.name.slice(0, 1).toUpperCase()}
+							<div className="ml-1 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden border border-border bg-surface font-display text-sm text-foreground">
+								{user.image ? (
+									<img
+										src={user.image}
+										alt=""
+										className="h-full w-full object-cover"
+									/>
+								) : (
+									user.name.slice(0, 1).toUpperCase()
+								)}
 							</div>
 						</div>
 					</header>

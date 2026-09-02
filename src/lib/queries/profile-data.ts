@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { uploadMyAvatar } from "@/lib/api/avatar.functions";
 import {
 	addArticle,
 	addLink,
@@ -67,6 +68,16 @@ export function useUpdateProfile() {
 		}) => upsertMyProfile({ data: input }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: profileCoreKey });
+		},
+	});
+}
+
+export function useUploadAvatar() {
+	return useMutation({
+		mutationFn: (file: File) => {
+			const formData = new FormData();
+			formData.append("file", file);
+			return uploadMyAvatar({ data: formData });
 		},
 	});
 }

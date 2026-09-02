@@ -1,6 +1,11 @@
 import { CameraIcon } from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useRouteContext } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	useRouteContext,
+	useRouter,
+} from "@tanstack/react-router";
+import { type ChangeEvent, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -15,8 +20,15 @@ import {
 	type ProfileCore,
 	profileInput,
 } from "@/lib/api/profile-data.functions";
-import { useProfileCore, useUpdateProfile } from "@/lib/queries/profile-data";
+import {
+	useProfileCore,
+	useUpdateProfile,
+	useUploadAvatar,
+} from "@/lib/queries/profile-data";
 import { zodField } from "@/lib/schemas/field";
+
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
+const ALLOWED_AVATAR_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 export const Route = createFileRoute("/_authenticated/dashboard/profile")({
 	head: () => ({ meta: [{ title: "Profile — DevLinks" }] }),
@@ -66,7 +78,41 @@ function FormSkeleton() {
 
 function ProfileForm({ core }: { core: ProfileCore }) {
 	const { user } = useRouteContext({ from: "/_authenticated/dashboard" });
+	const router = useRouter();
 	const updateProfile = useUpdateProfile();
+	const uploadAvatar = useUploadAvatar();
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+	const avatarSrc = avatarPreview ?? user.image ?? null;
+
+	async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		e.target.value = "";
+		if (!file) return;
+
+		if (!ALLOWED_AVATAR_TYPES.has(file.type)) {
+			toast.error("Only PNG, JPG or WEBP images are allowed");
+			return;
+		}
+		if (file.size > MAX_AVATAR_BYTES) {
+			toast.error("Image must be 2MB or smaller");
+			return;
+		}
+
+		const objectUrl = URL.createObjectURL(file);
+		setAvatarPreview(objectUrl);
+
+		try {
+			await uploadAvatar.mutateAsync(file);
+			await router.invalidate();
+			toast.success("Avatar updated");
+		} catch (err) {
+			toast.error(err instanceof Error ? err.message : "Upload failed");
+		} finally {
+			URL.revokeObjectURL(objectUrl);
+			setAvatarPreview(null);
+		}
+	}
 
 	const form = useForm({
 		defaultValues: {
@@ -99,14 +145,32 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 			<section className="border-b border-border pb-8">
 				<div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
 					<div className="flex items-center gap-5">
-						<div className="relative flex h-20 w-20 shrink-0 items-center justify-center border border-border bg-surface font-display text-2xl">
-							{user.name.slice(0, 1).toUpperCase()}
+						<div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden border border-border bg-surface font-display text-2xl">
+							{avatarSrc ? (
+								<img
+									src={avatarSrc}
+									alt=""
+									className="h-full w-full object-cover"
+								/>
+							) : (
+								user.name.slice(0, 1).toUpperCase()
+							)}
+
+							<input
+								ref={fileInputRef}
+								type="file"
+								accept="image/png,image/jpeg,image/webp"
+								onChange={handleAvatarChange}
+								className="hidden"
+							/>
 
 							<button
 								type="button"
-								title="Coming soon"
+								title="Change avatar"
 								aria-label="Change avatar"
-								className="absolute -bottom-2 -right-2 inline-flex h-7 w-7 items-center justify-center border border-border bg-background text-muted-foreground transition-colors hover:text-foreground"
+								disabled={uploadAvatar.isPending}
+								onClick={() => fileInputRef.current?.click()}
+								className="absolute -bottom-2 -right-2 inline-flex h-7 w-7 items-center justify-center border border-border bg-background text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
 							>
 								<CameraIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
 							</button>
@@ -120,7 +184,9 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 							<p className="mt-2 text-sm">Your profile image</p>
 
 							<p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-								PNG or JPG, max 2MB. Upload coming soon.
+								{uploadAvatar.isPending
+									? "Uploading…"
+									: "PNG, JPG or WEBP, max 2MB."}
 							</p>
 						</div>
 					</div>

@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AuthShell, OAuthRow } from "@/components/auth/authShell";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +9,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { getSession } from "@/lib/auth.functions";
 import { useSignIn } from "@/lib/queries/use-sign-in";
 import { signInSchema } from "@/lib/schemas/auth";
 import { zodField } from "@/lib/schemas/field";
@@ -21,6 +22,12 @@ export const Route = createFileRoute("/login")({
 				typeof s.redirect === "string" ? s.redirect : undefined,
 			) ?? undefined,
 	}),
+	beforeLoad: async ({ search }) => {
+		const session = await getSession();
+		if (session) {
+			throw redirect({ to: search.redirect ?? "/dashboard" });
+		}
+	},
 	head: () => ({ meta: [{ title: "Sign in — DevLinks" }] }),
 	component: LoginPage,
 });

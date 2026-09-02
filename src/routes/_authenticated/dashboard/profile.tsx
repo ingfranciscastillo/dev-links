@@ -39,7 +39,7 @@ function ProfilePage() {
 	const core = useProfileCore();
 
 	return (
-		<div className="mx-auto w-full max-w-4xl">
+		<div className="mx-auto w-full max-w-6xl">
 			<header className="border-b border-border pb-8">
 				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
 					02 / Profile

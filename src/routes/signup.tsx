@@ -1,5 +1,10 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	redirect,
+	useNavigate,
+} from "@tanstack/react-router";
 
 import { AuthShell, OAuthRow } from "@/components/auth/authShell";
 import { Button } from "@/components/ui/button";
@@ -15,6 +20,7 @@ import {
 	InputGroupAddon,
 	InputGroupInput,
 } from "@/components/ui/input-group";
+import { getSession } from "@/lib/auth.functions";
 import { useSignUp } from "@/lib/queries/use-sign-up";
 import {
 	emailSchema,
@@ -29,6 +35,12 @@ export const Route = createFileRoute("/signup")({
 		username:
 			typeof s.username === "string" ? s.username.slice(0, 24) : undefined,
 	}),
+	beforeLoad: async () => {
+		const session = await getSession();
+		if (session) {
+			throw redirect({ to: "/dashboard" });
+		}
+	},
 	head: () => ({ meta: [{ title: "Create your DevLinks" }] }),
 	component: SignupPage,
 });

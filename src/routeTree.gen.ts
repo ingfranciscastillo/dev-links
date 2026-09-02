@@ -30,6 +30,7 @@ import { Route as AuthenticatedDashboardProjectsRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardSettingsRouteImport } from './routes/_authenticated/dashboard/settings'
 import { Route as AuthenticatedDashboardSnippetsRouteImport } from './routes/_authenticated/dashboard/snippets'
 import { Route as AuthenticatedDashboardSupportRouteImport } from './routes/_authenticated/dashboard/support'
+import { Route as AuthenticatedDashboardTalksRouteImport } from './routes/_authenticated/dashboard/talks'
 import { Route as AuthenticatedDashboardThemeRouteImport } from './routes/_authenticated/dashboard/theme'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiPublicHooksIntegrationsRefreshRouteImport } from './routes/api/public/hooks/integrations-refresh'
@@ -150,6 +151,12 @@ const AuthenticatedDashboardSupportRoute =
     path: '/support',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const AuthenticatedDashboardTalksRoute =
+  AuthenticatedDashboardTalksRouteImport.update({
+    id: '/talks',
+    path: '/talks',
+    getParentRoute: () => AuthenticatedDashboardRoute,
+  } as any)
 const AuthenticatedDashboardThemeRoute =
   AuthenticatedDashboardThemeRouteImport.update({
     id: '/theme',
@@ -199,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
   '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
+  '/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -225,6 +233,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
   '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
+  '/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
@@ -254,6 +263,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/settings': typeof AuthenticatedDashboardSettingsRoute
   '/_authenticated/dashboard/snippets': typeof AuthenticatedDashboardSnippetsRoute
   '/_authenticated/dashboard/support': typeof AuthenticatedDashboardSupportRoute
+  '/_authenticated/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/_authenticated/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/snippets'
     | '/dashboard/support'
+    | '/dashboard/talks'
     | '/dashboard/theme'
     | '/api/auth/$'
     | '/dashboard/'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/snippets'
     | '/dashboard/support'
+    | '/dashboard/talks'
     | '/dashboard/theme'
     | '/api/auth/$'
     | '/dashboard'
@@ -337,6 +349,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/settings'
     | '/_authenticated/dashboard/snippets'
     | '/_authenticated/dashboard/support'
+    | '/_authenticated/dashboard/talks'
     | '/_authenticated/dashboard/theme'
     | '/api/auth/$'
     | '/_authenticated/dashboard/'
@@ -511,6 +524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardSupportRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/_authenticated/dashboard/talks': {
+      id: '/_authenticated/dashboard/talks'
+      path: '/talks'
+      fullPath: '/dashboard/talks'
+      preLoaderRoute: typeof AuthenticatedDashboardTalksRouteImport
+      parentRoute: typeof AuthenticatedDashboardRoute
+    }
     '/_authenticated/dashboard/theme': {
       id: '/_authenticated/dashboard/theme'
       path: '/theme'
@@ -559,6 +579,7 @@ interface AuthenticatedDashboardRouteChildren {
   AuthenticatedDashboardSettingsRoute: typeof AuthenticatedDashboardSettingsRoute
   AuthenticatedDashboardSnippetsRoute: typeof AuthenticatedDashboardSnippetsRoute
   AuthenticatedDashboardSupportRoute: typeof AuthenticatedDashboardSupportRoute
+  AuthenticatedDashboardTalksRoute: typeof AuthenticatedDashboardTalksRoute
   AuthenticatedDashboardThemeRoute: typeof AuthenticatedDashboardThemeRoute
   AuthenticatedDashboardIndexRoute: typeof AuthenticatedDashboardIndexRoute
 }
@@ -575,6 +596,7 @@ const AuthenticatedDashboardRouteChildren: AuthenticatedDashboardRouteChildren =
     AuthenticatedDashboardSettingsRoute: AuthenticatedDashboardSettingsRoute,
     AuthenticatedDashboardSnippetsRoute: AuthenticatedDashboardSnippetsRoute,
     AuthenticatedDashboardSupportRoute: AuthenticatedDashboardSupportRoute,
+    AuthenticatedDashboardTalksRoute: AuthenticatedDashboardTalksRoute,
     AuthenticatedDashboardThemeRoute: AuthenticatedDashboardThemeRoute,
     AuthenticatedDashboardIndexRoute: AuthenticatedDashboardIndexRoute,
   }

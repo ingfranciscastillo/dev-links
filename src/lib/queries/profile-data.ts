@@ -6,6 +6,7 @@ import {
 	addProject,
 	addSnippet,
 	addSupportLink,
+	addTalk,
 	applyThemeTemplate,
 	getMyProfileCore,
 	getMyProfileData,
@@ -14,6 +15,7 @@ import {
 	removeProject,
 	removeSnippet,
 	removeSupportLink,
+	removeTalk,
 	reorderLinks,
 	resetTheme,
 	toggleLink,
@@ -23,6 +25,7 @@ import {
 	updateProject,
 	updateSnippet,
 	updateSupportLink,
+	updateTalk,
 	updateTheme,
 	upsertMyProfile,
 	wipeProfileData,
@@ -36,6 +39,7 @@ import {
 	type ProjectItem,
 	type SnippetItem,
 	type SupportLinkItem,
+	type TalkItem,
 } from "@/lib/schemas";
 import type { ThemeV2 } from "@/lib/theme-config";
 
@@ -461,6 +465,79 @@ export function useRemoveArticle() {
 			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
 				const c = d ?? emptyProfileData;
 				return { ...c, articles: c.articles.filter((a) => a.id !== id) };
+			});
+			return { previous };
+		},
+		onError: (_e, _i, ctx) => rollback(queryClient, ctx?.previous),
+		onSettled: () =>
+			queryClient.invalidateQueries({ queryKey: profileDataKey }),
+	});
+}
+
+// ---------- talks ----------
+
+export function useAddTalk() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (input: Omit<TalkItem, "id">) => addTalk({ data: input }),
+		onMutate: async (input) => {
+			await queryClient.cancelQueries({ queryKey: profileDataKey });
+			const previous = queryClient.getQueryData<ProfileData>(profileDataKey);
+			const tempId = `optimistic-${crypto.randomUUID()}`;
+			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
+				const c = d ?? emptyProfileData;
+				return { ...c, talks: [{ ...input, id: tempId }, ...c.talks] };
+			});
+			return { previous, tempId };
+		},
+		onSuccess: (result, _input, ctx) => {
+			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
+				const c = d ?? emptyProfileData;
+				return {
+					...c,
+					talks: c.talks.map((t) => (t.id === ctx?.tempId ? result : t)),
+				};
+			});
+		},
+		onError: (_e, _i, ctx) => rollback(queryClient, ctx?.previous),
+		onSettled: () =>
+			queryClient.invalidateQueries({ queryKey: profileDataKey }),
+	});
+}
+
+export function useUpdateTalk() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (input: { id: string } & Partial<TalkItem>) =>
+			updateTalk({ data: input }),
+		onMutate: async ({ id, ...patch }) => {
+			await queryClient.cancelQueries({ queryKey: profileDataKey });
+			const previous = queryClient.getQueryData<ProfileData>(profileDataKey);
+			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
+				const c = d ?? emptyProfileData;
+				return {
+					...c,
+					talks: c.talks.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+				};
+			});
+			return { previous };
+		},
+		onError: (_e, _i, ctx) => rollback(queryClient, ctx?.previous),
+		onSettled: () =>
+			queryClient.invalidateQueries({ queryKey: profileDataKey }),
+	});
+}
+
+export function useRemoveTalk() {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: (id: string) => removeTalk({ data: { id } }),
+		onMutate: async (id) => {
+			await queryClient.cancelQueries({ queryKey: profileDataKey });
+			const previous = queryClient.getQueryData<ProfileData>(profileDataKey);
+			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => {
+				const c = d ?? emptyProfileData;
+				return { ...c, talks: c.talks.filter((t) => t.id !== id) };
 			});
 			return { previous };
 		},

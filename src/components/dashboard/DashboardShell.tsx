@@ -6,6 +6,7 @@ import {
 	Home2Icon,
 	LinkIcon,
 	Logout2Icon,
+	MicrophoneIcon,
 	NotesIcon,
 	PaletteIcon,
 	PlugCircleIcon,
@@ -64,6 +65,11 @@ const nav: NavItem[] = [
 		label: "Support",
 		to: "/dashboard/support",
 		icon: HeartIcon,
+	},
+	{
+		label: "Talks",
+		to: "/dashboard/talks",
+		icon: MicrophoneIcon,
 	},
 	{
 		label: "Settings",

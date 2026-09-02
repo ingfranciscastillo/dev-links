@@ -623,6 +623,74 @@ export const removeArticle = createServerFn({ method: "POST" })
 			.where(and(eq(articles.id, data.id), eq(articles.userId, userId)));
 	});
 
+// ---------- talks ----------
+
+const talkInput = z.object({
+	title: z.string().min(1),
+	event: z.string().optional(),
+	description: z.string().optional(),
+	date: z.string().nullable().optional(),
+	slidesUrl: z.string().nullable().optional(),
+	videoUrl: z.string().nullable().optional(),
+});
+
+export const addTalk = createServerFn({ method: "POST" })
+	.validator((input) => talkInput.parse(input))
+	.handler(async ({ data }) => {
+		const userId = await requireUserId();
+		const [row] = await db
+			.insert(talks)
+			.values({
+				userId,
+				title: data.title,
+				event: data.event || "",
+				description: data.description || "",
+				date: data.date || null,
+				slidesUrl: data.slidesUrl || null,
+				videoUrl: data.videoUrl || null,
+			})
+			.returning();
+		return {
+			id: row.id,
+			title: row.title,
+			event: row.event,
+			description: row.description,
+			date: row.date,
+			slidesUrl: row.slidesUrl,
+			videoUrl: row.videoUrl,
+		};
+	});
+
+const updateTalkInput = z.object({
+	id: z.string(),
+	title: z.string().optional(),
+	event: z.string().optional(),
+	description: z.string().optional(),
+	date: z.string().nullable().optional(),
+	slidesUrl: z.string().nullable().optional(),
+	videoUrl: z.string().nullable().optional(),
+});
+
+export const updateTalk = createServerFn({ method: "POST" })
+	.validator((input) => updateTalkInput.parse(input))
+	.handler(async ({ data }) => {
+		const userId = await requireUserId();
+		const { id, ...patch } = data;
+		await db
+			.update(talks)
+			.set(patch)
+			.where(and(eq(talks.id, id), eq(talks.userId, userId)));
+	});
+
+export const removeTalk = createServerFn({ method: "POST" })
+	.validator((input) => idInput.parse(input))
+	.handler(async ({ data }) => {
+		const userId = await requireUserId();
+		await db
+			.delete(talks)
+			.where(and(eq(talks.id, data.id), eq(talks.userId, userId)));
+	});
+
 // ---------- support links ----------
 
 const supportLinkInput = z.object({

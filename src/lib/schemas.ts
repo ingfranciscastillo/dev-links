@@ -53,6 +53,16 @@ export type TalkItem = {
 	videoUrl: string | null;
 };
 
+export const talkSchema = z.object({
+	id: z.string(),
+	title: z.string().min(1, "Title is required").max(160),
+	event: z.string().max(120).optional().or(z.literal("")),
+	description: z.string().max(400).optional().or(z.literal("")),
+	date: z.string().optional().or(z.literal("")).nullable(),
+	slidesUrl: z.url().optional().or(z.literal("")).nullable(),
+	videoUrl: z.url().optional().or(z.literal("")).nullable(),
+});
+
 export type SupportLinkItem = {
 	id: string;
 	category: string;

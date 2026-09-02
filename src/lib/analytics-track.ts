@@ -33,18 +33,17 @@ export function trackClick(input: {
 			title: input.title ?? "",
 			referrer: document.referrer || null,
 		});
-		const url = "/api/public/hooks/track-click";
-		if (navigator.sendBeacon) {
-			const blob = new Blob([body], { type: "application/json" });
-			navigator.sendBeacon(url, blob);
-		} else {
-			fetch(url, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body,
-				keepalive: true,
-			}).catch(() => {});
-		}
+		// Los links abren en pestaña nueva (target="_blank"), la página actual
+		// nunca se descarga, así que no hace falta sendBeacon — y sendBeacon
+		// es justo el patrón que ad-blockers y protección anti-tracking del
+		// navegador bloquean con más frecuencia (es la API clásica de
+		// analytics), lo que hacía fallar el conteo en silencio.
+		fetch("/api/public/hooks/track-click", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body,
+			keepalive: true,
+		}).catch(() => {});
 	} catch {
 		// Ignore
 	}

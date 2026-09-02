@@ -211,8 +211,16 @@ function DashboardHome() {
 
 					<div className="mt-8 border-t border-border pt-6">
 						<div className="flex items-start gap-4">
-							<div className="flex h-14 w-14 shrink-0 items-center justify-center border border-border bg-surface font-display text-xl">
-								{user.name.slice(0, 1).toUpperCase()}
+							<div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border border-border bg-surface font-display text-xl">
+								{user.image ? (
+									<img
+										src={user.image}
+										alt=""
+										className="h-full w-full object-cover"
+									/>
+								) : (
+									user.name.slice(0, 1).toUpperCase()
+								)}
 							</div>
 
 							<div className="min-w-0">

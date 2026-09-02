@@ -18,10 +18,6 @@ const faqs = [
 		a: "Your GitHub repos and contributions, Dev.to articles, Hashnode posts, a Medium RSS feed, and Stack Overflow stats. All refreshed in the background.",
 	},
 	{
-		q: "Can I use my own domain?",
-		a: "On Pro you can connect any domain. We handle SSL automatically.",
-	},
-	{
 		q: "Do you track my visitors with third-party cookies?",
 		a: "No. Analytics is first-party, cookieless, and aggregated. Visitors stay anonymous.",
 	},

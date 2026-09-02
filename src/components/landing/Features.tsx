@@ -18,10 +18,6 @@ const items = [
 		desc: "Useful numbers without cookies or third-party trackers.",
 	},
 	{
-		title: "Custom domains",
-		desc: "Use your own domain with SSL handled for you.",
-	},
-	{
 		title: "Discover",
 		desc: "Help people find developers by stack, language and availability.",
 	},

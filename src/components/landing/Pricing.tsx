@@ -12,7 +12,6 @@ const rows = [
 	["Snippets", "Up to 5", "Unlimited"],
 	["Basic themes", "Included", "Included"],
 	["Analytics", "—", "Included"],
-	["Custom domain", "—", "Included"],
 	["Custom CSS", "—", "Included"],
 	["DevLinks branding", "Included", "Removed"],
 	["Priority support", "—", "Included"],

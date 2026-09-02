@@ -13,6 +13,7 @@ import {
 	themes,
 } from "@/db/schema";
 import { ensureSession } from "@/lib/auth.functions";
+import { limitsFor } from "@/lib/plan-limits";
 import { defaultTheme, type ProfileData } from "@/lib/schemas";
 import {
 	parseThemeConfig,
@@ -26,6 +27,23 @@ import { templateById } from "@/lib/theme-templates";
 async function requireUserId() {
 	const session = await ensureSession();
 	return session.user.id;
+}
+
+async function getPlanLimits(userId: string) {
+	const [row] = await db
+		.select({ plan: profiles.plan })
+		.from(profiles)
+		.where(eq(profiles.id, userId))
+		.limit(1);
+	return limitsFor(row?.plan);
+}
+
+function assertUnderLimit(count: number, limit: number, label: string) {
+	if (Number.isFinite(limit) && count >= limit) {
+		throw new Error(
+			`Free plan is limited to ${limit} ${label}. Upgrade to Pro for unlimited.`,
+		);
+	}
 }
 
 // db.transaction no existe en el driver neon-http; los writes multi-statement
@@ -154,6 +172,7 @@ export type ProfileCore = {
 	primaryLanguage: string;
 	seniority: string;
 	technologies: string[];
+	plan: string;
 };
 
 export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
@@ -169,6 +188,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 				primaryLanguage: profiles.primaryLanguage,
 				seniority: profiles.seniority,
 				technologies: profiles.technologies,
+				plan: profiles.plan,
 			})
 			.from(profiles)
 			.where(eq(profiles.id, userId))
@@ -182,6 +202,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 			primaryLanguage: row?.primaryLanguage ?? "",
 			seniority: row?.seniority ?? "",
 			technologies: row?.technologies ?? [],
+			plan: row?.plan ?? "free",
 		};
 	},
 );
@@ -296,6 +317,13 @@ export const addLink = createServerFn({ method: "POST" })
 	.validator((input) => linkInput.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
+		const limits = await getPlanLimits(userId);
+		const [{ count }] = await db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(links)
+			.where(eq(links.userId, userId));
+		assertUnderLimit(count, limits.links, "links");
+
 		const [row] = await db
 			.insert(links)
 			.values({
@@ -390,6 +418,13 @@ export const addProject = createServerFn({ method: "POST" })
 	.validator((input) => projectInput.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
+		const limits = await getPlanLimits(userId);
+		const [{ count }] = await db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(projects)
+			.where(eq(projects.userId, userId));
+		assertUnderLimit(count, limits.projects, "projects");
+
 		const [row] = await db
 			.insert(projects)
 			.values({
@@ -447,6 +482,13 @@ export const addSnippet = createServerFn({ method: "POST" })
 	.validator((input) => snippetInput.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
+		const limits = await getPlanLimits(userId);
+		const [{ count }] = await db
+			.select({ count: sql<number>`count(*)::int` })
+			.from(snippets)
+			.where(eq(snippets.userId, userId));
+		assertUnderLimit(count, limits.snippets, "snippets");
+
 		const [row] = await db
 			.insert(snippets)
 			.values({ userId, ...data })
@@ -551,6 +593,12 @@ export const updateTheme = createServerFn({ method: "POST" })
 	.validator((input) => themeV2Schema.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
+		const limits = await getPlanLimits(userId);
+		if (!limits.customCss && data.customCss.trim()) {
+			throw new Error(
+				"Custom CSS is a Pro feature. Upgrade to Pro to enable it.",
+			);
+		}
 		await upsertTheme(userId, data, null);
 	});
 

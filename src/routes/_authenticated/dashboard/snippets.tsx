@@ -20,8 +20,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 import {
 	useAddSnippet,
+	useProfileCore,
 	useProfileData,
 	useRemoveSnippet,
 	useUpdateSnippet,
@@ -42,10 +44,14 @@ type SnippetFormValues = {
 
 function SnippetsPage() {
 	const data = useProfileData();
+	const core = useProfileCore();
 	const addSnippet = useAddSnippet();
 	const updateSnippet = useUpdateSnippet();
 	const removeSnippet = useRemoveSnippet();
 	const [editing, setEditing] = useState<SnippetItem | "new" | null>(null);
+
+	const isPro = core.data?.plan === "pro";
+	const atCap = !isPro && data.snippets.length >= PLAN_LIMITS.free.snippets;
 
 	return (
 		<>
@@ -63,12 +69,18 @@ function SnippetsPage() {
 						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 							Small pieces of code you reach for often, shared on your public
 							page.
+							{!isPro &&
+								` ${data.snippets.length}/${PLAN_LIMITS.free.snippets} used on the Free plan.`}
 						</p>
 					</div>
 
 					<Button
 						onClick={() => setEditing("new")}
-						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						disabled={atCap}
+						title={
+							atCap ? "Free plan limit reached — upgrade to Pro" : undefined
+						}
+						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground disabled:pointer-events-none disabled:opacity-50"
 					>
 						<AddCircleIcon
 							secondaryOpacity={0.5}
@@ -143,7 +155,12 @@ function SnippetsPage() {
 									toast.success("Snippet created");
 									setEditing(null);
 								},
-								onError: () => toast.error("Couldn't create snippet"),
+								onError: (err) =>
+									toast.error(
+										err instanceof Error
+											? err.message
+											: "Couldn't create snippet",
+									),
 							});
 						} else {
 							updateSnippet.mutate(

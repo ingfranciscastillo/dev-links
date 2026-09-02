@@ -198,7 +198,7 @@ function ProfilePage() {
 						/>
 					)}
 
-					<Watermark themed={themed} />
+					{live.plan !== "pro" && <Watermark themed={themed} />}
 				</div>
 			</main>
 		</div>

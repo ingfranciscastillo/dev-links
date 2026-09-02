@@ -28,8 +28,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 import {
 	useAddProject,
+	useProfileCore,
 	useProfileData,
 	useRemoveProject,
 	useUpdateProject,
@@ -59,10 +61,14 @@ const STATUS_OPTIONS = [
 
 function ProjectsPage() {
 	const data = useProfileData();
+	const core = useProfileCore();
 	const addProject = useAddProject();
 	const updateProject = useUpdateProject();
 	const removeProject = useRemoveProject();
 	const [editing, setEditing] = useState<ProjectItem | "new" | null>(null);
+
+	const isPro = core.data?.plan === "pro";
+	const atCap = !isPro && data.projects.length >= PLAN_LIMITS.free.projects;
 
 	return (
 		<>
@@ -80,12 +86,18 @@ function ProjectsPage() {
 						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 							Highlight what you&apos;ve built. Add repositories, demos, and
 							your stack.
+							{!isPro &&
+								` ${data.projects.length}/${PLAN_LIMITS.free.projects} used on the Free plan.`}
 						</p>
 					</div>
 
 					<Button
 						onClick={() => setEditing("new")}
-						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						disabled={atCap}
+						title={
+							atCap ? "Free plan limit reached — upgrade to Pro" : undefined
+						}
+						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground disabled:pointer-events-none disabled:opacity-50"
 					>
 						<AddCircleIcon
 							secondaryOpacity={0}
@@ -172,7 +184,12 @@ function ProjectsPage() {
 									toast.success("Project created");
 									setEditing(null);
 								},
-								onError: () => toast.error("Couldn't create project"),
+								onError: (err) =>
+									toast.error(
+										err instanceof Error
+											? err.message
+											: "Couldn't create project",
+									),
 							});
 						} else {
 							updateProject.mutate(

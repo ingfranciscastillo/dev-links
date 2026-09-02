@@ -31,6 +31,7 @@ export type PublicProfile = {
 	username: string;
 	name: string;
 	image: string | null;
+	plan: string;
 	bio: string;
 	location: string;
 	website: string;
@@ -53,6 +54,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				location: profiles.location,
 				website: profiles.website,
 				available: profiles.available,
+				plan: profiles.plan,
 				username: authUserTable.username,
 				name: authUserTable.name,
 				image: authUserTable.image,
@@ -177,6 +179,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			username: profile.username ?? data.username,
 			name: profile.name ?? profile.username ?? data.username,
 			image: profile.image ?? null,
+			plan: profile.plan,
 			bio: profile.bio ?? "",
 			location: profile.location ?? "",
 			website: profile.website ?? "",

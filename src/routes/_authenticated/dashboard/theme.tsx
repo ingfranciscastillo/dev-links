@@ -1,6 +1,6 @@
 import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
-import { RestartIcon } from "@solar-icons/react/linear";
-import { createFileRoute, useRouteContext } from "@tanstack/react-router";
+import { LockKeyholeIcon, RestartIcon } from "@solar-icons/react/linear";
+import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -40,6 +40,7 @@ function ThemePage() {
 
 	const theme = data.theme;
 	const bio = core.data?.bio ?? "";
+	const isPro = core.data?.plan === "pro";
 
 	const set = (patch: Partial<ThemeV2>) => {
 		updateTheme.mutate(patch, {
@@ -136,7 +137,7 @@ function ThemePage() {
 
 						{tab === "effects" && <EffectsPane theme={theme} set={set} />}
 
-						{tab === "css" && <CssPane theme={theme} set={set} />}
+						{tab === "css" && <CssPane theme={theme} set={set} isPro={isPro} />}
 					</div>
 
 					<div className="mt-8 border-t border-border pt-5">
@@ -692,11 +693,49 @@ function ChoiceButton({
 function CssPane({
 	theme,
 	set,
+	isPro,
 }: {
 	theme: ThemeV2;
 	set: (patch: Partial<ThemeV2>) => void;
+	isPro: boolean;
 }) {
 	const [draft, setDraft] = useState(theme.customCss);
+
+	if (!isPro) {
+		return (
+			<Pane>
+				<div className="flex items-start gap-4 border-b border-border pb-8">
+					<div className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center border border-border text-brand">
+						<LockKeyholeIcon className="h-4 w-4" strokeWidth={1.5} />
+					</div>
+
+					<div>
+						<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+							Pro feature
+						</p>
+
+						<h3 className="mt-3 font-display text-2xl tracking-[-0.03em]">
+							Custom CSS is part of Pro.
+						</h3>
+
+						<p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
+							Write your own CSS, scoped to your public page, for full control
+							over how it looks.
+						</p>
+
+						<Button
+							asChild
+							className="mt-5 h-9 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						>
+							<Link to="/" hash="pricing">
+								Upgrade to Pro
+							</Link>
+						</Button>
+					</div>
+				</div>
+			</Pane>
+		);
+	}
 
 	return (
 		<Pane>

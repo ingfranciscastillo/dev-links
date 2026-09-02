@@ -21,6 +21,8 @@ import type { ComponentType, ReactNode, SVGProps } from "react";
 
 import { ThemeToggle } from "@/components/site/ThemeToggle";
 import { authClient } from "@/lib/auth-client";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
+import { useProfileCore } from "@/lib/queries/profile-data";
 
 type NavIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -69,6 +71,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
 	const router = useRouter();
 	const pathname = router.state.location.pathname;
+	const core = useProfileCore();
+	const isPro = core.data?.plan === "pro";
 
 	async function handleSignOut() {
 		await authClient.signOut();
@@ -144,20 +148,25 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 									</p>
 
 									<p className="mt-2 font-display text-2xl tracking-[-0.02em]">
-										Free
+										{isPro ? "Pro" : "Free"}
 									</p>
 
 									<p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-										5 links · 5 projects · 3 snippets
+										{isPro
+											? "Unlimited links · projects · snippets"
+											: `${PLAN_LIMITS.free.links} links · ${PLAN_LIMITS.free.projects} projects · ${PLAN_LIMITS.free.snippets} snippets`}
 									</p>
 								</div>
 
-								<Link
-									to="/dashboard"
-									className="font-mono text-[9px] uppercase tracking-[0.08em] text-brand transition-colors hover:text-foreground"
-								>
-									Upgrade
-								</Link>
+								{!isPro && (
+									<Link
+										to="/"
+										hash="pricing"
+										className="font-mono text-[9px] uppercase tracking-[0.08em] text-brand transition-colors hover:text-foreground"
+									>
+										Upgrade
+									</Link>
+								)}
 							</div>
 						</div>
 					</div>

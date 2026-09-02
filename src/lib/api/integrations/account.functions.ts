@@ -3,10 +3,11 @@ import { and, asc, eq } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { z } from "zod";
 import { db } from "@/db/index";
-import { integrationAccounts, integrationCache } from "@/db/schema";
+import { integrationAccounts, integrationCache, profiles } from "@/db/schema";
 import { ensureSession } from "@/lib/auth.functions";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
 import { PROVIDERS, type Provider } from "@/lib/integrations/types";
+import { limitsFor } from "@/lib/plan-limits";
 
 type Batch = [BatchItem<"pg">, ...Array<BatchItem<"pg">>];
 
@@ -75,6 +76,29 @@ export const upsertIntegrationAccount = createServerFn({ method: "POST" })
 	.validator((input) => upsertSchema.parse(input))
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
+
+		const [planRow] = await db
+			.select({ plan: profiles.plan })
+			.from(profiles)
+			.where(eq(profiles.id, userId))
+			.limit(1);
+		const limits = limitsFor(planRow?.plan);
+
+		if (Number.isFinite(limits.integrations)) {
+			const existing = await db
+				.select({ provider: integrationAccounts.provider })
+				.from(integrationAccounts)
+				.where(eq(integrationAccounts.userId, userId));
+			const alreadyConnected = existing.some(
+				(r) => r.provider === data.provider,
+			);
+			if (!alreadyConnected && existing.length >= limits.integrations) {
+				throw new Error(
+					`Free plan is limited to ${limits.integrations} connected integrations. Upgrade to Pro for unlimited.`,
+				);
+			}
+		}
+
 		await db
 			.insert(integrationAccounts)
 			.values({

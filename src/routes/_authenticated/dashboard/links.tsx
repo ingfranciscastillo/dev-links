@@ -38,8 +38,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { domainOf, iconForUrl } from "@/lib/icons";
+import { PLAN_LIMITS } from "@/lib/plan-limits";
 import {
 	useAddLink,
+	useProfileCore,
 	useProfileData,
 	useRemoveLink,
 	useReorderLinks,
@@ -56,6 +58,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/links")({
 
 function LinksPage() {
 	const data = useProfileData();
+	const core = useProfileCore();
 	const addLink = useAddLink();
 	const updateLink = useUpdateLink();
 	const removeLink = useRemoveLink();
@@ -63,6 +66,9 @@ function LinksPage() {
 	const reorderLinks = useReorderLinks();
 
 	const [editing, setEditing] = useState<LinkItem | "new" | null>(null);
+
+	const isPro = core.data?.plan === "pro";
+	const atCap = !isPro && data.links.length >= PLAN_LIMITS.free.links;
 
 	const sensors = useSensors(
 		useSensor(PointerSensor, {
@@ -99,12 +105,18 @@ function LinksPage() {
 
 						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 							The destinations you want visitors to find. Drag to reorder.
+							{!isPro &&
+								` ${data.links.length}/${PLAN_LIMITS.free.links} used on the Free plan.`}
 						</p>
 					</div>
 
 					<Button
 						onClick={() => setEditing("new")}
-						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						disabled={atCap}
+						title={
+							atCap ? "Free plan limit reached — upgrade to Pro" : undefined
+						}
+						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground disabled:pointer-events-none disabled:opacity-50"
 					>
 						<AddCircleIcon
 							secondaryOpacity={0}
@@ -189,7 +201,10 @@ function LinksPage() {
 									toast.success("Link created");
 									setEditing(null);
 								},
-								onError: () => toast.error("Couldn't create link"),
+								onError: (err) =>
+									toast.error(
+										err instanceof Error ? err.message : "Couldn't create link",
+									),
 							});
 						} else {
 							updateLink.mutate(

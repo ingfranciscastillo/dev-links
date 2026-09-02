@@ -5,6 +5,15 @@ import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
+import {
+	ColorPicker,
+	ColorPickerArea,
+	ColorPickerContent,
+	ColorPickerEyeDropper,
+	ColorPickerHueSlider,
+	ColorPickerSwatch,
+	ColorPickerTrigger,
+} from "@/components/ui/color-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -251,21 +260,38 @@ function ColorField({
 }) {
 	return (
 		<Row label={label}>
-			<div className="flex min-w-0 items-center gap-3">
-				<input
-					type="color"
-					value={value}
-					onChange={(event) => onChange(event.target.value)}
-					className="h-10 w-12 shrink-0 cursor-pointer rounded-none border border-border bg-background p-1"
-					aria-label={label}
-				/>
+			<ColorPicker value={value} onValueChange={onChange}>
+				<div className="flex min-w-0 items-center gap-3">
+					<ColorPickerTrigger asChild>
+						<button
+							type="button"
+							aria-label={`Pick ${label.toLowerCase()} color`}
+							className="flex h-10 w-12 shrink-0 items-center justify-center border border-border bg-background p-1.5 transition-colors hover:border-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+						>
+							<ColorPickerSwatch className="h-full w-full rounded-none border-0 shadow-none" />
+						</button>
+					</ColorPickerTrigger>
 
-				<Input
-					value={value}
-					onChange={(event) => onChange(event.target.value)}
-					className="h-10 min-w-0 flex-1 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-xs shadow-none focus-visible:border-brand focus-visible:ring-0"
-				/>
-			</div>
+					<Input
+						value={value}
+						onChange={(event) => onChange(event.target.value)}
+						className="h-10 min-w-0 flex-1 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-xs shadow-none focus-visible:border-brand focus-visible:ring-0"
+					/>
+				</div>
+
+				<ColorPickerContent
+					align="start"
+					className="w-64 rounded-none border-border bg-background p-4 shadow-none"
+				>
+					<ColorPickerArea className="rounded-none" />
+
+					<div className="mt-4 flex items-center gap-3">
+						<ColorPickerHueSlider className="flex-1" />
+
+						<ColorPickerEyeDropper className="h-8 w-8 shrink-0 rounded-none border-border p-0" />
+					</div>
+				</ColorPickerContent>
+			</ColorPicker>
 		</Row>
 	);
 }

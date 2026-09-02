@@ -10,7 +10,7 @@ import {
 	Share2,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { BlueskyBlock } from "@/components/profile/BlueskyBlock";
 import { DevtoBlock } from "@/components/profile/DevtoBlock";
@@ -192,8 +192,16 @@ function ProfilePage() {
 		authClient.useSession();
 	const isOwner = session?.user?.id === live.id;
 
+	// isSessionPending puede pasar por más de una transición al resolver
+	// (better-auth revalida el cache de sesión), y cada una re-dispara este
+	// efecto — sin el guard, cualquier transición que aterrice en "no
+	// pending, no owner" volvía a llamar trackView, duplicando la vista real
+	// (se veía como dos inserts a milisegundos de diferencia por cada visita).
+	const trackedRef = useRef(false);
+
 	useEffect(() => {
-		if (isSessionPending || isOwner) return;
+		if (isSessionPending || isOwner || trackedRef.current) return;
+		trackedRef.current = true;
 		trackView(username, `/${username}`);
 	}, [username, isOwner, isSessionPending]);
 

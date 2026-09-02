@@ -5,7 +5,8 @@ import {
 	useRouteContext,
 	useRouter,
 } from "@tanstack/react-router";
-import { type ChangeEvent, useRef, useState } from "react";
+import { X } from "lucide-react";
+import { type ChangeEvent, type KeyboardEvent, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -18,9 +19,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
 	type ProfileCore,
 	profileInput,
 } from "@/lib/api/profile-data.functions";
+import { COUNTRIES } from "@/lib/countries";
 import {
 	useProfileCore,
 	useUpdateDiscovery,
@@ -32,8 +41,10 @@ import { zodField } from "@/lib/schemas/field";
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
+const SENIORITY_UNSET = "none";
+
 const SENIORITY_OPTIONS = [
-	{ value: "", label: "—" },
+	{ value: SENIORITY_UNSET, label: "Not specified" },
 	{ value: "junior", label: "Junior" },
 	{ value: "mid", label: "Mid" },
 	{ value: "senior", label: "Senior" },
@@ -41,11 +52,13 @@ const SENIORITY_OPTIONS = [
 	{ value: "principal", label: "Principal" },
 ];
 
+const COUNTRY_UNSET = "none";
+
 type DiscoveryFormValues = {
 	country: string;
 	primaryLanguage: string;
 	seniority: string;
-	technologies: string;
+	technologies: string[];
 	available: boolean;
 };
 
@@ -537,16 +550,49 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 		country: core.country,
 		primaryLanguage: core.primaryLanguage,
 		seniority: core.seniority,
-		technologies: core.technologies.join(", "),
+		technologies: core.technologies,
 		available: core.available,
 	}));
+	const [techInput, setTechInput] = useState("");
 
-	const handleCountryChange = (value: string) => {
+	function commitTech(raw: string) {
+		const value = raw.trim();
+		if (!value) return;
+		setDisc((current) => {
+			if (
+				current.technologies.length >= 20 ||
+				current.technologies.some(
+					(t) => t.toLowerCase() === value.toLowerCase(),
+				)
+			) {
+				return current;
+			}
+			return { ...current, technologies: [...current.technologies, value] };
+		});
+		setTechInput("");
+	}
+
+	function removeTech(value: string) {
 		setDisc((current) => ({
 			...current,
-			country: value.toUpperCase().slice(0, 2),
+			technologies: current.technologies.filter((t) => t !== value),
 		}));
-	};
+	}
+
+	function handleTechKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+		if (event.key === "," || event.key === "Enter") {
+			event.preventDefault();
+			commitTech(techInput);
+			return;
+		}
+		if (
+			event.key === "Backspace" &&
+			!techInput &&
+			disc.technologies.length > 0
+		) {
+			removeTech(disc.technologies[disc.technologies.length - 1]);
+		}
+	}
 
 	async function saveDiscovery(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -556,11 +602,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 				country: disc.country,
 				primaryLanguage: disc.primaryLanguage,
 				seniority: disc.seniority,
-				technologies: disc.technologies
-					.split(",")
-					.map((value) => value.trim())
-					.filter(Boolean)
-					.slice(0, 20),
+				technologies: disc.technologies,
 				available: disc.available,
 			});
 
@@ -575,24 +617,37 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 			<div className="grid gap-6 sm:grid-cols-2">
 				<div>
 					<Label
-						htmlFor="country"
+						htmlFor="country-select"
 						className="font-mono text-[10px] uppercase tracking-[0.08em]"
 					>
 						Country
 					</Label>
 
-					<Input
-						id="country"
-						value={disc.country}
-						onChange={(event) => handleCountryChange(event.target.value)}
-						placeholder="DO"
-						maxLength={2}
-						className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-xs uppercase shadow-none focus-visible:border-brand focus-visible:ring-0"
-					/>
+					<Select
+						value={disc.country || COUNTRY_UNSET}
+						onValueChange={(value) =>
+							setDisc({
+								...disc,
+								country: value === COUNTRY_UNSET ? "" : value,
+							})
+						}
+					>
+						<SelectTrigger
+							id="country-select"
+							className="mt-2 h-11 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
+						>
+							<SelectValue />
+						</SelectTrigger>
 
-					<p className="mt-2 font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground">
-						ISO-2
-					</p>
+						<SelectContent>
+							<SelectItem value={COUNTRY_UNSET}>Not specified</SelectItem>
+							{COUNTRIES.map((c) => (
+								<SelectItem key={c.code} value={c.code}>
+									{c.name}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 
 				<div>
@@ -619,29 +674,36 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 
 				<div>
 					<Label
-						htmlFor="seniority"
+						htmlFor="seniority-select"
 						className="font-mono text-[10px] uppercase tracking-[0.08em]"
 					>
 						Seniority
 					</Label>
 
-					<select
-						id="seniority"
-						value={disc.seniority}
-						onChange={(event) =>
+					<Select
+						value={disc.seniority || SENIORITY_UNSET}
+						onValueChange={(value) =>
 							setDisc({
 								...disc,
-								seniority: event.target.value,
+								seniority: value === SENIORITY_UNSET ? "" : value,
 							})
 						}
-						className="mt-2 h-11 w-full appearance-none rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 text-sm text-foreground focus:border-brand focus:outline-none"
 					>
-						{SENIORITY_OPTIONS.map((option) => (
-							<option key={option.value} value={option.value}>
-								{option.label}
-							</option>
-						))}
-					</select>
+						<SelectTrigger
+							id="seniority-select"
+							className="mt-2 h-11 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
+						>
+							<SelectValue />
+						</SelectTrigger>
+
+						<SelectContent>
+							{SENIORITY_OPTIONS.map((option) => (
+								<SelectItem key={option.value} value={option.value}>
+									{option.label}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 
 				<div className="flex items-end">
@@ -670,21 +732,42 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						Technologies
 					</Label>
 
-					<Input
-						id="technologies"
-						value={disc.technologies}
-						onChange={(event) =>
-							setDisc({
-								...disc,
-								technologies: event.target.value,
-							})
-						}
-						placeholder="React, Node.js, Postgres"
-						className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-					/>
+					<div className="mt-2 flex flex-wrap items-center gap-2 border-b border-border py-2">
+						{disc.technologies.map((tech) => (
+							<span
+								key={tech}
+								className="inline-flex items-center gap-1.5 border border-border bg-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.04em]"
+							>
+								{tech}
+								<button
+									type="button"
+									onClick={() => removeTech(tech)}
+									aria-label={`Remove ${tech}`}
+									className="text-muted-foreground transition-colors hover:text-foreground"
+								>
+									<X className="h-3 w-3" />
+								</button>
+							</span>
+						))}
+
+						<input
+							id="technologies"
+							value={techInput}
+							onChange={(event) => setTechInput(event.target.value)}
+							onKeyDown={handleTechKeyDown}
+							onBlur={() => commitTech(techInput)}
+							placeholder={
+								disc.technologies.length === 0
+									? "React, Node.js, Postgres…"
+									: undefined
+							}
+							disabled={disc.technologies.length >= 20}
+							className="h-7 min-w-24 flex-1 bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
+						/>
+					</div>
 
 					<p className="mt-2 font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground">
-						Separate technologies with commas · up to 20
+						Press comma or enter to add · up to 20
 					</p>
 				</div>
 			</div>

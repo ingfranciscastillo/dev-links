@@ -66,7 +66,12 @@ export const searchProfiles = createServerFn({ method: "GET" })
 			}
 
 			if (data.language)
-				conditions.push(eq(profiles.primaryLanguage, data.language));
+				// ilike, no eq: primaryLanguage es texto libre en el perfil
+				// ("typescript", "TypeScript", "Typescript" son todos válidos),
+				// mientras los botones de /discover mandan una casing fija —
+				// con eq, cualquier perfil que no coincidiera letra por letra
+				// simplemente no aparecía nunca en esa búsqueda.
+				conditions.push(ilike(profiles.primaryLanguage, data.language));
 			if (data.country) conditions.push(eq(profiles.country, data.country));
 			if (data.available === true)
 				conditions.push(eq(profiles.available, true));

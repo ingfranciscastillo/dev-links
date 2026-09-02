@@ -10,6 +10,14 @@ import {
 	type DiscoverResult,
 	searchProfiles,
 } from "@/lib/api/discover.functions";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { COUNTRIES, COUNTRY_NAME_BY_CODE } from "@/lib/countries";
 
 const LANGUAGES = [
 	"TypeScript",
@@ -257,21 +265,35 @@ function Discover() {
 								Available for hire
 							</FilterButton>
 
-							<label className="flex items-center gap-2 border-b border-border pb-1">
+							<div className="flex items-center gap-2 border-b border-border pb-1">
 								<span className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
 									Country
 								</span>
 
-								<input
-									value={country}
-									onChange={(event) =>
-										setCountry(event.target.value.toUpperCase().slice(0, 2))
+								<Select
+									value={country || "ALL"}
+									onValueChange={(value) =>
+										setCountry(value === "ALL" ? "" : value)
 									}
-									placeholder="ALL"
-									aria-label="Country code"
-									className="w-10 bg-transparent text-center font-mono text-[10px] uppercase text-foreground placeholder:text-muted-foreground focus:outline-none"
-								/>
-							</label>
+								>
+									<SelectTrigger
+										size="sm"
+										aria-label="Country"
+										className="h-6 w-auto gap-1 rounded-none border-none bg-transparent px-0 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground shadow-none focus-visible:ring-0"
+									>
+										<SelectValue />
+									</SelectTrigger>
+
+									<SelectContent>
+										<SelectItem value="ALL">All</SelectItem>
+										{COUNTRIES.map((c) => (
+											<SelectItem key={c.code} value={c.code}>
+												{c.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
 					</div>
 				</motion.div>
@@ -456,7 +478,7 @@ function ProfileRow({
 					<div className="text-right">
 						{p.country && (
 							<p className="font-mono text-[10px] text-muted-foreground">
-								{p.country}
+								{COUNTRY_NAME_BY_CODE[p.country] ?? p.country}
 							</p>
 						)}
 

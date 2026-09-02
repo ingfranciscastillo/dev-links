@@ -568,6 +568,7 @@ function LinksSection({
 									"grid h-10 w-10 place-items-center rounded-md border text-lg",
 									themed ? "tt-panel" : "border-hairline bg-background",
 								)}
+								style={themed ? { color: "var(--tt-fg)" } : undefined}
 							>
 								<Icon className="h-4 w-4" />
 							</span>

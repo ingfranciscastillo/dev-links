@@ -187,7 +187,7 @@ function Discover() {
 						</motion.span>
 					</div>
 
-					<div className="mt-5 grid gap-5 border-b border-border pb-6 sm:grid-cols-[auto_1fr_auto] sm:items-start">
+					<div className="mt-5 grid gap-6 border-b border-border pb-6 sm:grid-cols-2 sm:items-start lg:grid-cols-4">
 						<div>
 							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
 								Language
@@ -280,47 +280,52 @@ function Discover() {
 							</motion.div>
 						</div>
 
-						<div className="flex items-end gap-4 sm:justify-self-end">
-							<FilterButton
-								active={available}
-								onClick={() => setAvailable((value) => !value)}
+						<div>
+							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+								Country
+							</p>
+
+							<Select
+								value={country || "ALL"}
+								onValueChange={(value) =>
+									setCountry(value === "ALL" ? "" : value)
+								}
 							>
-								<span
-									className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
-										available ? "bg-brand" : "bg-muted-foreground/40"
-									}`}
-								/>
-								Available for hire
-							</FilterButton>
-
-							<div className="flex items-center gap-2 border-b border-border pb-1">
-								<span className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
-									Country
-								</span>
-
-								<Select
-									value={country || "ALL"}
-									onValueChange={(value) =>
-										setCountry(value === "ALL" ? "" : value)
-									}
+								<SelectTrigger
+									aria-label="Country"
+									className="mt-3 h-9 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground shadow-none focus:ring-0"
 								>
-									<SelectTrigger
-										size="sm"
-										aria-label="Country"
-										className="h-6 w-auto gap-1 rounded-none border-none bg-transparent px-0 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground shadow-none focus-visible:ring-0"
-									>
-										<SelectValue />
-									</SelectTrigger>
+									<SelectValue />
+								</SelectTrigger>
 
-									<SelectContent>
-										<SelectItem value="ALL">All</SelectItem>
-										{COUNTRIES.map((c) => (
-											<SelectItem key={c.code} value={c.code}>
-												{c.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
+								<SelectContent>
+									<SelectItem value="ALL">All</SelectItem>
+									{COUNTRIES.map((c) => (
+										<SelectItem key={c.code} value={c.code}>
+											{c.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div>
+							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+								Availability
+							</p>
+
+							<div className="mt-3">
+								<FilterButton
+									active={available}
+									onClick={() => setAvailable((value) => !value)}
+								>
+									<span
+										className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
+											available ? "bg-brand" : "bg-muted-foreground/40"
+										}`}
+									/>
+									Available for hire
+								</FilterButton>
 							</div>
 						</div>
 					</div>

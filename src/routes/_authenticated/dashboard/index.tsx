@@ -9,9 +9,15 @@ import {
 	ShareIcon,
 } from "@solar-icons/react/linear";
 import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useAnalyticsSummary } from "@/lib/queries/analytics";
+import { useIntegrationAccounts } from "@/lib/queries/integrations";
 import { useProfileCore, useProfileData } from "@/lib/queries/profile-data";
+
+function sharedStorageKey(userId: string) {
+	return `devlinks:shared:${userId}`;
+}
 
 export const Route = createFileRoute("/_authenticated/dashboard/")({
 	head: () => ({ meta: [{ title: "Dashboard — DevLinks" }] }),
@@ -23,9 +29,31 @@ function DashboardHome() {
 	const data = useProfileData();
 	const core = useProfileCore();
 	const analytics = useAnalyticsSummary(7);
+	const integrations = useIntegrationAccounts();
+
+	const [hasShared, setHasShared] = useState(false);
+
+	useEffect(() => {
+		try {
+			setHasShared(localStorage.getItem(sharedStorageKey(user.id)) === "1");
+		} catch {
+			// Private browsing / storage disabled — checklist item just stays open.
+		}
+	}, [user.id]);
 
 	const activeLinks = data.links.filter((link) => link.active).length;
 	const totals = analytics.data ?? { views: 0, clicks: 0 };
+
+	const checklist: Array<[string, boolean]> = [
+		["Create your account", true],
+		["Add a bio and avatar", Boolean(core.data?.bio) && Boolean(user.image)],
+		[
+			"Connect GitHub",
+			integrations.data?.some((a) => a.provider === "github") ?? false,
+		],
+		["Add your first link", data.links.length > 0],
+		["Share your page", hasShared],
+	];
 
 	const stats = [
 		{
@@ -54,6 +82,12 @@ function DashboardHome() {
 		try {
 			await navigator.clipboard.writeText(url);
 			toast.success("Link copied to clipboard");
+			try {
+				localStorage.setItem(sharedStorageKey(user.id), "1");
+			} catch {
+				// Private browsing / storage disabled — non-critical, skip.
+			}
+			setHasShared(true);
 		} catch {
 			toast.error("Couldn't copy");
 		}
@@ -209,15 +243,9 @@ function DashboardHome() {
 					</h2>
 
 					<ul className="mt-6 border-t border-border">
-						{[
-							["Create your account", true],
-							["Add a bio and avatar", false],
-							["Connect GitHub", false],
-							["Add your first link", false],
-							["Share your page", false],
-						].map(([label, done], index) => (
+						{checklist.map(([label, done], index) => (
 							<li
-								key={label as string}
+								key={label}
 								className="flex items-center gap-3 border-b border-border py-4"
 							>
 								<span

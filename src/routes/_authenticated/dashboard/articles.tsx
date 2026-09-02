@@ -64,7 +64,8 @@ function ArticlesPage() {
 						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
 						<AddCircleIcon
-							secondaryOpacity={0.5}
+							secondaryOpacity={0}
+							size={25}
 							className="h-3.5 w-3.5"
 							strokeWidth={1.7}
 						/>
@@ -85,7 +86,8 @@ function ArticlesPage() {
 								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 							>
 								<AddCircleIcon
-									secondaryOpacity={0.5}
+									secondaryOpacity={0}
+									size={25}
 									className="h-3.5 w-3.5"
 									strokeWidth={1.7}
 								/>

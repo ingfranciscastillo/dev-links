@@ -32,9 +32,35 @@ const LANGUAGES = [
 
 const SENIORITIES = ["junior", "mid", "senior", "staff", "principal"];
 
+const DEFAULT_FILTERS = {
+	q: "",
+	language: null as string | null,
+	seniority: null as string | null,
+	available: null as boolean | null,
+	country: null as string | null,
+	technologies: [] as string[],
+	limit: 24,
+};
+
+function isDefaultFilters(filters: typeof DEFAULT_FILTERS) {
+	return (
+		filters.q === "" &&
+		filters.language === null &&
+		filters.seniority === null &&
+		filters.available === null &&
+		filters.country === null &&
+		filters.technologies.length === 0
+	);
+}
+
 const ease = [0.16, 1, 0.3, 1] as const;
 
 export const Route = createFileRoute("/discover")({
+	// Sin loader, el primer render llega vacío y espera un round-trip
+	// completo cliente → server function → Neon (con cold start) antes de
+	// mostrar resultados. Precargarlos en el server durante el SSR evita
+	// ese waterfall en la primera visita.
+	loader: async () => searchProfiles({ data: DEFAULT_FILTERS }),
 	head: () => ({
 		meta: [
 			{ title: "Discover developers — DevLinks" },
@@ -61,6 +87,7 @@ export const Route = createFileRoute("/discover")({
 
 function Discover() {
 	const searchProfilesFn = useServerFn(searchProfiles);
+	const loaderData = Route.useLoaderData();
 	const reduceMotion = useReducedMotion();
 
 	const [q, setQ] = useState("");
@@ -88,6 +115,7 @@ function Discover() {
 		queryKey: ["discover", filters],
 		queryFn: () => searchProfilesFn({ data: filters }),
 		placeholderData: (previous) => previous,
+		initialData: isDefaultFilters(filters) ? loaderData : undefined,
 	});
 
 	const results = data ?? [];

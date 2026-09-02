@@ -68,6 +68,7 @@ export function Footer() {
 						<FooterCol
 							title="Elsewhere"
 							items={[
+								{ label: "Contact", href: "/contact" },
 								{ label: "GitHub", href: "https://github.com" },
 								{ label: "X", href: "https://x.com" },
 								{ label: "Changelog", href: "#" },

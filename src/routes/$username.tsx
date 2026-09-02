@@ -30,6 +30,7 @@ import {
 	type PublicIntegration,
 	type PublicProfile,
 } from "@/lib/api/public-profile.functions";
+import { authClient } from "@/lib/auth-client";
 import { iconForUrl } from "@/lib/icons";
 import type {
 	BlueskyPayload,
@@ -133,9 +134,14 @@ function ProfilePage() {
 	const isNarrow = themed && theme?.cardWidth === "narrow";
 	const avatarHue = hueFromString(live.id);
 
+	const { data: session, isPending: isSessionPending } =
+		authClient.useSession();
+	const isOwner = session?.user?.id === live.id;
+
 	useEffect(() => {
+		if (isSessionPending || isOwner) return;
 		trackView(username, `/${username}`);
-	}, [username]);
+	}, [username, isOwner, isSessionPending]);
 
 	const styleTag = theme ? themeToStyleTag(theme, ".tt-scope") : "";
 
@@ -173,6 +179,7 @@ function ProfilePage() {
 						links={live.data.links}
 						themed={themed}
 						username={username}
+						isOwner={isOwner}
 					/>
 
 					{live.data.snippets.length > 0 && (
@@ -521,10 +528,12 @@ function LinksSection({
 	links,
 	themed,
 	username,
+	isOwner,
 }: {
 	links: ProfileData["links"];
 	themed: boolean;
 	username: string;
+	isOwner: boolean;
 }) {
 	if (links.length === 0) return null;
 	return (
@@ -539,14 +548,15 @@ function LinksSection({
 							href={l.url}
 							target="_blank"
 							rel="noreferrer"
-							onClick={() =>
+							onClick={() => {
+								if (isOwner) return;
 								trackClick({
 									username,
 									linkId: l.id,
 									url: l.url,
 									title: l.title,
-								})
-							}
+								});
+							}}
 							className={
 								themed
 									? "tt-btn tt-card"

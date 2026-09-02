@@ -8,6 +8,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -164,6 +165,8 @@ function IntegrationRow({
 			: "",
 	);
 
+	const [confirmingDelete, setConfirmingDelete] = useState(false);
+
 	const upsertAccount = useUpsertIntegrationAccount();
 	const deleteAccount = useDeleteIntegrationAccount();
 	const refreshAccount = useRefreshIntegration();
@@ -221,13 +224,10 @@ function IntegrationRow({
 	}
 
 	async function handleDelete() {
-		if (!window.confirm(`Disconnect ${PROVIDER_LABEL[provider]}?`)) {
-			return;
-		}
-
 		try {
 			await deleteAccount.mutateAsync(provider);
 			toast.success(`${PROVIDER_LABEL[provider]} disconnected`);
+			setConfirmingDelete(false);
 		} catch (err) {
 			toast.error(err instanceof Error ? err.message : "Delete failed");
 		}
@@ -357,7 +357,7 @@ function IntegrationRow({
 					{account && (
 						<button
 							type="button"
-							onClick={handleDelete}
+							onClick={() => setConfirmingDelete(true)}
 							disabled={busy}
 							className="inline-flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
 							title="Disconnect"
@@ -368,6 +368,17 @@ function IntegrationRow({
 					)}
 				</div>
 			</div>
+
+			{confirmingDelete && (
+				<ConfirmDialog
+					title="Disconnect integration"
+					description={`This removes ${PROVIDER_LABEL[provider]} and its cached data from your profile. You can reconnect it anytime.`}
+					confirmLabel="Disconnect"
+					pending={deleteAccount.isPending}
+					onClose={() => setConfirmingDelete(false)}
+					onConfirm={handleDelete}
+				/>
+			)}
 		</article>
 	);
 }

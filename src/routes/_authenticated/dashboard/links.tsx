@@ -27,6 +27,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ function LinksPage() {
 	const reorderLinks = useReorderLinks();
 
 	const [editing, setEditing] = useState<LinkItem | "new" | null>(null);
+	const [removing, setRemoving] = useState<LinkItem | null>(null);
 
 	const isPro = core.data?.plan === "pro";
 	const atCap = !isPro && data.links.length >= PLAN_LIMITS.free.links;
@@ -176,12 +178,7 @@ function LinksPage() {
 										link={link}
 										onEdit={() => setEditing(link)}
 										onToggle={() => toggleLink.mutate(link.id)}
-										onRemove={() => {
-											removeLink.mutate(link.id, {
-												onSuccess: () => toast.success("Link removed"),
-												onError: () => toast.error("Couldn't remove link"),
-											});
-										}}
+										onRemove={() => setRemoving(link)}
 									/>
 								))}
 							</ul>
@@ -223,6 +220,27 @@ function LinksPage() {
 						}
 					}}
 					pending={addLink.isPending || updateLink.isPending}
+				/>
+			) : null}
+
+			{removing ? (
+				<ConfirmDialog
+					title="Delete link"
+					description={`"${removing.title}" will be removed from your public page. This can't be undone.`}
+					pending={removeLink.isPending}
+					onClose={() => setRemoving(null)}
+					onConfirm={() => {
+						removeLink.mutate(removing.id, {
+							onSuccess: () => {
+								toast.success("Link removed");
+								setRemoving(null);
+							},
+							onError: (err) =>
+								toast.error(
+									err instanceof Error ? err.message : "Couldn't remove link",
+								),
+						});
+					}}
 				/>
 			) : null}
 		</>

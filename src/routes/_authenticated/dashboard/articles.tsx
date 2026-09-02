@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ function ArticlesPage() {
 	const updateArticle = useUpdateArticle();
 	const removeArticle = useRemoveArticle();
 	const [editing, setEditing] = useState<ArticleItem | "new" | null>(null);
+	const [removing, setRemoving] = useState<ArticleItem | null>(null);
 
 	const sorted = [...data.articles].sort((a, b) => (a.date < b.date ? 1 : -1));
 
@@ -108,12 +110,7 @@ function ArticlesPage() {
 								article={article}
 								index={index}
 								onEdit={() => setEditing(article)}
-								onRemove={() => {
-									removeArticle.mutate(article.id, {
-										onSuccess: () => toast.success("Article removed"),
-										onError: () => toast.error("Couldn't remove article"),
-									});
-								}}
+								onRemove={() => setRemoving(article)}
 							/>
 						))}
 					</div>
@@ -150,6 +147,29 @@ function ArticlesPage() {
 						}
 					}}
 					pending={addArticle.isPending || updateArticle.isPending}
+				/>
+			) : null}
+
+			{removing ? (
+				<ConfirmDialog
+					title="Delete article"
+					description={`"${removing.title}" will be removed from your public page. This can't be undone.`}
+					pending={removeArticle.isPending}
+					onClose={() => setRemoving(null)}
+					onConfirm={() => {
+						removeArticle.mutate(removing.id, {
+							onSuccess: () => {
+								toast.success("Article removed");
+								setRemoving(null);
+							},
+							onError: (err) =>
+								toast.error(
+									err instanceof Error
+										? err.message
+										: "Couldn't remove article",
+								),
+						});
+					}}
 				/>
 			) : null}
 		</>

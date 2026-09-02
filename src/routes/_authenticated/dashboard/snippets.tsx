@@ -9,6 +9,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ function SnippetsPage() {
 	const updateSnippet = useUpdateSnippet();
 	const removeSnippet = useRemoveSnippet();
 	const [editing, setEditing] = useState<SnippetItem | "new" | null>(null);
+	const [removing, setRemoving] = useState<SnippetItem | null>(null);
 
 	const isPro = core.data?.plan === "pro";
 	const atCap = !isPro && data.snippets.length >= PLAN_LIMITS.free.snippets;
@@ -132,12 +134,7 @@ function SnippetsPage() {
 								snippet={snippet}
 								index={index}
 								onEdit={() => setEditing(snippet)}
-								onRemove={() => {
-									removeSnippet.mutate(snippet.id, {
-										onSuccess: () => toast.success("Snippet removed"),
-										onError: () => toast.error("Couldn't remove snippet"),
-									});
-								}}
+								onRemove={() => setRemoving(snippet)}
 							/>
 						))}
 					</div>
@@ -179,6 +176,29 @@ function SnippetsPage() {
 						}
 					}}
 					pending={addSnippet.isPending || updateSnippet.isPending}
+				/>
+			) : null}
+
+			{removing ? (
+				<ConfirmDialog
+					title="Delete snippet"
+					description={`"${removing.title}" will be removed from your public page. This can't be undone.`}
+					pending={removeSnippet.isPending}
+					onClose={() => setRemoving(null)}
+					onConfirm={() => {
+						removeSnippet.mutate(removing.id, {
+							onSuccess: () => {
+								toast.success("Snippet removed");
+								setRemoving(null);
+							},
+							onError: (err) =>
+								toast.error(
+									err instanceof Error
+										? err.message
+										: "Couldn't remove snippet",
+								),
+						});
+					}}
 				/>
 			) : null}
 		</>

@@ -10,6 +10,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { GithubIcon } from "#/components/brand-icons";
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ function ProjectsPage() {
 	const updateProject = useUpdateProject();
 	const removeProject = useRemoveProject();
 	const [editing, setEditing] = useState<ProjectItem | "new" | null>(null);
+	const [removing, setRemoving] = useState<ProjectItem | null>(null);
 
 	const isPro = core.data?.plan === "pro";
 	const atCap = !isPro && data.projects.length >= PLAN_LIMITS.free.projects;
@@ -149,12 +151,7 @@ function ProjectsPage() {
 								project={project}
 								index={index}
 								onEdit={() => setEditing(project)}
-								onRemove={() => {
-									removeProject.mutate(project.id, {
-										onSuccess: () => toast.success("Project removed"),
-										onError: () => toast.error("Couldn't remove project"),
-									});
-								}}
+								onRemove={() => setRemoving(project)}
 							/>
 						))}
 					</div>
@@ -208,6 +205,29 @@ function ProjectsPage() {
 						}
 					}}
 					pending={addProject.isPending || updateProject.isPending}
+				/>
+			) : null}
+
+			{removing ? (
+				<ConfirmDialog
+					title="Delete project"
+					description={`"${removing.name}" will be removed from your public page. This can't be undone.`}
+					pending={removeProject.isPending}
+					onClose={() => setRemoving(null)}
+					onConfirm={() => {
+						removeProject.mutate(removing.id, {
+							onSuccess: () => {
+								toast.success("Project removed");
+								setRemoving(null);
+							},
+							onError: (err) =>
+								toast.error(
+									err instanceof Error
+										? err.message
+										: "Couldn't remove project",
+								),
+						});
+					}}
 				/>
 			) : null}
 		</>

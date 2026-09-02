@@ -3,33 +3,76 @@ import { z } from "zod";
 // ---- Rich theme config (stored in themes.config jsonb) ----------------------
 
 export const fontOptions = [
-	{ value: "inter", label: "Inter", stack: "'Inter', system-ui, sans-serif" },
-	{ value: "geist", label: "Geist", stack: "'Geist', 'Inter', sans-serif" },
-	{ value: "manrope", label: "Manrope", stack: "'Manrope', sans-serif" },
+	{
+		value: "inter",
+		label: "Inter",
+		category: "sans",
+		stack: "'Inter', system-ui, sans-serif",
+	},
+	{
+		value: "instrument-sans",
+		label: "Instrument Sans",
+		category: "sans",
+		stack: "'Instrument Sans Variable', system-ui, sans-serif",
+	},
+	{
+		value: "geist",
+		label: "Geist",
+		category: "sans",
+		stack: "'Geist', 'Inter', sans-serif",
+	},
+	{
+		value: "manrope",
+		label: "Manrope",
+		category: "sans",
+		stack: "'Manrope', sans-serif",
+	},
 	{
 		value: "space-grotesk",
 		label: "Space Grotesk",
+		category: "sans",
 		stack: "'Space Grotesk', sans-serif",
+	},
+	{
+		value: "system",
+		label: "System",
+		category: "sans",
+		stack: "system-ui, -apple-system, sans-serif",
+	},
+	{
+		value: "fraunces",
+		label: "Fraunces",
+		category: "serif",
+		stack: "'Fraunces', Georgia, serif",
+	},
+	{
+		value: "newsreader",
+		label: "Newsreader",
+		category: "serif",
+		stack: "'Newsreader Variable', Georgia, serif",
 	},
 	{
 		value: "jetbrains",
 		label: "JetBrains Mono",
+		category: "mono",
 		stack: "'JetBrains Mono', ui-monospace, monospace",
 	},
 	{
 		value: "ibm-plex-mono",
 		label: "IBM Plex Mono",
+		category: "mono",
 		stack: "'IBM Plex Mono', ui-monospace, monospace",
 	},
-	{ value: "fraunces", label: "Fraunces", stack: "'Fraunces', Georgia, serif" },
 	{
-		value: "system",
-		label: "System",
-		stack: "system-ui, -apple-system, sans-serif",
+		value: "geist-mono",
+		label: "Geist Mono",
+		category: "mono",
+		stack: "'Geist Mono Variable', ui-monospace, monospace",
 	},
 ] as const;
 
 export type FontKey = (typeof fontOptions)[number]["value"];
+export type FontCategory = (typeof fontOptions)[number]["category"];
 
 export const themeV2Schema = z.object({
 	// Colors

@@ -17,7 +17,12 @@ import {
 	useResetTheme,
 	useUpdateTheme,
 } from "@/lib/queries/profile-data";
-import { fontOptions, type ThemeV2, themeToStyleTag } from "@/lib/theme-config";
+import {
+	fontOptions,
+	type FontCategory,
+	type ThemeV2,
+	themeToStyleTag,
+} from "@/lib/theme-config";
 import { templates } from "@/lib/theme-templates";
 import { cn } from "@/lib/utils";
 
@@ -451,18 +456,21 @@ function TypePane({
 				label="Heading font"
 				value={theme.headingFont}
 				onChange={(value) => set({ headingFont: value })}
+				categories={["sans", "serif"]}
 			/>
 
 			<FontPicker
 				label="Body font"
 				value={theme.bodyFont}
 				onChange={(value) => set({ bodyFont: value })}
+				categories={["sans", "serif"]}
 			/>
 
 			<FontPicker
 				label="Mono font"
 				value={theme.monoFont}
 				onChange={(value) => set({ monoFont: value })}
+				categories={["mono"]}
 			/>
 
 			<Row
@@ -495,15 +503,21 @@ function FontPicker({
 	label,
 	value,
 	onChange,
+	categories,
 }: {
 	label: string;
 	value: string;
 	onChange: (value: string) => void;
+	categories: readonly FontCategory[];
 }) {
+	const options = fontOptions.filter((font) =>
+		categories.includes(font.category),
+	);
+
 	return (
 		<Row label={label}>
 			<div className="grid gap-px border border-border bg-border sm:grid-cols-2">
-				{fontOptions.map((font) => (
+				{options.map((font) => (
 					<button
 						type="button"
 						key={font.value}

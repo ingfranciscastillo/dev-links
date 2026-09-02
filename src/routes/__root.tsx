@@ -11,6 +11,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Toaster } from "react-hot-toast";
 import { noFlashThemeScript } from "#/lib/theme";
+import { absoluteUrl } from "@/lib/site";
 import PostHogProvider from "../integrations/posthog/provider";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import appCss from "../styles.css?url";
@@ -93,13 +94,54 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 					"One page for your repos, snippets, articles and projects. Auto-synced with GitHub, Dev.to, Hashnode, Medium and Stack Overflow.",
 			},
 			{ name: "author", content: "DevLinks" },
+			{ name: "robots", content: "index, follow" },
 			{ property: "og:site_name", content: "DevLinks" },
 			{ property: "og:type", content: "website" },
+			{ property: "og:image", content: absoluteUrl("/og-image-1200x630.png") },
+			{ property: "og:image:width", content: "1200" },
+			{ property: "og:image:height", content: "630" },
 			{ name: "twitter:card", content: "summary_large_image" },
 			{ name: "twitter:site", content: "@devlinks" },
-			{ name: "theme-color", content: "#0a0a0a" },
+			{
+				name: "twitter:image",
+				content: absoluteUrl("/og-image-1200x630.png"),
+			},
+			{
+				name: "theme-color",
+				content: "#f7f6f4",
+				media: "(prefers-color-scheme: light)",
+			},
+			{
+				name: "theme-color",
+				content: "#0a0a0a",
+				media: "(prefers-color-scheme: dark)",
+			},
 		],
-		links: [{ rel: "stylesheet", href: appCss }],
+		links: [
+			{ rel: "stylesheet", href: appCss },
+			{ rel: "manifest", href: "/site.webmanifest" },
+			{ rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+			{ rel: "icon", href: "/favicon.ico", sizes: "any" },
+			{
+				rel: "icon",
+				type: "image/png",
+				sizes: "32x32",
+				href: "/favicon-32.png",
+				media: "(prefers-color-scheme: light)",
+			},
+			{
+				rel: "icon",
+				type: "image/png",
+				sizes: "32x32",
+				href: "/favicon-32-dark.png",
+				media: "(prefers-color-scheme: dark)",
+			},
+			{
+				rel: "apple-touch-icon",
+				sizes: "180x180",
+				href: "/apple-touch-icon-180.png",
+			},
+		],
 	}),
 	shellComponent: RootDocument,
 	notFoundComponent: NotFoundComponent,

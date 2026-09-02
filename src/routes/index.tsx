@@ -7,6 +7,7 @@ import { Hero } from "@/components/landing/Hero";
 import { Pricing } from "@/components/landing/Pricing";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { absoluteUrl } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
 	head: () => ({
@@ -26,9 +27,9 @@ export const Route = createFileRoute("/")({
 				content:
 					"One page for everything you ship. Built for developers, with the polish of Linear and the speed of Vercel.",
 			},
-			{ property: "og:url", content: "/" },
+			{ property: "og:url", content: absoluteUrl("/") },
 		],
-		links: [{ rel: "canonical", href: "/" }],
+		links: [{ rel: "canonical", href: absoluteUrl("/") }],
 	}),
 	component: Landing,
 });

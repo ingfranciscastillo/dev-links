@@ -46,6 +46,7 @@ import type {
 	YoutubePayload,
 } from "@/lib/integrations/types";
 import type { ProfileData } from "@/lib/schemas";
+import { absoluteUrl } from "@/lib/site";
 import { themeToStyleTag } from "@/lib/theme-config";
 import { hueFromString } from "@/lib/user";
 
@@ -70,6 +71,24 @@ export const Route = createFileRoute("/$username")({
 		const l = loaderData?.live;
 		const name = l?.name ?? params.username;
 		const desc = l?.bio ?? `${name} on DevLinks`;
+		const profileUrl = absoluteUrl(`/${params.username}`);
+
+		const jsonLd = l
+			? {
+					"@context": "https://schema.org",
+					"@type": "ProfilePage",
+					mainEntity: {
+						"@type": "Person",
+						name: l.name,
+						alternateName: params.username,
+						...(l.bio ? { description: l.bio } : {}),
+						url: profileUrl,
+						...(l.image ? { image: l.image } : {}),
+						...(l.website ? { sameAs: [l.website] } : {}),
+					},
+				}
+			: null;
+
 		return {
 			meta: [
 				{ title: `${name} (@${params.username}) — DevLinks` },
@@ -77,10 +96,19 @@ export const Route = createFileRoute("/$username")({
 				{ property: "og:title", content: `${name} on DevLinks` },
 				{ property: "og:description", content: desc },
 				{ property: "og:type", content: "profile" },
+				{ property: "og:url", content: profileUrl },
 				{ name: "twitter:title", content: `${name} on DevLinks` },
 				{ name: "twitter:description", content: desc },
 			],
-			links: [{ rel: "canonical", href: `/${params.username}` }],
+			links: [{ rel: "canonical", href: profileUrl }],
+			scripts: jsonLd
+				? [
+						{
+							attrs: { type: "application/ld+json" },
+							children: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+						},
+					]
+				: undefined,
 		};
 	},
 	notFoundComponent: NotFoundBlock,

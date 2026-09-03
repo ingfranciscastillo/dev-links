@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
+import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -50,9 +51,9 @@ function ArticlesPage() {
 
 				<div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
 					<div className="min-w-0">
-						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+						<PageTitle className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 							Articles.
-						</h1>
+						</PageTitle>
 
 						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 							Posts and writing you want visitors to discover on your profile.

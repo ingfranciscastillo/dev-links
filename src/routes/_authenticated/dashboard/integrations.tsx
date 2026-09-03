@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
+import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -112,9 +113,9 @@ function IntegrationsPage() {
 
 				<div className="mt-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 					<div className="min-w-0">
-						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+						<PageTitle className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 							Integrations.
-						</h1>
+						</PageTitle>
 
 						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
 							Connect the services you use and keep your DevLinks profile

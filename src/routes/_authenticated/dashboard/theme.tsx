@@ -4,6 +4,7 @@ import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
+import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import {
 	ColorPicker,
@@ -75,9 +76,9 @@ function ThemePage() {
 
 				<div className="mt-5 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
 					<div className="min-w-0">
-						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+						<PageTitle className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 							Theme.
-						</h1>
+						</PageTitle>
 
 						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
 							Design your public page. Changes are previewed live and saved

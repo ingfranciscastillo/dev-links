@@ -7,6 +7,7 @@ import {
 import { type ReactNode, useState } from "react";
 import toast from "react-hot-toast";
 
+import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -108,9 +109,9 @@ function SettingsPage() {
 					12 / Settings
 				</p>
 
-				<h1 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+				<PageTitle className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 					Settings.
-				</h1>
+				</PageTitle>
 
 				<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 					Manage your account, password, billing, and content.

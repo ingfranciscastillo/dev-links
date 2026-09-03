@@ -12,6 +12,10 @@ export function getRouter() {
 		scrollRestoration: true,
 		defaultPreload: "intent",
 		defaultPreloadStaleTime: 0,
+		// Crossfade en cada navegación vía document.startViewTransition nativo
+		// del navegador — sin dependencias extra. Timing/easing y el guard de
+		// prefers-reduced-motion están en styles.css (::view-transition-*).
+		defaultViewTransition: true,
 	});
 
 	setupRouterSsrQueryIntegration({ router, queryClient: context.queryClient });

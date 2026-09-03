@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { GithubIcon, GoogleIcon } from "@/components/brand-icons";
+import { PageTitle } from "@/components/motion/PageTitle";
 import { authClient } from "@/lib/auth-client";
 
 const githubEnabled = Boolean(
@@ -40,9 +41,9 @@ export function AuthShell({
 						<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
 							DevLinks / Account
 						</p>
-						<h1 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+						<PageTitle className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 							{title}
-						</h1>
+						</PageTitle>
 						{subtitle ? (
 							<p className="mt-5 max-w-sm text-sm leading-relaxed text-muted-foreground">
 								{subtitle}

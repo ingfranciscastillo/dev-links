@@ -11,6 +11,7 @@ import {
 import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { PageTitle } from "@/components/motion/PageTitle";
 import { useAnalyticsSummary } from "@/lib/queries/analytics";
 import { useIntegrationAccounts } from "@/lib/queries/integrations";
 import { useProfileCore, useProfileData } from "@/lib/queries/profile-data";
@@ -101,9 +102,9 @@ function DashboardHome() {
 						01 / Overview
 					</p>
 
-					<h1 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+					<PageTitle className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 						Welcome back, {user.name.split(" ")[0]}.
-					</h1>
+					</PageTitle>
 
 					<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 						Here&apos;s how your DevLinks page is doing this week.

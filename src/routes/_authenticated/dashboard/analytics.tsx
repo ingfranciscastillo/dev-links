@@ -20,6 +20,7 @@ import {
 } from "recharts";
 import toast from "react-hot-toast";
 
+import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import type { AnalyticsSummary } from "@/lib/api/analytics.functions";
 import { startProCheckout } from "@/lib/billing";
@@ -51,9 +52,9 @@ function AnalyticsPage() {
 				</p>
 
 				<div className="mt-5">
-					<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+					<PageTitle className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 						Analytics.
-					</h1>
+					</PageTitle>
 
 					<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
 						Understand how people discover and interact with your public

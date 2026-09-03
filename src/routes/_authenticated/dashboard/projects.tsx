@@ -13,6 +13,7 @@ import { GithubIcon } from "#/components/brand-icons";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
+import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -81,9 +82,9 @@ function ProjectsPage() {
 
 				<div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
 					<div>
-						<h1 className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+						<PageTitle className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 							Projects.
-						</h1>
+						</PageTitle>
 
 						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 							Highlight what you&apos;ve built. Add repositories, demos, and

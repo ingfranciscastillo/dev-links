@@ -9,6 +9,7 @@ import { X } from "lucide-react";
 import { type ChangeEvent, type KeyboardEvent, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
+import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -77,9 +78,9 @@ function ProfilePage() {
 					02 / Profile
 				</p>
 
-				<h1 className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+				<PageTitle className="mt-5 font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
 					Your profile.
-				</h1>
+				</PageTitle>
 
 				<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 					The information people see when they visit your public DevLinks page.

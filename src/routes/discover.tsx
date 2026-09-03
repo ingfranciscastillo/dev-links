@@ -18,17 +18,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { COUNTRIES, COUNTRY_NAME_BY_CODE } from "@/lib/countries";
-
-const LANGUAGES = [
-	"TypeScript",
-	"JavaScript",
-	"Rust",
-	"Go",
-	"Python",
-	"Elixir",
-	"Ruby",
-	"Swift",
-];
+import { LANGUAGES } from "@/lib/languages";
 
 const SENIORITIES = ["junior", "mid", "senior", "staff", "principal"];
 

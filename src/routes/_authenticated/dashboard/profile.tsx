@@ -6,7 +6,13 @@ import {
 	useRouter,
 } from "@tanstack/react-router";
 import { X } from "lucide-react";
-import { type ChangeEvent, type KeyboardEvent, useRef, useState } from "react";
+import {
+	type ChangeEvent,
+	type KeyboardEvent,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import toast from "react-hot-toast";
 
 import { PageTitle } from "@/components/motion/PageTitle";
@@ -30,7 +36,9 @@ import {
 	type ProfileCore,
 	profileInput,
 } from "@/lib/api/profile-data.functions";
+import { authClient } from "@/lib/auth-client";
 import { COUNTRIES } from "@/lib/countries";
+import { LANGUAGES } from "@/lib/languages";
 import {
 	useProfileCore,
 	useUpdateDiscovery,
@@ -41,6 +49,15 @@ import { zodField } from "@/lib/schemas/field";
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+
+type UsernameStatus = "idle" | "checking" | "available" | "taken";
+
+const USERNAME_STATUS_COPY: Record<UsernameStatus, string | null> = {
+	idle: null,
+	checking: "Checking…",
+	available: "Available",
+	taken: "Already taken",
+};
 
 const SENIORITY_UNSET = "none";
 
@@ -54,6 +71,8 @@ const SENIORITY_OPTIONS = [
 ];
 
 const COUNTRY_UNSET = "none";
+
+const LANGUAGE_UNSET = "none";
 
 type DiscoveryFormValues = {
 	country: string;
@@ -111,6 +130,114 @@ function FormSkeleton() {
 	);
 }
 
+// Mismo patrón de debounce que el claim de username en el CTA de landing
+// (src/components/landing/cta.tsx) — acá además se salta el chequeo cuando
+// el valor es el username actual del usuario, porque isUsernameAvailable
+// lo reportaría como "tomado" (por él mismo).
+function UsernameField({
+	id,
+	name,
+	value,
+	currentUsername,
+	invalid,
+	errors,
+	onChange,
+	onBlur,
+	onStatusChange,
+}: {
+	id: string;
+	name: string;
+	value: string;
+	currentUsername: string;
+	invalid: boolean;
+	errors: unknown[];
+	onChange: (value: string) => void;
+	onBlur: () => void;
+	onStatusChange: (status: UsernameStatus) => void;
+}) {
+	const [status, setStatus] = useState<UsernameStatus>("idle");
+	const requestId = useRef(0);
+
+	useEffect(() => {
+		const trimmed = value.trim().toLowerCase();
+
+		function update(next: UsernameStatus) {
+			setStatus(next);
+			onStatusChange(next);
+		}
+
+		if (!trimmed || trimmed === currentUsername.toLowerCase()) {
+			update("idle");
+			return;
+		}
+		if (!profileInput.shape.username.safeParse(trimmed).success) {
+			update("idle");
+			return;
+		}
+
+		update("checking");
+		const id = ++requestId.current;
+
+		const timer = setTimeout(async () => {
+			try {
+				const { data } = await authClient.isUsernameAvailable({
+					username: trimmed,
+				});
+				if (requestId.current !== id) return;
+				update(data?.available ? "available" : "taken");
+			} catch {
+				if (requestId.current !== id) return;
+				update("idle");
+			}
+		}, 400);
+
+		return () => clearTimeout(timer);
+	}, [value, currentUsername, onStatusChange]);
+
+	return (
+		<Field data-invalid={invalid}>
+			<FieldLabel
+				htmlFor={id}
+				className="font-mono text-[10px] uppercase tracking-[0.08em]"
+			>
+				Username
+			</FieldLabel>
+
+			<div className="mt-2 flex h-11 items-center border-b border-border">
+				<span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+					devlinks.com/
+				</span>
+
+				<Input
+					id={id}
+					name={name}
+					value={value}
+					onBlur={onBlur}
+					onChange={(e) => onChange(e.target.value.toLowerCase())}
+					aria-invalid={invalid || undefined}
+					className="h-full rounded-none border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
+				/>
+			</div>
+
+			{invalid ? (
+				<FieldError>{errors.join(", ")}</FieldError>
+			) : USERNAME_STATUS_COPY[status] ? (
+				<p
+					className={`mt-2 font-mono text-[9px] uppercase tracking-[0.08em] ${
+						status === "taken"
+							? "text-destructive"
+							: status === "available"
+								? "text-brand"
+								: "text-muted-foreground"
+					}`}
+				>
+					{USERNAME_STATUS_COPY[status]}
+				</p>
+			) : null}
+		</Field>
+	);
+}
+
 function ProfileForm({ core }: { core: ProfileCore }) {
 	const { user } = useRouteContext({ from: "/_authenticated/dashboard" });
 	const router = useRouter();
@@ -119,6 +246,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 	const avatarSrc = avatarPreview ?? user.image ?? null;
+	const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>("idle");
 
 	async function handleAvatarChange(e: ChangeEvent<HTMLInputElement>) {
 		const file = e.target.files?.[0];
@@ -300,38 +428,17 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 									field.state.meta.errors.length > 0;
 
 								return (
-									<Field data-invalid={invalid}>
-										<FieldLabel
-											htmlFor={field.name}
-											className="font-mono text-[10px] uppercase tracking-[0.08em]"
-										>
-											Username
-										</FieldLabel>
-
-										<div className="mt-2 flex h-11 items-center border-b border-border">
-											<span className="shrink-0 font-mono text-[11px] text-muted-foreground">
-												devlinks.com/
-											</span>
-
-											<Input
-												id={field.name}
-												name={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) =>
-													field.handleChange(e.target.value.toLowerCase())
-												}
-												aria-invalid={invalid || undefined}
-												className="h-full rounded-none border-0 bg-transparent px-1 shadow-none focus-visible:ring-0"
-											/>
-										</div>
-
-										{invalid ? (
-											<FieldError>
-												{field.state.meta.errors.join(", ")}
-											</FieldError>
-										) : null}
-									</Field>
+									<UsernameField
+										id={field.name}
+										name={field.name}
+										value={field.state.value}
+										currentUsername={user.username ?? ""}
+										invalid={invalid}
+										errors={field.state.meta.errors}
+										onChange={(value) => field.handleChange(value)}
+										onBlur={field.handleBlur}
+										onStatusChange={setUsernameStatus}
+									/>
 								);
 							}}
 						</form.Field>
@@ -450,7 +557,13 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 					{({ canSubmit, isSubmitting }) => (
 						<Button
 							type="submit"
-							disabled={!canSubmit || updateProfile.isPending || isSubmitting}
+							disabled={
+								!canSubmit ||
+								updateProfile.isPending ||
+								isSubmitting ||
+								usernameStatus === "checking" ||
+								usernameStatus === "taken"
+							}
 							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 						>
 							{updateProfile.isPending || isSubmitting
@@ -513,6 +626,14 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 		available: core.available,
 	}));
 	const [techInput, setTechInput] = useState("");
+
+	// Preserva un valor libre guardado antes de que este campo fuera un
+	// select (o cualquiera fuera de la lista curada) en vez de ocultarlo.
+	const languageOptions = LANGUAGES.includes(core.primaryLanguage)
+		? LANGUAGES
+		: core.primaryLanguage
+			? [core.primaryLanguage, ...LANGUAGES]
+			: LANGUAGES;
 
 	function commitTech(raw: string) {
 		const value = raw.trim();
@@ -611,24 +732,37 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 
 				<div>
 					<Label
-						htmlFor="primary_language"
+						htmlFor="primary-language-select"
 						className="font-mono text-[10px] uppercase tracking-[0.08em]"
 					>
 						Primary language
 					</Label>
 
-					<Input
-						id="primary_language"
-						value={disc.primaryLanguage}
-						onChange={(event) =>
+					<Select
+						value={disc.primaryLanguage || LANGUAGE_UNSET}
+						onValueChange={(value) =>
 							setDisc({
 								...disc,
-								primaryLanguage: event.target.value,
+								primaryLanguage: value === LANGUAGE_UNSET ? "" : value,
 							})
 						}
-						placeholder="TypeScript"
-						className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-					/>
+					>
+						<SelectTrigger
+							id="primary-language-select"
+							className="mt-2 h-11 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
+						>
+							<SelectValue />
+						</SelectTrigger>
+
+						<SelectContent>
+							<SelectItem value={LANGUAGE_UNSET}>Not specified</SelectItem>
+							{languageOptions.map((lang) => (
+								<SelectItem key={lang} value={lang}>
+									{lang}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
 				</div>
 
 				<div>

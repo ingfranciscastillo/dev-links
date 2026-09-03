@@ -1,7 +1,7 @@
 <div align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="public/favicon-mark-dark-theme.svg">
-    <source media="(prefers-color-scheme: light)" srcset="public/symbol-color-on-paper.svg">
+    <source media="(prefers-color-scheme: dark)" srcset="public/symbol-color-on-paper.svg">
+    <source media="(prefers-color-scheme: light)" srcset="public/favicon-mark-dark-theme.svg">
     <img src="public/symbol-color-on-paper.svg" alt="DevLinks logo" width="112" />
   </picture>
 

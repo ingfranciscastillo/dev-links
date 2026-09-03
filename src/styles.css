@@ -481,6 +481,25 @@
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* La sidebar y el header del dashboard son el mismo nodo entre subpáginas —
+   sin esto, la view transition igual los mete en el crossfade de "root" y
+   anima píxeles que no cambiaron. El header además usa backdrop-filter: el
+   snapshot viejo no lo respeta bien, así que se oculta en vez de animarlo. */
+::view-transition-group(dashboard-sidebar),
+::view-transition-group(dashboard-header) {
+  animation: none;
+}
+::view-transition-old(dashboard-sidebar),
+::view-transition-new(dashboard-sidebar) {
+  animation: none;
+}
+::view-transition-old(dashboard-header) {
+  display: none;
+}
+::view-transition-new(dashboard-header) {
+  animation: none;
+}
+
 /* =========================================================
    REDUCED MOTION
    ========================================================= */

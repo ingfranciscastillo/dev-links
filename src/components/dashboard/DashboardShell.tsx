@@ -23,6 +23,7 @@ import {
 import { X } from "lucide-react";
 import {
 	type ComponentType,
+	type CSSProperties,
 	type ReactNode,
 	type SVGProps,
 	useEffect,
@@ -117,7 +118,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 	return (
 		<div className="min-h-dvh bg-background text-foreground">
 			<div className="mx-auto flex min-h-dvh max-w-360">
-				<aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-background md:flex">
+				<aside
+					className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-background md:flex"
+					// La sidebar no cambia entre subpáginas del dashboard — sin
+					// nombre propio, la view transition del router la incluiría
+					// en el crossfade de "root" y animaría píxeles idénticos.
+					style={{ viewTransitionName: "dashboard-sidebar" } as CSSProperties}
+				>
 					<div className="flex h-16 items-center border-b border-border px-6">
 						<Link to="/" className="flex items-center gap-2.5">
 							<span className="font-display text-xl leading-none tracking-[-0.03em]">
@@ -185,7 +192,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 				)}
 
 				<div className="flex min-w-0 flex-1 flex-col">
-					<header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/95 px-5 backdrop-blur-sm sm:px-8">
+					<header
+						className="sticky top-0 z-40 flex h-16 items-center justify-between gap-3 border-b border-border bg-background/95 px-5 backdrop-blur-sm sm:px-8"
+						style={{ viewTransitionName: "dashboard-header" } as CSSProperties}
+					>
 						<div className="flex min-w-0 items-center gap-3">
 							<button
 								type="button"

@@ -92,7 +92,7 @@ export function Header() {
 					}}
 				>
 					<a
-						href="https://github.com"
+						href="https://github.com/ingfranciscastillo/dev-links"
 						target="_blank"
 						rel="noreferrer"
 						aria-label="GitHub"

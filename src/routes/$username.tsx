@@ -126,16 +126,15 @@ export const Route = createFileRoute("/$username")({
 				{ property: "og:url", content: profileUrl },
 				{ name: "twitter:title", content: `${name} on DevLinks` },
 				{ name: "twitter:description", content: desc },
+				// Built-in JSON-LD support: renders a correctly-typed
+				// <script type="application/ld+json"> with safe escaping.
+				// A flat `scripts: [{ attrs: {...}, children }]` entry here
+				// gets misassembled into a nested `attrs.attrs` by the
+				// framework's headScripts merge, losing the `type` attr and
+				// making the browser try (and fail) to execute it as JS.
+				...(jsonLd ? [{ "script:ld+json": jsonLd }] : []),
 			],
 			links: [{ rel: "canonical", href: profileUrl }],
-			scripts: jsonLd
-				? [
-						{
-							attrs: { type: "application/ld+json" },
-							children: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
-						},
-					]
-				: undefined,
 		};
 	},
 	notFoundComponent: NotFoundBlock,

@@ -124,7 +124,7 @@ function IntegrationsPage() {
 					</div>
 
 					<p className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-						Sync every 6h
+						Sync every 24h
 					</p>
 				</div>
 			</header>

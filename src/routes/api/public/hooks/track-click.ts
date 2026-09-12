@@ -13,8 +13,8 @@ import {
 
 const bodySchema = z.object({
 	username: z.string().min(1).max(64),
-	linkId: z.string().uuid().optional().nullable(),
-	url: z.string().url().max(2048),
+	linkId: z.uuid().optional().nullable(),
+	url: z.url().max(2048),
 	title: z.string().max(200).optional().nullable(),
 	referrer: z.string().max(1024).optional().nullable(),
 });

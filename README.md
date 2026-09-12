@@ -15,7 +15,7 @@ A developer profile for your work, writing, projects, and everything you want pe
 ## Features
 
 - **GitHub-native** — repositories, activity, and contributions kept in sync automatically.
-- **Auto-imports** — writing and activity pulled in from Dev.to, Medium, Hashnode, Stack Overflow, and more.
+- **Auto-imports** — writing and activity pulled in from Dev.to, Medium, Stack Overflow, and more.
 - **Theme builder** — full control over colors, typography, layout, and effects, down to custom CSS.
 - **Snippets, projects & articles** — publish syntax-highlighted code and showcase your work directly on your page.
 - **Discover** — a searchable directory of developer profiles, filterable by stack, seniority, and availability.

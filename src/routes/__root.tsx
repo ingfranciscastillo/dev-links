@@ -91,7 +91,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			{
 				name: "description",
 				content:
-					"One page for your repos, snippets, articles and projects. Auto-synced with GitHub, Dev.to, Hashnode, Medium and Stack Overflow.",
+					"One page for your repos, snippets, articles and projects. Auto-synced with GitHub, Dev.to, Medium and Stack Overflow.",
 			},
 			{ name: "author", content: "DevLinks" },
 			{ name: "robots", content: "index, follow" },

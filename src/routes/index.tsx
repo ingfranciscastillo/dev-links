@@ -16,7 +16,7 @@ export const Route = createFileRoute("/")({
 			{
 				name: "description",
 				content:
-					"Your repos, snippets, articles and projects on one page — auto-synced with GitHub, Dev.to, Hashnode, Medium and Stack Overflow.",
+					"Your repos, snippets, articles and projects on one page — auto-synced with GitHub, Dev.to, Medium and Stack Overflow.",
 			},
 			{
 				property: "og:title",

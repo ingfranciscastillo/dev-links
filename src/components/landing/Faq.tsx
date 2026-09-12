@@ -15,7 +15,7 @@ const faqs = [
 	},
 	{
 		q: "What gets imported automatically?",
-		a: "Your GitHub repos and contributions, Dev.to articles, Hashnode posts, a Medium RSS feed, and Stack Overflow stats. All refreshed in the background.",
+		a: "Your GitHub repos and contributions, Dev.to articles, a Medium RSS feed, and Stack Overflow stats. All refreshed in the background.",
 	},
 	{
 		q: "Do you track my visitors with third-party cookies?",

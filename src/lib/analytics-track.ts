@@ -1,4 +1,3 @@
-// TODO: backend endpoints /api/public/hooks/track-view and /track-click pending migration.
 export function trackView(username: string, path: string) {
 	if (typeof window === "undefined") return;
 	try {

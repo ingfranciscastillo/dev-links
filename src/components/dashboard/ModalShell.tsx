@@ -41,7 +41,7 @@ export function ModalShell({
 			/>
 			<div
 				className={cn(
-					"relative z-10 w-full max-w-md border border-border bg-background p-6 transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] starting:opacity-0 starting:translate-y-2 starting:scale-95 sm:p-7 motion-reduce:transition-none",
+					"relative z-10 flex max-h-[90dvh] w-full max-w-md flex-col border border-border bg-background transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] starting:opacity-0 starting:translate-y-2 starting:scale-95 motion-reduce:transition-none",
 					closing
 						? "translate-y-2 scale-95 opacity-0"
 						: "translate-y-0 scale-100 opacity-100",
@@ -50,7 +50,7 @@ export function ModalShell({
 				aria-modal="true"
 				aria-labelledby="modal-title"
 			>
-				<div className="flex items-start justify-between gap-6 border-b border-border pb-4">
+				<div className="flex shrink-0 items-start justify-between gap-6 border-b border-border p-6 pb-4 sm:p-7 sm:pb-4">
 					<div>
 						<p className="font-mono text-[9px] uppercase tracking-[0.14em] text-brand">
 							DevLinks
@@ -74,7 +74,7 @@ export function ModalShell({
 					</button>
 				</div>
 
-				<div className="pt-6">
+				<div className="overflow-y-auto p-6 pt-6 sm:p-7 sm:pt-6">
 					{typeof children === "function" ? children(requestClose) : children}
 				</div>
 			</div>

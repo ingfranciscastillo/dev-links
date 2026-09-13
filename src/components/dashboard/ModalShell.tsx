@@ -74,7 +74,7 @@ export function ModalShell({
 					</button>
 				</div>
 
-				<div className="overflow-y-auto p-6 pt-6 sm:p-7 sm:pt-6">
+				<div className="min-h-0 overflow-y-auto p-6 pt-6 sm:p-7 sm:pt-6">
 					{typeof children === "function" ? children(requestClose) : children}
 				</div>
 			</div>

@@ -475,7 +475,7 @@ function SupportDialog({
 						</form.Subscribe>
 					</FieldGroup>
 
-					<div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+					<div className="sticky bottom-0 -mx-6 -mb-6 mt-6 flex items-center justify-between border-t border-border bg-background px-6 pb-6 pt-5 sm:-mx-7 sm:-mb-7 sm:px-7 sm:pb-7">
 						<button
 							type="button"
 							onClick={requestClose}

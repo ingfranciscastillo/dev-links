@@ -327,7 +327,13 @@ export function themeToStyleTag(t: ThemeV2, scope = ".tt-scope"): string {
 
 	const container = `${scope} .tt-container { max-width: var(--tt-max-width); margin-inline: auto; }`;
 
-	return `${scope} {\n${body}\n}\n${scopeBase}\n${headings}\n${monoEls}\n${card}\n${muted}\n${surface}\n${borderC}\n${panel}\n${container}\n${glass}\n${hover}\n${btn}\n${custom}`;
+	// El scrollbar visible lo pinta html/body, no .tt-scope (ese div no es su
+	// propio contenedor de scroll) — por eso va sin scope y con colores
+	// literales: las custom properties de arriba solo llegan a descendientes
+	// de .tt-scope, y html/body son ancestros.
+	const scrollbar = scrollbarCss(t);
+
+	return `${scope} {\n${body}\n}\n${scopeBase}\n${headings}\n${monoEls}\n${card}\n${muted}\n${surface}\n${borderC}\n${panel}\n${container}\n${glass}\n${hover}\n${btn}\n${scrollbar}\n${custom}`;
 }
 
 function hoverCss(kind: ThemeV2["hover"], scope: string): string {
@@ -359,6 +365,16 @@ function buttonCss(t: ThemeV2, scope: string): string {
 		case "glass":
 			return `${base}\n${scope} .tt-btn { background: ${withAlpha(t.fg, 0.08)}; color: var(--tt-fg); border: var(--tt-btn-border) solid ${withAlpha(t.fg, 0.15)}; backdrop-filter: blur(10px); }\n${scope} .tt-btn:hover { background: ${withAlpha(t.fg, 0.14)}; }`;
 	}
+}
+
+function scrollbarCss(t: ThemeV2): string {
+	return [
+		`html, body { scrollbar-color: ${t.accent} ${t.surface}; scrollbar-width: thin; }`,
+		`html::-webkit-scrollbar, body::-webkit-scrollbar { width: 10px; height: 10px; }`,
+		`html::-webkit-scrollbar-track, body::-webkit-scrollbar-track { background: ${t.surface}; }`,
+		`html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb { background: ${t.accent}; border-radius: 999px; border: 2px solid ${t.surface}; }`,
+		`html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover { background: ${mix(t.accent, t.fg, 0.15)}; }`,
+	].join("\n");
 }
 
 // ---- Color helpers ----------------------------------------------------------

@@ -1,5 +1,5 @@
 import { SiBluesky } from "@icons-pack/react-simple-icons";
-import { Heart, Repeat2 } from "lucide-react";
+import { HeartIcon, RepeatIcon } from "@solar-icons/react/linear";
 import type { BlueskyPayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -58,11 +58,11 @@ export function BlueskyBlock({
 							)}
 						>
 							<span className="inline-flex items-center gap-1">
-								<Heart className="h-3 w-3" />
+								<HeartIcon className="h-3 w-3" />
 								{p.likes}
 							</span>
 							<span className="inline-flex items-center gap-1">
-								<Repeat2 className="h-3 w-3" />
+								<RepeatIcon className="h-3 w-3" />
 								{p.reposts}
 							</span>
 							{p.created_at && (

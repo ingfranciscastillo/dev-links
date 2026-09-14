@@ -1,5 +1,5 @@
 import { SiLeetcode } from "@icons-pack/react-simple-icons";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import type { LeetcodePayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -111,7 +111,7 @@ export function LeetcodeBlock({
 							: "text-muted-foreground hover:text-foreground",
 					)}
 				>
-					View profile <ArrowUpRight className="h-3 w-3" />
+					View profile <ArrowRightUpIcon className="h-3 w-3" />
 				</a>
 			</div>
 		</section>

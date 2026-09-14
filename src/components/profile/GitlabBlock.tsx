@@ -1,5 +1,6 @@
 import { SiGitlab } from "@icons-pack/react-simple-icons";
-import { ArrowUpRight, GitFork, Star } from "lucide-react";
+import { ArrowRightUpIcon, StarIcon } from "@solar-icons/react/linear";
+import { GitFork } from "lucide-react";
 import type { GitlabPayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -53,7 +54,7 @@ export function GitlabBlock({
 					>
 						<div className="flex items-start justify-between gap-2">
 							<p className="truncate font-mono text-sm font-medium">{r.name}</p>
-							<ArrowUpRight
+							<ArrowRightUpIcon
 								className={cx(
 									"h-4 w-4 shrink-0",
 									themed ? "tt-muted" : "text-muted-foreground",
@@ -77,7 +78,7 @@ export function GitlabBlock({
 							)}
 						>
 							<span className="inline-flex items-center gap-1">
-								<Star className="h-3 w-3" />
+								<StarIcon className="h-3 w-3" />
 								{r.stars}
 							</span>
 							<span className="inline-flex items-center gap-1">

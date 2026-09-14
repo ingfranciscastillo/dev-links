@@ -1,4 +1,8 @@
-import { Mic, PlayCircle, Presentation } from "lucide-react";
+import {
+	DisplayIcon,
+	MicrophoneLargeIcon,
+	PlayIcon,
+} from "@solar-icons/react/linear";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -35,7 +39,7 @@ export function TalksBlock({
 					themed ? "tt-muted" : "text-muted-foreground",
 				)}
 			>
-				<Mic className="h-3.5 w-3.5" /> Talks & slides
+				<MicrophoneLargeIcon className="h-3.5 w-3.5" /> Talks & slides
 			</h2>
 			<div
 				className={cx(
@@ -93,7 +97,7 @@ export function TalksBlock({
 											: "text-muted-foreground hover:text-foreground",
 									)}
 								>
-									<Presentation className="h-3.5 w-3.5" /> Slides
+									<DisplayIcon className="h-3.5 w-3.5" /> Slides
 								</a>
 							)}
 							{t.videoUrl && (
@@ -108,7 +112,7 @@ export function TalksBlock({
 											: "text-muted-foreground hover:text-foreground",
 									)}
 								>
-									<PlayCircle className="h-3.5 w-3.5" /> Watch
+									<PlayIcon className="h-3.5 w-3.5" /> Watch
 								</a>
 							)}
 						</div>

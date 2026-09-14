@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import type { LinkedinPayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -47,7 +47,7 @@ export function LinkedinBlock({
 							"View full experience and recommendations on LinkedIn."}
 					</p>
 				</div>
-				<ArrowUpRight
+				<ArrowRightUpIcon
 					className={cx(
 						"h-4 w-4 shrink-0",
 						themed ? "tt-muted" : "text-muted-foreground",

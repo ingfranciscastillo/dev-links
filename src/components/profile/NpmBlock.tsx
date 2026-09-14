@@ -1,5 +1,8 @@
 import { SiNpm } from "@icons-pack/react-simple-icons";
-import { ArrowUpRight, Download } from "lucide-react";
+import {
+	ArrowRightUpIcon,
+	DownloadMinimalisticIcon,
+} from "@solar-icons/react/linear";
 import type { NpmPayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -79,13 +82,13 @@ export function NpmBlock({
 								<span>v{p.version}</span>
 								{p.weekly_downloads != null && (
 									<span className="inline-flex items-center gap-1">
-										<Download className="h-3 w-3" />
+										<DownloadMinimalisticIcon className="h-3 w-3" />
 										{compact(p.weekly_downloads)}
 									</span>
 								)}
 							</div>
 						</div>
-						<ArrowUpRight
+						<ArrowRightUpIcon
 							className={cx(
 								"h-4 w-4 shrink-0",
 								themed ? "tt-muted" : "text-muted-foreground",

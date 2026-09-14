@@ -1,5 +1,5 @@
 import { SiMastodon } from "@icons-pack/react-simple-icons";
-import { Heart, Repeat2 } from "lucide-react";
+import { HeartIcon, RepeatIcon } from "@solar-icons/react/linear";
 import type { MastodonPayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -58,11 +58,11 @@ export function MastodonBlock({
 							)}
 						>
 							<span className="inline-flex items-center gap-1">
-								<Heart className="h-3 w-3" />
+								<HeartIcon className="h-3 w-3" />
 								{p.favourites}
 							</span>
 							<span className="inline-flex items-center gap-1">
-								<Repeat2 className="h-3 w-3" />
+								<RepeatIcon className="h-3 w-3" />
 								{p.reblogs}
 							</span>
 							{p.created_at && (

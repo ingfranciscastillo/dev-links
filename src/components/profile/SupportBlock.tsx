@@ -1,4 +1,10 @@
-import { Coffee, Heart, MessageCircle, Users } from "lucide-react";
+import {
+	SiBuymeacoffee,
+	SiDiscord,
+	SiGithubsponsors,
+	SiKofi,
+} from "@icons-pack/react-simple-icons";
+import { HeartIcon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -25,10 +31,11 @@ export const SUPPORT_PLATFORM_LABEL: Record<string, string> = {
 };
 
 function iconFor(platform: string) {
-	if (platform === "buymeacoffee" || platform === "kofi") return Coffee;
-	if (platform === "discord" || platform === "slack") return MessageCircle;
-	if (platform === "ghsponsors") return Heart;
-	return Users;
+	if (platform === "buymeacoffee") return SiBuymeacoffee;
+	if (platform === "kofi") return SiKofi;
+	if (platform === "discord" || platform === "slack") return SiDiscord;
+	if (platform === "ghsponsors") return SiGithubsponsors;
+	return UsersGroupRoundedIcon;
 }
 
 export function SupportBlock({
@@ -48,7 +55,7 @@ export function SupportBlock({
 					themed ? "tt-muted" : "text-muted-foreground",
 				)}
 			>
-				<Heart className="h-3.5 w-3.5" /> Support my work
+				<HeartIcon className="h-3.5 w-3.5" /> Support
 			</h2>
 			<div className="flex flex-wrap gap-2">
 				{support.map((l) => {
@@ -95,7 +102,7 @@ export function CommunityBlock({
 					themed ? "tt-muted" : "text-muted-foreground",
 				)}
 			>
-				<Users className="h-3.5 w-3.5" /> Community
+				<UsersGroupRoundedIcon className="h-3.5 w-3.5" /> Community
 			</h2>
 			<div className="grid gap-2 sm:grid-cols-2">
 				{community.map((l) => {

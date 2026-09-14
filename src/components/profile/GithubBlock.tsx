@@ -1,5 +1,6 @@
 import { SiGithub } from "@icons-pack/react-simple-icons";
-import { GitFork, Star } from "lucide-react";
+import { StarIcon } from "@solar-icons/react/linear";
+import { GitFork } from "lucide-react";
 import type { GithubPayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {
@@ -89,7 +90,7 @@ export function GithubBlock({
 							)}
 						>
 							<span className="inline-flex items-center gap-1">
-								<Star className="h-3 w-3" />
+								<StarIcon className="h-3 w-3" />
 								{r.stars}
 							</span>
 							<span className="inline-flex items-center gap-1">

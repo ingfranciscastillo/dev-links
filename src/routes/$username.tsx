@@ -1,14 +1,14 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import {
-	Activity,
-	ArrowUpRight,
-	Code2,
-	Globe,
-	Link as LinkIcon,
-	MapPin,
-	MessageSquare,
-	Share2,
-} from "lucide-react";
+	ArrowRightUpIcon,
+	CodeIcon,
+	FolderWithFilesIcon,
+	GlobalIcon,
+	LinkMinimalistic2Icon,
+	MapPointIcon,
+	Notebook2Icon,
+	ShareIcon,
+} from "@solar-icons/react/linear";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { type ReactNode, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
@@ -355,7 +355,7 @@ function SnippetsSection({
 }) {
 	return (
 		<section>
-			<SectionTitle icon={Code2} title="Snippets" themed={themed} />
+			<SectionTitle icon={CodeIcon} title="Snippets" themed={themed} />
 			<div className="grid gap-3">
 				{snippets.map((s) => (
 					<article
@@ -453,7 +453,7 @@ function ProfileHeader({
 								: "border-border bg-surface text-muted-foreground hover:bg-surface-elevated hover:text-foreground",
 						)}
 					>
-						<Share2 className="h-4 w-4" />
+						<ShareIcon className="h-4 w-4" />
 					</button>
 
 					{!themed && <ThemeToggle />}
@@ -563,14 +563,14 @@ function ProfileSidebar({
 				>
 					{location && (
 						<li className="flex items-center gap-2">
-							<MapPin className="h-3.5 w-3.5" />
+							<MapPointIcon className="h-3.5 w-3.5" />
 							{location}
 						</li>
 					)}
 
 					{website && (
 						<li className="flex items-center gap-2">
-							<Globe className="h-3.5 w-3.5" />
+							<GlobalIcon className="h-3.5 w-3.5" />
 
 							<a
 								href={website}
@@ -640,7 +640,11 @@ function LinksSection({
 	if (links.length === 0) return null;
 	return (
 		<section className="pt-10">
-			<SectionTitle icon={LinkIcon} title="Links" themed={themed} />
+			<SectionTitle
+				icon={LinkMinimalistic2Icon}
+				title="Links"
+				themed={themed}
+			/>
 			<div className="grid gap-2">
 				{links.map((l) => {
 					const Icon = iconForUrl(l.url);
@@ -680,7 +684,7 @@ function LinksSection({
 									<p className="truncate text-xs opacity-70">{l.description}</p>
 								)}
 							</div>
-							<ArrowUpRight className="h-4 w-4 opacity-70 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+							<ArrowRightUpIcon className="h-4 w-4 opacity-70 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
 						</a>
 					);
 				})}
@@ -699,7 +703,11 @@ function ProjectsSection({
 	if (projects.length === 0) return null;
 	return (
 		<section>
-			<SectionTitle icon={Activity} title="Projects" themed={themed} />
+			<SectionTitle
+				icon={FolderWithFilesIcon}
+				title="Projects"
+				themed={themed}
+			/>
 			<div className="grid gap-3 sm:grid-cols-2">
 				{projects.map((p) => (
 					<div
@@ -811,7 +819,7 @@ function ArticlesSection({
 	if (articles.length === 0) return null;
 	return (
 		<section>
-			<SectionTitle icon={MessageSquare} title="Writing" themed={themed} />
+			<SectionTitle icon={Notebook2Icon} title="Writing" themed={themed} />
 			<div
 				className={cx(
 					"divide-y overflow-hidden rounded-xl border",
@@ -843,7 +851,7 @@ function ArticlesSection({
 								{new Date(a.date).toLocaleDateString()}
 							</p>
 						</div>
-						<ArrowUpRight
+						<ArrowRightUpIcon
 							className={cx(
 								"h-4 w-4 shrink-0",
 								themed ? "tt-muted" : "text-muted-foreground",

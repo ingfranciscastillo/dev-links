@@ -1,4 +1,4 @@
-import { ArrowRightUpIcon } from "@solar-icons/react/linear/arrow-right-up";
+import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import { Link } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 

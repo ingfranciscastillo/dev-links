@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { CloseIcon } from "@solar-icons/react/linear/close";
 import { type ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -70,7 +70,7 @@ export function ModalShell({
 						className="inline-flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 						aria-label="Close"
 					>
-						<X className="h-4 w-4" strokeWidth={1.5} />
+						<CloseIcon className="h-4 w-4" strokeWidth={1.5} />
 					</button>
 				</div>
 

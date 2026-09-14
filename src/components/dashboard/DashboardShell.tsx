@@ -1,5 +1,6 @@
 import {
 	Chart2Icon,
+	CloseIcon,
 	CodeSquareIcon,
 	FolderWithFilesIcon,
 	HamburgerMenuIcon,
@@ -20,7 +21,6 @@ import {
 	useRouteContext,
 	useRouter,
 } from "@tanstack/react-router";
-import { X } from "lucide-react";
 import {
 	type ComponentType,
 	type CSSProperties,
@@ -171,7 +171,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 										aria-label="Close menu"
 										className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
 									>
-										<X className="h-4 w-4" strokeWidth={1.5} />
+										<CloseIcon className="h-4 w-4" strokeWidth={1.5} />
 									</button>
 								</div>
 

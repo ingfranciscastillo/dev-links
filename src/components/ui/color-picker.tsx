@@ -1,20 +1,13 @@
 "use client";
 
+import { PipetteIcon } from "@solar-icons/react/linear";
 import { cva, type VariantProps } from "class-variance-authority";
-import { PipetteIcon } from "lucide-react";
 import {
 	Direction as DirectionPrimitive,
 	Slider as SliderPrimitive,
 	Slot as SlotPrimitive,
 } from "radix-ui";
 import * as React from "react";
-
-import { useComposedRefs } from "#/lib/compose-refs.ts";
-import { cn } from "#/lib/utils.ts";
-import { VisuallyHiddenInput } from "#/components/visually-hidden-input.tsx";
-import { useAsRef } from "#/hooks/use-as-ref.ts";
-import { useIsomorphicLayoutEffect } from "#/hooks/use-isomorphic-layout-effect.ts";
-import { useLazyRef } from "#/hooks/use-lazy-ref.ts";
 import { Button } from "#/components/ui/button.tsx";
 import { Input } from "#/components/ui/input.tsx";
 import {
@@ -29,6 +22,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "#/components/ui/select.tsx";
+import { VisuallyHiddenInput } from "#/components/visually-hidden-input.tsx";
+import { useAsRef } from "#/hooks/use-as-ref.ts";
+import { useIsomorphicLayoutEffect } from "#/hooks/use-isomorphic-layout-effect.ts";
+import { useLazyRef } from "#/hooks/use-lazy-ref.ts";
+import { useComposedRefs } from "#/lib/compose-refs.ts";
+import { cn } from "#/lib/utils.ts";
 
 const ROOT_NAME = "ColorPicker";
 const ROOT_IMPL_NAME = "ColorPickerImpl";

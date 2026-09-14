@@ -402,9 +402,34 @@ function ProjectDialog({
 		<ModalShell
 			title={initial ? "Edit project" : "New project"}
 			onClose={onClose}
+			footer={(requestClose) => (
+				<>
+					<button
+						type="button"
+						onClick={requestClose}
+						className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+					>
+						Cancel
+					</button>
+
+					<Button
+						type="submit"
+						form="project-dialog-form"
+						disabled={pending || !form.state.canSubmit}
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					>
+						{pending
+							? "Saving..."
+							: initial
+								? "Save project"
+								: "Create project"}
+					</Button>
+				</>
+			)}
 		>
-			{(requestClose) => (
+			{() => (
 				<form
+					id="project-dialog-form"
 					onSubmit={(e) => {
 						e.preventDefault();
 						e.stopPropagation();
@@ -640,28 +665,6 @@ function ProjectDialog({
 							)}
 						</form.Field>
 					</FieldGroup>
-
-					<div className="sticky bottom-0 -mx-6 -mb-6 mt-6 flex items-center justify-between border-t border-border bg-background px-6 pb-6 pt-5 sm:-mx-7 sm:-mb-7 sm:px-7 sm:pb-7">
-						<button
-							type="button"
-							onClick={requestClose}
-							className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
-						>
-							Cancel
-						</button>
-
-						<Button
-							type="submit"
-							disabled={pending || !form.state.canSubmit}
-							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
-						>
-							{pending
-								? "Saving..."
-								: initial
-									? "Save project"
-									: "Create project"}
-						</Button>
-					</div>
 				</form>
 			)}
 		</ModalShell>

@@ -8,10 +8,12 @@ export function ModalShell({
 	title,
 	onClose,
 	children,
+	footer,
 }: {
 	title: string;
 	onClose: () => void;
 	children: ReactNode | ((requestClose: () => void) => ReactNode);
+	footer?: ReactNode | ((requestClose: () => void) => ReactNode);
 }) {
 	const [closing, setClosing] = useState(false);
 
@@ -41,7 +43,7 @@ export function ModalShell({
 			/>
 			<div
 				className={cn(
-					"relative z-10 flex max-h-[90dvh] w-full max-w-md flex-col border border-border bg-background transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] starting:opacity-0 starting:translate-y-2 starting:scale-95 motion-reduce:transition-none",
+					"relative z-10 flex max-h-[80dvh] w-full max-w-md flex-col border border-border bg-background transition-[opacity,transform] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] starting:opacity-0 starting:translate-y-2 starting:scale-95 motion-reduce:transition-none sm:max-h-[90dvh]",
 					closing
 						? "translate-y-2 scale-95 opacity-0"
 						: "translate-y-0 scale-100 opacity-100",
@@ -74,9 +76,15 @@ export function ModalShell({
 					</button>
 				</div>
 
-				<div className="min-h-0 overflow-y-auto p-6 pt-6 sm:p-7 sm:pt-6">
+				<div className="min-h-0 flex-1 overflow-y-auto p-6 pt-6 sm:p-7 sm:pt-6">
 					{typeof children === "function" ? children(requestClose) : children}
 				</div>
+
+				{footer && (
+					<div className="flex shrink-0 items-center justify-between gap-4 border-t border-border px-6 py-4 sm:px-7">
+						{typeof footer === "function" ? footer(requestClose) : footer}
+					</div>
+				)}
 			</div>
 		</div>
 	);

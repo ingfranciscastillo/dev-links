@@ -1,18 +1,19 @@
-import { SiMastodon } from "@icons-pack/react-simple-icons";
-import { Heart, Repeat2 } from "lucide-react";
-import type { MastodonPayload } from "@/lib/integrations/types";
+import { SiGitlab } from "@icons-pack/react-simple-icons";
+import { ArrowUpRight, GitFork, Star } from "lucide-react";
+import type { GitlabPayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
 }
 
-export function MastodonBlock({
+export function GitlabBlock({
 	payload,
 	themed = false,
 }: {
-	payload: MastodonPayload;
+	payload: GitlabPayload;
 	themed?: boolean;
 }) {
+	if (payload.repos.length === 0) return null;
 	return (
 		<section>
 			<h2
@@ -22,7 +23,7 @@ export function MastodonBlock({
 				)}
 			>
 				<span className="flex items-center gap-2">
-					<SiMastodon className="h-3.5 w-3.5" /> Mastodon
+					<SiGitlab className="h-3.5 w-3.5" /> GitLab
 				</span>
 				<a
 					href={payload.profile.url}
@@ -33,14 +34,14 @@ export function MastodonBlock({
 						themed ? "hover:opacity-80" : "hover:text-foreground",
 					)}
 				>
-					{payload.profile.acct}
+					@{payload.profile.username}
 				</a>
 			</h2>
-			<div className="grid gap-2">
-				{payload.posts.slice(0, 5).map((p) => (
+			<div className="grid gap-2 sm:grid-cols-2">
+				{payload.repos.slice(0, 6).map((r) => (
 					<a
-						key={p.url}
-						href={p.url}
+						key={r.url}
+						href={r.url}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(
@@ -50,7 +51,25 @@ export function MastodonBlock({
 								: "border-hairline bg-surface hover:bg-surface-elevated",
 						)}
 					>
-						<p className="whitespace-pre-line text-sm">{p.text}</p>
+						<div className="flex items-start justify-between gap-2">
+							<p className="truncate font-mono text-sm font-medium">{r.name}</p>
+							<ArrowUpRight
+								className={cx(
+									"h-4 w-4 shrink-0",
+									themed ? "tt-muted" : "text-muted-foreground",
+								)}
+							/>
+						</div>
+						{r.description && (
+							<p
+								className={cx(
+									"mt-1 line-clamp-2 text-xs",
+									themed ? "tt-muted" : "text-muted-foreground",
+								)}
+							>
+								{r.description}
+							</p>
+						)}
 						<div
 							className={cx(
 								"mt-2 flex items-center gap-3 text-[11px]",
@@ -58,16 +77,13 @@ export function MastodonBlock({
 							)}
 						>
 							<span className="inline-flex items-center gap-1">
-								<Heart className="h-3 w-3" />
-								{p.favourites}
+								<Star className="h-3 w-3" />
+								{r.stars}
 							</span>
 							<span className="inline-flex items-center gap-1">
-								<Repeat2 className="h-3 w-3" />
-								{p.reblogs}
+								<GitFork className="h-3 w-3" />
+								{r.forks}
 							</span>
-							{p.created_at && (
-								<span>{new Date(p.created_at).toLocaleDateString()}</span>
-							)}
 						</div>
 					</a>
 				))}

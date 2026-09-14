@@ -1,5 +1,5 @@
 import { SiNpm } from "@icons-pack/react-simple-icons";
-import { ArrowUpRight, Download, Package } from "lucide-react";
+import { ArrowUpRight, Download } from "lucide-react";
 import type { NpmPayload } from "@/lib/integrations/types";
 
 function cx(...classes: Array<string | false | null | undefined>) {

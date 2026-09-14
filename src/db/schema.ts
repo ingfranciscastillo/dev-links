@@ -29,6 +29,7 @@ export const buttonStyle = pgEnum("button_style", [
 
 export const integrationProvider = pgEnum("integration_provider", [
 	"github",
+	"gitlab",
 	"devto",
 	"medium",
 	"stackoverflow",
@@ -37,6 +38,7 @@ export const integrationProvider = pgEnum("integration_provider", [
 	"npm",
 	"bluesky",
 	"mastodon",
+	"linkedin",
 	"dockerhub",
 	"youtube",
 ]);

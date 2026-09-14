@@ -1,5 +1,6 @@
 export type Provider =
 	| "github"
+	| "gitlab"
 	| "devto"
 	| "medium"
 	| "stackoverflow"
@@ -8,11 +9,13 @@ export type Provider =
 	| "npm"
 	| "bluesky"
 	| "mastodon"
+	| "linkedin"
 	| "dockerhub"
 	| "youtube";
 
 export const PROVIDERS: Provider[] = [
 	"github",
+	"gitlab",
 	"devto",
 	"medium",
 	"stackoverflow",
@@ -21,12 +24,14 @@ export const PROVIDERS: Provider[] = [
 	"npm",
 	"bluesky",
 	"mastodon",
+	"linkedin",
 	"dockerhub",
 	"youtube",
 ];
 
 export const PROVIDER_LABEL: Record<Provider, string> = {
 	github: "GitHub",
+	gitlab: "GitLab",
 	devto: "Dev.to",
 	medium: "Medium",
 	stackoverflow: "Stack Overflow",
@@ -35,6 +40,7 @@ export const PROVIDER_LABEL: Record<Provider, string> = {
 	npm: "npm",
 	bluesky: "Bluesky",
 	mastodon: "Mastodon",
+	linkedin: "LinkedIn",
 	dockerhub: "Docker Hub",
 	youtube: "YouTube",
 };
@@ -43,6 +49,7 @@ export type ProviderCategory = "code" | "writing" | "social" | "containers";
 
 export const PROVIDER_CATEGORY: Record<Provider, ProviderCategory> = {
 	github: "code",
+	gitlab: "code",
 	wakatime: "code",
 	leetcode: "code",
 	npm: "code",
@@ -52,6 +59,7 @@ export const PROVIDER_CATEGORY: Record<Provider, ProviderCategory> = {
 	youtube: "writing",
 	bluesky: "social",
 	mastodon: "social",
+	linkedin: "social",
 	dockerhub: "containers",
 };
 
@@ -242,4 +250,30 @@ export type YoutubePayload = {
 		published_at: string;
 		description: string;
 	}>;
+};
+
+export type LinkedinPayload = {
+	slug: string;
+	headline: string;
+	url: string;
+};
+
+export type GitlabPayload = {
+	profile: {
+		username: string;
+		name: string | null;
+		bio: string | null;
+		avatar_url: string | null;
+		url: string;
+	};
+	repos: Array<{
+		name: string;
+		full_name: string;
+		description: string;
+		stars: number;
+		forks: number;
+		url: string;
+		updated_at: string;
+	}>;
+	totals: { stars: number; projects: number };
 };

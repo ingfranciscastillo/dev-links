@@ -4,7 +4,9 @@ import { fetchBluesky } from "./bluesky.server";
 import { fetchDevto } from "./devto.server";
 import { fetchDockerhub } from "./dockerhub.server";
 import { fetchGithub } from "./github.server";
+import { fetchGitlab } from "./gitlab.server";
 import { fetchLeetcode } from "./leetcode.server";
+import { fetchLinkedin } from "./linkedin.server";
 import { fetchMastodon } from "./mastodon.server";
 import { fetchMedium } from "./medium.server";
 import { fetchNpm } from "./npm.server";
@@ -23,6 +25,8 @@ export async function runProviderFetch(
 				handle: input.handle,
 				config: input.config as { pinned?: string[] },
 			});
+		case "gitlab":
+			return fetchGitlab({ handle: input.handle });
 		case "devto":
 			return fetchDevto({ handle: input.handle });
 		case "medium":
@@ -39,6 +43,8 @@ export async function runProviderFetch(
 			return fetchBluesky({ handle: input.handle });
 		case "mastodon":
 			return fetchMastodon({ handle: input.handle });
+		case "linkedin":
+			return fetchLinkedin({ handle: input.handle, config: input.config });
 		case "dockerhub":
 			return fetchDockerhub({ handle: input.handle });
 		case "youtube":

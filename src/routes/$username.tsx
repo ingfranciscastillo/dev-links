@@ -16,7 +16,9 @@ import { BlueskyBlock } from "@/components/profile/BlueskyBlock";
 import { DevtoBlock } from "@/components/profile/DevtoBlock";
 import { DockerhubBlock } from "@/components/profile/DockerhubBlock";
 import { GithubBlock } from "@/components/profile/GithubBlock";
+import { GitlabBlock } from "@/components/profile/GitlabBlock";
 import { LeetcodeBlock } from "@/components/profile/LeetcodeBlock";
+import { LinkedinBlock } from "@/components/profile/LinkedinBlock";
 import { MastodonBlock } from "@/components/profile/MastodonBlock";
 import { MediumBlock } from "@/components/profile/MediumBlock";
 import { NpmBlock } from "@/components/profile/NpmBlock";
@@ -43,7 +45,9 @@ import type {
 	DevtoPayload,
 	DockerhubPayload,
 	GithubPayload,
+	GitlabPayload,
 	LeetcodePayload,
+	LinkedinPayload,
 	MastodonPayload,
 	MediumPayload,
 	NpmPayload,
@@ -308,6 +312,7 @@ function IntegrationBlocks({
 			?.payload;
 
 	const gh = by("github", "profile") as GithubPayload | undefined;
+	const gitlab = by("gitlab", "profile") as GitlabPayload | undefined;
 	const dev = by("devto", "articles") as DevtoPayload | undefined;
 	const md = by("medium", "posts") as MediumPayload | undefined;
 	const so = by("stackoverflow", "profile") as StackOverflowPayload | undefined;
@@ -316,6 +321,7 @@ function IntegrationBlocks({
 	const dockerhub = by("dockerhub", "repos") as DockerhubPayload | undefined;
 	const leetcode = by("leetcode", "stats") as LeetcodePayload | undefined;
 	const mastodon = by("mastodon", "feed") as MastodonPayload | undefined;
+	const linkedin = by("linkedin", "profile") as LinkedinPayload | undefined;
 	const npm = by("npm", "packages") as NpmPayload | undefined;
 	const wakatime = by("wakatime", "stats") as WakatimePayload | undefined;
 	const youtube = by("youtube", "videos") as YoutubePayload | undefined;
@@ -323,6 +329,7 @@ function IntegrationBlocks({
 	return (
 		<>
 			{gh && <GithubBlock payload={gh} themed={themed} />}
+			{gitlab && <GitlabBlock payload={gitlab} themed={themed} />}
 			{dev && <DevtoBlock payload={dev} themed={themed} />}
 			{md && <MediumBlock payload={md} themed={themed} />}
 			{so && <StackOverflowBlock payload={so} themed={themed} />}
@@ -331,6 +338,7 @@ function IntegrationBlocks({
 			{dockerhub && <DockerhubBlock payload={dockerhub} themed={themed} />}
 			{leetcode && <LeetcodeBlock payload={leetcode} themed={themed} />}
 			{mastodon && <MastodonBlock payload={mastodon} themed={themed} />}
+			{linkedin && <LinkedinBlock payload={linkedin} themed={themed} />}
 			{npm && <NpmBlock payload={npm} themed={themed} />}
 			{wakatime && <WakatimeBlock payload={wakatime} themed={themed} />}
 			{youtube && <YoutubeBlock payload={youtube} themed={themed} />}

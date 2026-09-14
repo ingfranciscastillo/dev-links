@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/integrations")({
 			{
 				name: "description",
 				content:
-					"Connect GitHub, Dev.to, Medium, Stack Overflow, WakaTime, LeetCode, npm, Bluesky, Mastodon, Docker Hub and YouTube to your DevLinks profile.",
+					"Connect GitHub, GitLab, Dev.to, Medium, Stack Overflow, WakaTime, LeetCode, npm, Bluesky, Mastodon, LinkedIn, Docker Hub and YouTube to your DevLinks profile.",
 			},
 		],
 	}),
@@ -57,6 +57,10 @@ const PROVIDER_HELP: Record<
 	github: {
 		placeholder: "octocat",
 		helper: "Your public GitHub username.",
+	},
+	gitlab: {
+		placeholder: "yourusername",
+		helper: "Your public GitLab username.",
 	},
 	devto: {
 		placeholder: "ben",
@@ -90,6 +94,15 @@ const PROVIDER_HELP: Record<
 	mastodon: {
 		placeholder: "@you@mastodon.social",
 		helper: "Your Mastodon handle.",
+	},
+	linkedin: {
+		placeholder: "https://www.linkedin.com/in/yourprofile",
+		helper: "Your LinkedIn profile URL or vanity name.",
+		configField: {
+			key: "headline",
+			label: "Headline (optional)",
+			placeholder: "Senior Software Engineer",
+		},
 	},
 	dockerhub: {
 		placeholder: "yourusername",

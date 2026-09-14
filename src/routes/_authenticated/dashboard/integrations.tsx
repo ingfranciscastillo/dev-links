@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/integrations")({
 			{
 				name: "description",
 				content:
-					"Connect GitHub, GitLab, Dev.to, Medium, Stack Overflow, WakaTime, LeetCode, npm, Bluesky, Mastodon, LinkedIn, Docker Hub and YouTube to your DevLinks profile.",
+					"Connect GitHub, GitLab, Dev.to, Medium, Stack Overflow, WakaTime, LeetCode, npm, Bluesky, Mastodon, Docker Hub, YouTube, Hugging Face and Product Hunt to your DevLinks profile.",
 			},
 		],
 	}),
@@ -98,15 +98,6 @@ const PROVIDER_HELP: Record<
 		placeholder: "@you@mastodon.social",
 		helper: "Your Mastodon handle.",
 	},
-	linkedin: {
-		placeholder: "https://www.linkedin.com/in/yourprofile",
-		helper: "Your LinkedIn profile URL or vanity name.",
-		configField: {
-			key: "headline",
-			label: "Headline (optional)",
-			placeholder: "Senior Software Engineer",
-		},
-	},
 	dockerhub: {
 		placeholder: "yourusername",
 		helper: "Your Docker Hub username.",
@@ -114,6 +105,14 @@ const PROVIDER_HELP: Record<
 	youtube: {
 		placeholder: "@yourchannel",
 		helper: "Your YouTube channel handle.",
+	},
+	huggingface: {
+		placeholder: "yourusername",
+		helper: "Your Hugging Face username.",
+	},
+	producthunt: {
+		placeholder: "yourusername",
+		helper: "Your Product Hunt username.",
 	},
 };
 
@@ -165,8 +164,7 @@ function IntegrationsPage() {
 
 							{providers.map((provider) => {
 								const account =
-									accounts?.find((item) => item.provider === provider) ??
-									null;
+									accounts?.find((item) => item.provider === provider) ?? null;
 
 								return (
 									<IntegrationRow

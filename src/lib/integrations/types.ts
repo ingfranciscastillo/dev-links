@@ -9,9 +9,10 @@ export type Provider =
 	| "npm"
 	| "bluesky"
 	| "mastodon"
-	| "linkedin"
 	| "dockerhub"
-	| "youtube";
+	| "youtube"
+	| "huggingface"
+	| "producthunt";
 
 export const PROVIDERS: Provider[] = [
 	"github",
@@ -24,9 +25,10 @@ export const PROVIDERS: Provider[] = [
 	"npm",
 	"bluesky",
 	"mastodon",
-	"linkedin",
 	"dockerhub",
 	"youtube",
+	"huggingface",
+	"producthunt",
 ];
 
 export const PROVIDER_LABEL: Record<Provider, string> = {
@@ -40,12 +42,17 @@ export const PROVIDER_LABEL: Record<Provider, string> = {
 	npm: "npm",
 	bluesky: "Bluesky",
 	mastodon: "Mastodon",
-	linkedin: "LinkedIn",
 	dockerhub: "Docker Hub",
 	youtube: "YouTube",
+	huggingface: "Hugging Face",
+	producthunt: "Product Hunt",
 };
 
-export type ProviderSegment = "designer" | "developer" | "builder" | "professional";
+export type ProviderSegment =
+	| "designer"
+	| "developer"
+	| "builder"
+	| "professional";
 
 export const PROVIDER_SEGMENTS: ProviderSegment[] = [
 	"designer",
@@ -62,12 +69,13 @@ export const PROVIDER_SEGMENT: Record<Provider, ProviderSegment> = {
 	leetcode: "developer",
 	npm: "developer",
 	dockerhub: "developer",
+	huggingface: "developer",
 	devto: "builder",
 	medium: "builder",
 	youtube: "builder",
 	bluesky: "builder",
 	mastodon: "builder",
-	linkedin: "professional",
+	producthunt: "builder",
 };
 
 export const SEGMENT_LABEL: Record<ProviderSegment, string> = {
@@ -259,10 +267,49 @@ export type YoutubePayload = {
 	}>;
 };
 
-export type LinkedinPayload = {
-	slug: string;
-	headline: string;
-	url: string;
+export type HuggingfacePayload = {
+	profile: {
+		username: string;
+		fullname: string | null;
+		avatar_url: string | null;
+		bio: string | null;
+		is_pro: boolean;
+		followers: number;
+		models_count: number;
+		datasets_count: number;
+		spaces_count: number;
+		likes: number;
+		url: string;
+	};
+	models: Array<{
+		id: string;
+		name: string;
+		likes: number;
+		downloads: number;
+		pipeline_tag: string | null;
+		url: string;
+	}>;
+};
+
+export type ProductHuntPayload = {
+	profile: {
+		username: string;
+		name: string;
+		headline: string | null;
+		avatar_url: string | null;
+		followers: number;
+		url: string;
+	};
+	posts: Array<{
+		id: string;
+		name: string;
+		tagline: string;
+		url: string;
+		votes: number;
+		comments: number;
+		thumbnail: string | null;
+		created_at: string;
+	}>;
 };
 
 export type GitlabPayload = {

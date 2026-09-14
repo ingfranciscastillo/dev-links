@@ -5,11 +5,12 @@ import { fetchDevto } from "./devto.server";
 import { fetchDockerhub } from "./dockerhub.server";
 import { fetchGithub } from "./github.server";
 import { fetchGitlab } from "./gitlab.server";
+import { fetchHuggingface } from "./huggingface.server";
 import { fetchLeetcode } from "./leetcode.server";
-import { fetchLinkedin } from "./linkedin.server";
 import { fetchMastodon } from "./mastodon.server";
 import { fetchMedium } from "./medium.server";
 import { fetchNpm } from "./npm.server";
+import { fetchProductHunt } from "./producthunt.server";
 import { fetchStackOverflow } from "./stackoverflow.server";
 import type { FetchResult, Provider } from "./types";
 import { fetchWakatime } from "./wakatime.server";
@@ -43,11 +44,13 @@ export async function runProviderFetch(
 			return fetchBluesky({ handle: input.handle });
 		case "mastodon":
 			return fetchMastodon({ handle: input.handle });
-		case "linkedin":
-			return fetchLinkedin({ handle: input.handle, config: input.config });
 		case "dockerhub":
 			return fetchDockerhub({ handle: input.handle });
 		case "youtube":
 			return fetchYoutube({ handle: input.handle });
+		case "huggingface":
+			return fetchHuggingface({ handle: input.handle });
+		case "producthunt":
+			return fetchProductHunt({ handle: input.handle });
 	}
 }

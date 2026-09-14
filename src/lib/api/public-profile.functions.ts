@@ -185,11 +185,18 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			website: profile.website ?? "",
 			available: profile.available,
 			data: profileData,
-			integrations: integrationRows.map((r) => ({
-				provider: r.provider,
-				kind: r.kind,
-				payload: r.payload as Json,
-				fetchedAt: r.fetchedAt.toISOString(),
-			})),
+			// "linkedin" stays in the DB enum but isn't a valid Provider
+			// anymore — drop any leftover row rather than render dead UI.
+			integrations: integrationRows
+				.filter(
+					(r): r is typeof r & { provider: Provider } =>
+						r.provider !== "linkedin",
+				)
+				.map((r) => ({
+					provider: r.provider,
+					kind: r.kind,
+					payload: r.payload as Json,
+					fetchedAt: r.fetchedAt.toISOString(),
+				})),
 		};
 	});

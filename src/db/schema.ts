@@ -27,6 +27,11 @@ export const buttonStyle = pgEnum("button_style", [
 	"ghost",
 ]);
 
+// "linkedin" is no longer offered by the app (see Provider in
+// integrations/types.ts) but stays in this list on purpose: Postgres has no
+// safe way to drop an enum value in use, so removing it here would require
+// recreating the type. Existing linkedin rows are cleaned up by migration
+// 20260915000000_drop_linkedin_rows instead.
 export const integrationProvider = pgEnum("integration_provider", [
 	"github",
 	"gitlab",
@@ -41,6 +46,8 @@ export const integrationProvider = pgEnum("integration_provider", [
 	"linkedin",
 	"dockerhub",
 	"youtube",
+	"huggingface",
+	"producthunt",
 ]);
 
 export const projectStatus = pgEnum("project_status", [

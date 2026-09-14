@@ -17,11 +17,12 @@ import { DevtoBlock } from "@/components/profile/DevtoBlock";
 import { DockerhubBlock } from "@/components/profile/DockerhubBlock";
 import { GithubBlock } from "@/components/profile/GithubBlock";
 import { GitlabBlock } from "@/components/profile/GitlabBlock";
+import { HuggingfaceBlock } from "@/components/profile/HuggingfaceBlock";
 import { LeetcodeBlock } from "@/components/profile/LeetcodeBlock";
-import { LinkedinBlock } from "@/components/profile/LinkedinBlock";
 import { MastodonBlock } from "@/components/profile/MastodonBlock";
 import { MediumBlock } from "@/components/profile/MediumBlock";
 import { NpmBlock } from "@/components/profile/NpmBlock";
+import { ProducthuntBlock } from "@/components/profile/ProducthuntBlock";
 import { StackOverflowBlock } from "@/components/profile/StackOverflowBlock";
 import {
 	CommunityBlock,
@@ -46,11 +47,12 @@ import type {
 	DockerhubPayload,
 	GithubPayload,
 	GitlabPayload,
+	HuggingfacePayload,
 	LeetcodePayload,
-	LinkedinPayload,
 	MastodonPayload,
 	MediumPayload,
 	NpmPayload,
+	ProductHuntPayload,
 	StackOverflowPayload,
 	WakatimePayload,
 	YoutubePayload,
@@ -321,10 +323,15 @@ function IntegrationBlocks({
 	const dockerhub = by("dockerhub", "repos") as DockerhubPayload | undefined;
 	const leetcode = by("leetcode", "stats") as LeetcodePayload | undefined;
 	const mastodon = by("mastodon", "feed") as MastodonPayload | undefined;
-	const linkedin = by("linkedin", "profile") as LinkedinPayload | undefined;
 	const npm = by("npm", "packages") as NpmPayload | undefined;
 	const wakatime = by("wakatime", "stats") as WakatimePayload | undefined;
 	const youtube = by("youtube", "videos") as YoutubePayload | undefined;
+	const huggingface = by("huggingface", "profile") as
+		| HuggingfacePayload
+		| undefined;
+	const producthunt = by("producthunt", "profile") as
+		| ProductHuntPayload
+		| undefined;
 
 	return (
 		<div className="space-y-10">
@@ -338,10 +345,15 @@ function IntegrationBlocks({
 			{dockerhub && <DockerhubBlock payload={dockerhub} themed={themed} />}
 			{leetcode && <LeetcodeBlock payload={leetcode} themed={themed} />}
 			{mastodon && <MastodonBlock payload={mastodon} themed={themed} />}
-			{linkedin && <LinkedinBlock payload={linkedin} themed={themed} />}
 			{npm && <NpmBlock payload={npm} themed={themed} />}
 			{wakatime && <WakatimeBlock payload={wakatime} themed={themed} />}
 			{youtube && <YoutubeBlock payload={youtube} themed={themed} />}
+			{huggingface && (
+				<HuggingfaceBlock payload={huggingface} themed={themed} />
+			)}
+			{producthunt && (
+				<ProducthuntBlock payload={producthunt} themed={themed} />
+			)}
 		</div>
 	);
 }

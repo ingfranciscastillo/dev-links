@@ -61,15 +61,22 @@ export const listMyIntegrationAccounts = createServerFn({
 		.from(integrationAccounts)
 		.where(eq(integrationAccounts.userId, userId))
 		.orderBy(asc(integrationAccounts.provider));
-	return rows.map((r) => ({
-		id: r.id,
-		provider: r.provider,
-		handle: r.handle,
-		config: (r.config ?? {}) as Record<string, Json>,
-		lastSyncedAt: r.lastSyncedAt ? r.lastSyncedAt.toISOString() : null,
-		lastError: r.lastError,
-		updatedAt: r.updatedAt.toISOString(),
-	}));
+	// "linkedin" stays in the DB enum (Postgres can't drop enum values) but
+	// isn't a valid Provider anymore — drop any leftover row instead of
+	// showing an integration the UI no longer has a form for.
+	return rows
+		.filter(
+			(r): r is typeof r & { provider: Provider } => r.provider !== "linkedin",
+		)
+		.map((r) => ({
+			id: r.id,
+			provider: r.provider,
+			handle: r.handle,
+			config: (r.config ?? {}) as Record<string, Json>,
+			lastSyncedAt: r.lastSyncedAt ? r.lastSyncedAt.toISOString() : null,
+			lastError: r.lastError,
+			updatedAt: r.updatedAt.toISOString(),
+		}));
 });
 
 export const upsertIntegrationAccount = createServerFn({ method: "POST" })

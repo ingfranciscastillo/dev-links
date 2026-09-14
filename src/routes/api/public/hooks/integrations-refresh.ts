@@ -4,6 +4,7 @@ import type { BatchItem } from "drizzle-orm/batch";
 import { db } from "@/db/index";
 import { integrationAccounts, integrationCache } from "@/db/schema";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
+import type { Provider } from "@/lib/integrations/types";
 
 // Cron: refresca integraciones stale (>24h) de todas las cuentas.
 // Protegido con Authorization: Bearer $CRON_SECRET — sin sesión de usuario.
@@ -32,7 +33,7 @@ async function refreshStaleIntegrations(request: Request) {
 		lt(integrationAccounts.lastSyncedAt, staleCutoff),
 	);
 
-	const accounts = await db
+	const staleAccounts = await db
 		.select({
 			id: integrationAccounts.id,
 			userId: integrationAccounts.userId,
@@ -43,6 +44,13 @@ async function refreshStaleIntegrations(request: Request) {
 		.from(integrationAccounts)
 		.where(staleWhere)
 		.limit(MAX_ACCOUNTS);
+
+	// "linkedin" stays in the DB enum (Postgres can't drop enum values) but
+	// isn't a valid Provider anymore — skip any leftover row instead of
+	// calling runProviderFetch with a provider it has no case for.
+	const accounts = staleAccounts.filter(
+		(a): a is typeof a & { provider: Provider } => a.provider !== "linkedin",
+	);
 
 	const results: Array<{
 		id: string;

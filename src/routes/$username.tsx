@@ -327,7 +327,7 @@ function IntegrationBlocks({
 	const youtube = by("youtube", "videos") as YoutubePayload | undefined;
 
 	return (
-		<>
+		<div className="space-y-10">
 			{gh && <GithubBlock payload={gh} themed={themed} />}
 			{gitlab && <GitlabBlock payload={gitlab} themed={themed} />}
 			{dev && <DevtoBlock payload={dev} themed={themed} />}
@@ -342,7 +342,7 @@ function IntegrationBlocks({
 			{npm && <NpmBlock payload={npm} themed={themed} />}
 			{wakatime && <WakatimeBlock payload={wakatime} themed={themed} />}
 			{youtube && <YoutubeBlock payload={youtube} themed={themed} />}
-		</>
+		</div>
 	);
 }
 

@@ -1,5 +1,5 @@
-import { AddCircleIcon } from "@solar-icons/react/line-duotone";
 import {
+	AddIcon,
 	CodeSquareIcon,
 	MenuDotsIcon,
 	PenIcon,
@@ -93,12 +93,7 @@ function SnippetsPage() {
 						}
 						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground disabled:pointer-events-none disabled:opacity-50"
 					>
-						<AddCircleIcon
-							secondaryOpacity={0}
-							size={25}
-							className="h-3.5 w-3.5"
-							strokeWidth={1.7}
-						/>
+						<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 						New snippet
 					</Button>
 				</div>
@@ -115,12 +110,7 @@ function SnippetsPage() {
 								onClick={() => setEditing("new")}
 								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 							>
-								<AddCircleIcon
-									secondaryOpacity={0}
-									size={25}
-									className="h-3.5 w-3.5"
-									strokeWidth={1.7}
-								/>
+								<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 								Add your first snippet
 							</Button>
 						}

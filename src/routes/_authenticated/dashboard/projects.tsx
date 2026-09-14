@@ -1,5 +1,5 @@
-import { AddCircleIcon } from "@solar-icons/react/line-duotone";
 import {
+	AddIcon,
 	ArrowRightUpIcon,
 	FolderIcon,
 	MenuDotsIcon,
@@ -110,12 +110,7 @@ function ProjectsPage() {
 						}
 						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground disabled:pointer-events-none disabled:opacity-50"
 					>
-						<AddCircleIcon
-							secondaryOpacity={0}
-							size={25}
-							className="h-3.5 w-3.5"
-							strokeWidth={1.7}
-						/>
+						<AddIcon className="h-3.5 w-3.5" strokeWidth={1.7} />
 						New project
 					</Button>
 				</div>
@@ -132,12 +127,7 @@ function ProjectsPage() {
 								onClick={() => setEditing("new")}
 								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 							>
-								<AddCircleIcon
-									secondaryOpacity={0}
-									size={25}
-									className="h-3.5 w-3.5"
-									strokeWidth={1.7}
-								/>
+								<AddIcon className="h-3.5 w-3.5" strokeWidth={1.7} />
 								Add your first project
 							</Button>
 						}

@@ -1,5 +1,5 @@
-import { AddCircleIcon } from "@solar-icons/react/line-duotone";
 import {
+	AddIcon,
 	HeartIcon,
 	PenIcon,
 	TrashBin2Icon,
@@ -218,12 +218,7 @@ function Group({
 					onClick={onAdd}
 					className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 				>
-					<AddCircleIcon
-						secondaryOpacity={0}
-						size={20}
-						className="h-3.5 w-3.5"
-						strokeWidth={1.7}
-					/>
+					<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 					{addLabel}
 				</Button>
 			</div>

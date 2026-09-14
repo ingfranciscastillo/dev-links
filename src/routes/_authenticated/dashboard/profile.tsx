@@ -1,11 +1,10 @@
-import { CameraIcon } from "@solar-icons/react/linear";
+import { CameraIcon, CloseIcon } from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import {
 	createFileRoute,
 	useRouteContext,
 	useRouter,
 } from "@tanstack/react-router";
-import { X } from "lucide-react";
 import {
 	type ChangeEvent,
 	type KeyboardEvent,
@@ -854,7 +853,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 									aria-label={`Remove ${tech}`}
 									className="text-muted-foreground transition-colors hover:text-foreground"
 								>
-									<X className="h-3 w-3" />
+									<CloseIcon className="h-3 w-3" />
 								</button>
 							</span>
 						))}

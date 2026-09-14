@@ -15,10 +15,9 @@ import {
 	SiX,
 	SiYoutube,
 } from "@icons-pack/react-simple-icons";
-import { LetterIcon } from "@solar-icons/react/linear";
-import { Globe as LuGlobe } from "lucide-react";
+import { GlobeIcon, LetterIcon } from "@solar-icons/react/linear";
 
-type IconType = SimpleIconType | typeof LuGlobe;
+type IconType = SimpleIconType | typeof GlobeIcon | typeof LetterIcon;
 
 const map: { pattern: RegExp; icon: IconType }[] = [
 	{ pattern: /github\.com/i, icon: SiGithub },
@@ -40,7 +39,7 @@ const map: { pattern: RegExp; icon: IconType }[] = [
 
 export function iconForUrl(url: string): IconType {
 	for (const m of map) if (m.pattern.test(url)) return m.icon;
-	return LuGlobe;
+	return GlobeIcon;
 }
 
 export function domainOf(url: string): string {

@@ -18,6 +18,7 @@ import {
 	EyeClosedIcon,
 	EyeIcon,
 	LinkIcon,
+	MenuDotsIcon,
 	PenIcon,
 	SortVerticalIcon,
 	TrashBin2Icon,
@@ -32,6 +33,13 @@ import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
 	Field,
 	FieldError,
@@ -156,7 +164,7 @@ function LinksPage() {
 				</div>
 			) : (
 				<div className="mt-8">
-					<div className="grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[3rem_minmax(0,1fr)_12rem_auto]">
+					<div className="grid grid-cols-[2.5rem_minmax(0,1fr)_3rem] items-center border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[3rem_minmax(0,1fr)_12rem_3rem]">
 						<span>Order</span>
 						<span>Link</span>
 						<span className="hidden sm:block">Status</span>
@@ -280,7 +288,7 @@ function LinkRow({
 		<li
 			ref={setNodeRef}
 			style={style}
-			className={`group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center border-b border-border py-5 sm:grid-cols-[3rem_minmax(0,1fr)_12rem_auto] ${
+			className={`group grid grid-cols-[2.5rem_minmax(0,1fr)_3rem] items-center border-b border-border py-5 sm:grid-cols-[3rem_minmax(0,1fr)_12rem_3rem] ${
 				link.active ? "" : "opacity-55"
 			}`}
 		>
@@ -329,40 +337,41 @@ function LinkRow({
 				</span>
 			</div>
 
-			<div className="flex items-center justify-end gap-1">
-				<button
-					type="button"
-					onClick={onToggle}
-					className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-					title={link.active ? "Hide" : "Show"}
-					aria-label={link.active ? "Hide link" : "Show link"}
-				>
-					{link.active ? (
-						<EyeIcon className="h-4 w-4" strokeWidth={1.5} />
-					) : (
-						<EyeClosedIcon className="h-4 w-4" strokeWidth={1.5} />
-					)}
-				</button>
+			<div className="flex items-center justify-end">
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<button
+							type="button"
+							className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+							aria-label={`${link.title} actions`}
+						>
+							<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
+						</button>
+					</DropdownMenuTrigger>
 
-				<button
-					type="button"
-					onClick={onEdit}
-					className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-					title="Edit"
-					aria-label="Edit link"
-				>
-					<PenIcon className="h-4 w-4" strokeWidth={1.5} />
-				</button>
+					<DropdownMenuContent>
+						<DropdownMenuItem onSelect={onToggle}>
+							{link.active ? (
+								<EyeClosedIcon className="h-4 w-4" strokeWidth={1.5} />
+							) : (
+								<EyeIcon className="h-4 w-4" strokeWidth={1.5} />
+							)}
+							{link.active ? "Hide" : "Show"}
+						</DropdownMenuItem>
 
-				<button
-					type="button"
-					onClick={onRemove}
-					className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
-					title="Delete"
-					aria-label="Delete link"
-				>
-					<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
-				</button>
+						<DropdownMenuItem onSelect={onEdit}>
+							<PenIcon className="h-4 w-4" strokeWidth={1.5} />
+							Edit
+						</DropdownMenuItem>
+
+						<DropdownMenuSeparator />
+
+						<DropdownMenuItem variant="destructive" onSelect={onRemove}>
+							<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
+							Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 		</li>
 	);

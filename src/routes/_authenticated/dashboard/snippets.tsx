@@ -1,6 +1,7 @@
 import { AddCircleIcon } from "@solar-icons/react/line-duotone";
 import {
 	CodeSquareIcon,
+	MenuDotsIcon,
 	PenIcon,
 	TrashBin2Icon,
 } from "@solar-icons/react/linear";
@@ -14,6 +15,13 @@ import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
 	Field,
 	FieldError,
@@ -236,26 +244,32 @@ function SnippetEntry({
 					</span>
 				</div>
 
-				<div className="flex items-center gap-1 self-end sm:self-auto">
-					<button
-						type="button"
-						onClick={onEdit}
-						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-						title="Edit"
-						aria-label={`Edit ${snippet.title}`}
-					>
-						<PenIcon className="h-4 w-4" strokeWidth={1.5} />
-					</button>
+				<div className="flex items-center self-end sm:self-auto">
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<button
+								type="button"
+								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+								aria-label={`${snippet.title} actions`}
+							>
+								<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
+							</button>
+						</DropdownMenuTrigger>
 
-					<button
-						type="button"
-						onClick={onRemove}
-						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
-						title="Delete"
-						aria-label={`Delete ${snippet.title}`}
-					>
-						<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
-					</button>
+						<DropdownMenuContent>
+							<DropdownMenuItem onSelect={onEdit}>
+								<PenIcon className="h-4 w-4" strokeWidth={1.5} />
+								Edit
+							</DropdownMenuItem>
+
+							<DropdownMenuSeparator />
+
+							<DropdownMenuItem variant="destructive" onSelect={onRemove}>
+								<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
+								Delete
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</header>
 

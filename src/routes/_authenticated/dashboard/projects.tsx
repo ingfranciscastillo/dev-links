@@ -2,6 +2,7 @@ import { AddCircleIcon } from "@solar-icons/react/line-duotone";
 import {
 	ArrowRightUpIcon,
 	FolderIcon,
+	MenuDotsIcon,
 	PenIcon,
 	TrashBin2Icon,
 } from "@solar-icons/react/linear";
@@ -15,6 +16,13 @@ import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
 	Field,
 	FieldError,
@@ -137,7 +145,7 @@ function ProjectsPage() {
 				</div>
 			) : (
 				<div className="mt-8">
-					<div className="grid grid-cols-[3rem_minmax(0,1fr)_auto] items-center border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[4rem_minmax(0,1.4fr)_12rem_8rem_auto]">
+					<div className="grid grid-cols-[3rem_minmax(0,1fr)_3rem] items-center gap-5 border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[4rem_minmax(0,1.4fr)_12rem_8rem_3rem] sm:px-3">
 						<span>#</span>
 						<span>Project</span>
 						<span className="hidden sm:block">Stack</span>
@@ -247,7 +255,7 @@ function ProjectRow({
 	onRemove: () => void;
 }) {
 	return (
-		<article className="group grid gap-5 border-b border-border py-6 sm:grid-cols-[4rem_minmax(0,1.4fr)_12rem_8rem_auto] sm:items-center sm:px-3 sm:py-7">
+		<article className="group grid gap-5 border-b border-border py-6 sm:grid-cols-[4rem_minmax(0,1.4fr)_12rem_8rem_3rem] sm:items-center sm:px-3 sm:py-7">
 			<span className="font-mono text-[10px] tabular-nums text-muted-foreground">
 				{String(index + 1).padStart(2, "0")}
 			</span>
@@ -294,52 +302,50 @@ function ProjectRow({
 				<StatusLabel status={project.status} />
 			</div>
 
-			<div className="flex items-center justify-end gap-1">
-				{project.github ? (
-					<a
-						href={project.github}
-						target="_blank"
-						rel="noreferrer"
-						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-						title="GitHub"
-						aria-label={`Open ${project.name} on GitHub`}
-					>
-						<GithubIcon className="h-4 w-4" />
-					</a>
-				) : null}
+			<div className="flex items-center justify-end">
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<button
+							type="button"
+							className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+							aria-label={`${project.name} actions`}
+						>
+							<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
+						</button>
+					</DropdownMenuTrigger>
 
-				{project.demo ? (
-					<a
-						href={project.demo}
-						target="_blank"
-						rel="noreferrer"
-						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-brand"
-						title="Demo"
-						aria-label={`Open ${project.name} demo`}
-					>
-						<ArrowRightUpIcon className="h-4 w-4" strokeWidth={1.5} />
-					</a>
-				) : null}
+					<DropdownMenuContent>
+						{project.github ? (
+							<DropdownMenuItem asChild>
+								<a href={project.github} target="_blank" rel="noreferrer">
+									<GithubIcon className="h-4 w-4" />
+									GitHub
+								</a>
+							</DropdownMenuItem>
+						) : null}
 
-				<button
-					type="button"
-					onClick={onEdit}
-					className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-					title="Edit"
-					aria-label={`Edit ${project.name}`}
-				>
-					<PenIcon className="h-4 w-4" strokeWidth={1.5} />
-				</button>
+						{project.demo ? (
+							<DropdownMenuItem asChild>
+								<a href={project.demo} target="_blank" rel="noreferrer">
+									<ArrowRightUpIcon className="h-4 w-4" strokeWidth={1.5} />
+									Demo
+								</a>
+							</DropdownMenuItem>
+						) : null}
 
-				<button
-					type="button"
-					onClick={onRemove}
-					className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
-					title="Delete"
-					aria-label={`Delete ${project.name}`}
-				>
-					<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
-				</button>
+						{project.github || project.demo ? <DropdownMenuSeparator /> : null}
+
+						<DropdownMenuItem onSelect={onEdit}>
+							<PenIcon className="h-4 w-4" strokeWidth={1.5} />
+							Edit
+						</DropdownMenuItem>
+
+						<DropdownMenuItem variant="destructive" onSelect={onRemove}>
+							<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
+							Delete
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 		</article>
 	);

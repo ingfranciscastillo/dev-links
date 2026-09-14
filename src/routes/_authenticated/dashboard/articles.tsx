@@ -1,5 +1,11 @@
 import { AddCircleIcon } from "@solar-icons/react/line-duotone";
-import { NotesIcon, PenIcon, TrashBin2Icon } from "@solar-icons/react/linear";
+import {
+	ArrowRightUpIcon,
+	MenuDotsIcon,
+	NotesIcon,
+	PenIcon,
+	TrashBin2Icon,
+} from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
@@ -10,6 +16,13 @@ import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
 	Field,
 	FieldError,
@@ -99,7 +112,7 @@ function ArticlesPage() {
 				</div>
 			) : (
 				<div className="mt-8">
-					<div className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[5rem_minmax(0,1fr)_9rem_auto]">
+					<div className="grid grid-cols-[3.5rem_minmax(0,1fr)_3rem] items-center gap-4 border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[5rem_minmax(0,1fr)_9rem_3rem]">
 						<span>Date</span>
 						<span>Article</span>
 						<span className="hidden sm:block">Source</span>
@@ -194,7 +207,7 @@ function ArticleRow({
 
 	return (
 		<article className="group border-b border-border py-6 sm:py-7">
-			<div className="grid gap-4 sm:grid-cols-[5rem_minmax(0,1fr)_9rem_auto] sm:items-center">
+			<div className="grid gap-4 sm:grid-cols-[5rem_minmax(0,1fr)_9rem_3rem] sm:items-center">
 				<div>
 					<p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
 						{date.toLocaleDateString(undefined, {
@@ -249,35 +262,39 @@ function ArticleRow({
 					)}
 				</div>
 
-				<div className="flex items-center justify-end gap-2">
-					<a
-						href={article.url}
-						target="_blank"
-						rel="noreferrer"
-						className="hidden font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-brand sm:inline-flex"
-					>
-						Open ↗
-					</a>
+				<div className="flex items-center justify-end">
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<button
+								type="button"
+								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+								aria-label={`${article.title} actions`}
+							>
+								<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
+							</button>
+						</DropdownMenuTrigger>
 
-					<button
-						type="button"
-						onClick={onEdit}
-						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-						title="Edit"
-						aria-label={`Edit ${article.title}`}
-					>
-						<PenIcon className="h-4 w-4" strokeWidth={1.5} />
-					</button>
+						<DropdownMenuContent>
+							<DropdownMenuItem asChild>
+								<a href={article.url} target="_blank" rel="noreferrer">
+									<ArrowRightUpIcon className="h-4 w-4" strokeWidth={1.5} />
+									Open
+								</a>
+							</DropdownMenuItem>
 
-					<button
-						type="button"
-						onClick={onRemove}
-						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
-						title="Delete"
-						aria-label={`Delete ${article.title}`}
-					>
-						<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
-					</button>
+							<DropdownMenuSeparator />
+
+							<DropdownMenuItem onSelect={onEdit}>
+								<PenIcon className="h-4 w-4" strokeWidth={1.5} />
+								Edit
+							</DropdownMenuItem>
+
+							<DropdownMenuItem variant="destructive" onSelect={onRemove}>
+								<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
+								Delete
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</div>
 		</article>

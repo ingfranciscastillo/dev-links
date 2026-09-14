@@ -1,5 +1,6 @@
 import { AddCircleIcon } from "@solar-icons/react/line-duotone";
 import {
+	MenuDotsIcon,
 	MicrophoneIcon,
 	PenIcon,
 	TrashBin2Icon,
@@ -15,6 +16,13 @@ import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
 	Field,
 	FieldError,
 	FieldGroup,
@@ -28,7 +36,7 @@ import {
 	useRemoveTalk,
 	useUpdateTalk,
 } from "@/lib/queries/profile-data";
-import { talkSchema, type TalkItem } from "@/lib/schemas";
+import { type TalkItem, talkSchema } from "@/lib/schemas";
 import { zodField } from "@/lib/schemas/field";
 
 export const Route = createFileRoute("/_authenticated/dashboard/talks")({
@@ -115,7 +123,7 @@ function TalksPage() {
 				</div>
 			) : (
 				<div className="mt-8">
-					<div className="grid grid-cols-[3.5rem_minmax(0,1fr)_auto] items-center border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[5rem_minmax(0,1fr)_auto]">
+					<div className="grid grid-cols-[3.5rem_minmax(0,1fr)_3rem] items-center gap-4 border-t border-border py-3 font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground sm:grid-cols-[5rem_minmax(0,1fr)_3rem]">
 						<span>Date</span>
 						<span>Talk</span>
 						<span className="text-right">Actions</span>
@@ -209,7 +217,7 @@ function TalkRow({
 
 	return (
 		<article className="group border-b border-border py-6 sm:py-7">
-			<div className="grid gap-4 sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:items-center">
+			<div className="grid gap-4 sm:grid-cols-[5rem_minmax(0,1fr)_3rem] sm:items-center">
 				<div>
 					{date ? (
 						<>
@@ -274,26 +282,32 @@ function TalkRow({
 					)}
 				</div>
 
-				<div className="flex items-center justify-end gap-1">
-					<button
-						type="button"
-						onClick={onEdit}
-						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
-						title="Edit"
-						aria-label={`Edit ${talk.title}`}
-					>
-						<PenIcon className="h-4 w-4" strokeWidth={1.5} />
-					</button>
+				<div className="flex items-center justify-end">
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<button
+								type="button"
+								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+								aria-label={`${talk.title} actions`}
+							>
+								<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
+							</button>
+						</DropdownMenuTrigger>
 
-					<button
-						type="button"
-						onClick={onRemove}
-						className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
-						title="Delete"
-						aria-label={`Delete ${talk.title}`}
-					>
-						<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
-					</button>
+						<DropdownMenuContent>
+							<DropdownMenuItem onSelect={onEdit}>
+								<PenIcon className="h-4 w-4" strokeWidth={1.5} />
+								Edit
+							</DropdownMenuItem>
+
+							<DropdownMenuSeparator />
+
+							<DropdownMenuItem variant="destructive" onSelect={onRemove}>
+								<TrashBin2Icon className="h-4 w-4" strokeWidth={1.5} />
+								Delete
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
 				</div>
 			</div>
 		</article>

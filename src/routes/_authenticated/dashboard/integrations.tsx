@@ -16,8 +16,11 @@ import { Label } from "@/components/ui/label";
 import type { IntegrationAccount } from "@/lib/api/integrations/account.functions";
 import {
 	PROVIDER_LABEL,
+	PROVIDER_SEGMENT,
+	PROVIDER_SEGMENTS,
 	PROVIDERS,
 	type Provider,
+	SEGMENT_LABEL,
 } from "@/lib/integrations/types";
 import {
 	useDeleteIntegrationAccount,
@@ -117,6 +120,10 @@ const PROVIDER_HELP: Record<
 function IntegrationsPage() {
 	const { data: accounts } = useIntegrationAccounts();
 
+	const orderedProviders = PROVIDER_SEGMENTS.flatMap((segment) =>
+		PROVIDERS.filter((provider) => PROVIDER_SEGMENT[provider] === segment),
+	);
+
 	return (
 		<>
 			<header className="border-b border-border pb-8">
@@ -143,17 +150,34 @@ function IntegrationsPage() {
 			</header>
 
 			<div className="mt-8 border-t border-border">
-				{PROVIDERS.map((provider, index) => {
-					const account =
-						accounts?.find((item) => item.provider === provider) ?? null;
+				{PROVIDER_SEGMENTS.map((segment) => {
+					const providers = PROVIDERS.filter(
+						(provider) => PROVIDER_SEGMENT[provider] === segment,
+					);
+
+					if (providers.length === 0) return null;
 
 					return (
-						<IntegrationRow
-							key={provider}
-							index={index}
-							provider={provider}
-							account={account}
-						/>
+						<section key={segment}>
+							<h2 className="border-b border-border py-6 font-display text-3xl leading-none tracking-[-0.03em] sm:text-4xl">
+								{SEGMENT_LABEL[segment]}
+							</h2>
+
+							{providers.map((provider) => {
+								const account =
+									accounts?.find((item) => item.provider === provider) ??
+									null;
+
+								return (
+									<IntegrationRow
+										key={provider}
+										index={orderedProviders.indexOf(provider)}
+										provider={provider}
+										account={account}
+									/>
+								);
+							})}
+						</section>
 					);
 				})}
 			</div>

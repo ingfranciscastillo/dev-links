@@ -45,29 +45,36 @@ export const PROVIDER_LABEL: Record<Provider, string> = {
 	youtube: "YouTube",
 };
 
-export type ProviderCategory = "code" | "writing" | "social" | "containers";
+export type ProviderSegment = "designer" | "developer" | "builder" | "professional";
 
-export const PROVIDER_CATEGORY: Record<Provider, ProviderCategory> = {
-	github: "code",
-	gitlab: "code",
-	wakatime: "code",
-	leetcode: "code",
-	npm: "code",
-	devto: "writing",
-	medium: "writing",
-	stackoverflow: "writing",
-	youtube: "writing",
-	bluesky: "social",
-	mastodon: "social",
-	linkedin: "social",
-	dockerhub: "containers",
+export const PROVIDER_SEGMENTS: ProviderSegment[] = [
+	"designer",
+	"developer",
+	"builder",
+	"professional",
+];
+
+export const PROVIDER_SEGMENT: Record<Provider, ProviderSegment> = {
+	github: "developer",
+	gitlab: "developer",
+	stackoverflow: "developer",
+	wakatime: "developer",
+	leetcode: "developer",
+	npm: "developer",
+	dockerhub: "developer",
+	devto: "builder",
+	medium: "builder",
+	youtube: "builder",
+	bluesky: "builder",
+	mastodon: "builder",
+	linkedin: "professional",
 };
 
-export const CATEGORY_LABEL: Record<ProviderCategory, string> = {
-	code: "Code",
-	writing: "Writing & talks",
-	social: "Social",
-	containers: "Containers",
+export const SEGMENT_LABEL: Record<ProviderSegment, string> = {
+	designer: "Designer",
+	developer: "Developer",
+	builder: "Builder",
+	professional: "Professional",
 };
 
 export type IntegrationPayload = Record<string, unknown>;

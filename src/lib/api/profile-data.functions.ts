@@ -244,6 +244,8 @@ const idInput = z.object({ id: z.string() });
 
 // ---------- profile (user + profiles core fields) ----------
 
+export const BIO_MAX_LENGTH = 160;
+
 export const profileInput = z.object({
 	name: z.string().min(2).max(60),
 	username: z
@@ -251,7 +253,7 @@ export const profileInput = z.object({
 		.min(3)
 		.max(24)
 		.regex(/^[a-z0-9_-]+$/, "Only a-z, 0-9, _ and -"),
-	bio: z.string().max(160).optional().or(z.literal("")),
+	bio: z.string().max(BIO_MAX_LENGTH).optional().or(z.literal("")),
 	website: z.string().url().optional().or(z.literal("")),
 });
 

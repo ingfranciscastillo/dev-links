@@ -33,6 +33,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import {
+	BIO_MAX_LENGTH,
 	type ProfileCore,
 	profileInput,
 } from "@/lib/api/profile-data.functions";
@@ -510,14 +511,29 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								field.state.meta.isTouched &&
 								field.state.meta.errors.length > 0;
 
+							const length = (field.state.value ?? "").length;
+							const remaining = BIO_MAX_LENGTH - length;
+
 							return (
 								<Field data-invalid={invalid}>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										Bio
-									</FieldLabel>
+									<div className="flex items-center justify-between gap-4">
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Bio
+										</FieldLabel>
+
+										<span
+											className={`font-mono text-[9px] tabular-nums ${
+												remaining < 0
+													? "text-destructive"
+													: "text-muted-foreground"
+											}`}
+										>
+											{length}/{BIO_MAX_LENGTH}
+										</span>
+									</div>
 
 									<textarea
 										id={field.name}

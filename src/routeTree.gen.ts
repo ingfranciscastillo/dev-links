@@ -34,6 +34,8 @@ import { Route as AuthenticatedDashboardSupportRouteImport } from './routes/_aut
 import { Route as AuthenticatedDashboardTalksRouteImport } from './routes/_authenticated/dashboard/talks'
 import { Route as AuthenticatedDashboardThemeRouteImport } from './routes/_authenticated/dashboard/theme'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiIntegrationsProducthuntAuthorizeRouteImport } from './routes/api/integrations/producthunt/authorize'
+import { Route as ApiIntegrationsProducthuntCallbackRouteImport } from './routes/api/integrations/producthunt/callback'
 import { Route as ApiPublicHooksIntegrationsRefreshRouteImport } from './routes/api/public/hooks/integrations-refresh'
 import { Route as ApiPublicHooksTrackClickRouteImport } from './routes/api/public/hooks/track-click'
 import { Route as ApiPublicHooksTrackViewRouteImport } from './routes/api/public/hooks/track-view'
@@ -174,6 +176,18 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIntegrationsProducthuntAuthorizeRoute =
+  ApiIntegrationsProducthuntAuthorizeRouteImport.update({
+    id: '/api/integrations/producthunt/authorize',
+    path: '/api/integrations/producthunt/authorize',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiIntegrationsProducthuntCallbackRoute =
+  ApiIntegrationsProducthuntCallbackRouteImport.update({
+    id: '/api/integrations/producthunt/callback',
+    path: '/api/integrations/producthunt/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksIntegrationsRefreshRoute =
   ApiPublicHooksIntegrationsRefreshRouteImport.update({
     id: '/api/public/hooks/integrations-refresh',
@@ -217,6 +231,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
+  '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -245,6 +261,8 @@ export interface FileRoutesByTo {
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
+  '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -276,6 +294,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
+  '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
   '/api/public/hooks/track-click': typeof ApiPublicHooksTrackClickRoute
   '/api/public/hooks/track-view': typeof ApiPublicHooksTrackViewRoute
@@ -307,6 +327,8 @@ export interface FileRouteTypes {
     | '/dashboard/theme'
     | '/api/auth/$'
     | '/dashboard/'
+    | '/api/integrations/producthunt/authorize'
+    | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -335,6 +357,8 @@ export interface FileRouteTypes {
     | '/dashboard/theme'
     | '/api/auth/$'
     | '/dashboard'
+    | '/api/integrations/producthunt/authorize'
+    | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -365,6 +389,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/theme'
     | '/api/auth/$'
     | '/_authenticated/dashboard/'
+    | '/api/integrations/producthunt/authorize'
+    | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
     | '/api/public/hooks/track-click'
     | '/api/public/hooks/track-view'
@@ -383,6 +409,8 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiIntegrationsProducthuntAuthorizeRoute: typeof ApiIntegrationsProducthuntAuthorizeRoute
+  ApiIntegrationsProducthuntCallbackRoute: typeof ApiIntegrationsProducthuntCallbackRoute
   ApiPublicHooksIntegrationsRefreshRoute: typeof ApiPublicHooksIntegrationsRefreshRoute
   ApiPublicHooksTrackClickRoute: typeof ApiPublicHooksTrackClickRoute
   ApiPublicHooksTrackViewRoute: typeof ApiPublicHooksTrackViewRoute
@@ -565,6 +593,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/integrations/producthunt/authorize': {
+      id: '/api/integrations/producthunt/authorize'
+      path: '/api/integrations/producthunt/authorize'
+      fullPath: '/api/integrations/producthunt/authorize'
+      preLoaderRoute: typeof ApiIntegrationsProducthuntAuthorizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/integrations/producthunt/callback': {
+      id: '/api/integrations/producthunt/callback'
+      path: '/api/integrations/producthunt/callback'
+      fullPath: '/api/integrations/producthunt/callback'
+      preLoaderRoute: typeof ApiIntegrationsProducthuntCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/integrations-refresh': {
       id: '/api/public/hooks/integrations-refresh'
       path: '/api/public/hooks/integrations-refresh'
@@ -651,6 +693,10 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiIntegrationsProducthuntAuthorizeRoute:
+    ApiIntegrationsProducthuntAuthorizeRoute,
+  ApiIntegrationsProducthuntCallbackRoute:
+    ApiIntegrationsProducthuntCallbackRoute,
   ApiPublicHooksIntegrationsRefreshRoute:
     ApiPublicHooksIntegrationsRefreshRoute,
   ApiPublicHooksTrackClickRoute: ApiPublicHooksTrackClickRoute,

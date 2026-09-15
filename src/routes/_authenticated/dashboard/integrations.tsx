@@ -52,9 +52,13 @@ type ConfigField = {
 const PROVIDER_HELP: Record<
 	Provider,
 	{
-		placeholder: string;
+		placeholder?: string;
 		helper: string;
 		configField?: ConfigField;
+		// Product Hunt has no public API for a third party's launches — only
+		// viewer.user.madePosts (yourself, authenticated) works, so this one
+		// connects via OAuth instead of typing a username.
+		oauth?: boolean;
 	}
 > = {
 	github: {
@@ -111,8 +115,8 @@ const PROVIDER_HELP: Record<
 		helper: "Your Hugging Face username.",
 	},
 	producthunt: {
-		placeholder: "yourusername",
-		helper: "Your Product Hunt username.",
+		helper: "Connect your Product Hunt account to show your launches.",
+		oauth: true,
 	},
 };
 
@@ -122,6 +126,24 @@ function IntegrationsPage() {
 	const orderedProviders = PROVIDER_SEGMENTS.flatMap((segment) =>
 		PROVIDERS.filter((provider) => PROVIDER_SEGMENT[provider] === segment),
 	);
+
+	// The Product Hunt OAuth callback redirects back here with a status —
+	// surface it once, then strip it so a refresh doesn't re-toast.
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		const status = params.get("producthunt");
+		if (!status) return;
+
+		if (status === "connected") {
+			toast.success("Product Hunt connected");
+		} else {
+			toast.error(
+				params.get("producthunt_error") || "Couldn't connect Product Hunt",
+			);
+		}
+
+		window.history.replaceState(null, "", window.location.pathname);
+	}, []);
 
 	return (
 		<>
@@ -320,58 +342,85 @@ function IntegrationRow({
 				</div>
 
 				{/* Configuration */}
-				<div
-					className={`grid min-w-0 gap-5 ${
-						help.configField ? "sm:grid-cols-2" : "sm:grid-cols-1"
-					}`}
-				>
+				{help.oauth ? (
 					<div className="min-w-0">
-						<Label
-							htmlFor={`${provider}-handle`}
-							className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground"
-						>
-							Handle
+						<Label className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+							Account
 						</Label>
 
-						<Input
-							id={`${provider}-handle`}
-							value={handle}
-							onChange={(event) => setHandle(event.target.value)}
-							placeholder={help.placeholder}
-							className="mt-2 h-10 min-w-0 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-						/>
+						<p
+							className={`mt-2 flex h-10 items-center font-mono text-sm ${
+								account ? "" : "text-muted-foreground"
+							}`}
+						>
+							{account ? `@${account.handle}` : "Not connected"}
+						</p>
 					</div>
-
-					{help.configField && (
+				) : (
+					<div
+						className={`grid min-w-0 gap-5 ${
+							help.configField ? "sm:grid-cols-2" : "sm:grid-cols-1"
+						}`}
+					>
 						<div className="min-w-0">
 							<Label
-								htmlFor={`${provider}-${help.configField.key}`}
+								htmlFor={`${provider}-handle`}
 								className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground"
 							>
-								{help.configField.label}
+								Handle
 							</Label>
 
 							<Input
-								id={`${provider}-${help.configField.key}`}
-								value={configValue}
-								onChange={(event) => setConfigValue(event.target.value)}
-								placeholder={help.configField.placeholder}
+								id={`${provider}-handle`}
+								value={handle}
+								onChange={(event) => setHandle(event.target.value)}
+								placeholder={help.placeholder}
 								className="mt-2 h-10 min-w-0 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 							/>
 						</div>
-					)}
-				</div>
+
+						{help.configField && (
+							<div className="min-w-0">
+								<Label
+									htmlFor={`${provider}-${help.configField.key}`}
+									className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground"
+								>
+									{help.configField.label}
+								</Label>
+
+								<Input
+									id={`${provider}-${help.configField.key}`}
+									value={configValue}
+									onChange={(event) => setConfigValue(event.target.value)}
+									placeholder={help.configField.placeholder}
+									className="mt-2 h-10 min-w-0 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+								/>
+							</div>
+						)}
+					</div>
+				)}
 
 				{/* Actions */}
 				<div className="flex flex-wrap items-center gap-3 lg:justify-end">
-					<Button
-						onClick={handleSave}
-						disabled={busy}
-						className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
-					>
-						<DisketteIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
-						{account ? "Update" : "Connect"}
-					</Button>
+					{help.oauth && !account ? (
+						<a
+							href="/api/integrations/producthunt/authorize"
+							className="inline-flex h-9 items-center rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none transition-colors hover:bg-brand hover:text-brand-foreground"
+						>
+							Connect
+						</a>
+					) : (
+						!help.oauth && (
+							<Button
+								onClick={handleSave}
+								disabled={busy}
+								className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+							>
+								<DisketteIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
+								{account ? "Update" : "Connect"}
+							</Button>
+						)
+					)}
 
 					<Button
 						onClick={handleSync}

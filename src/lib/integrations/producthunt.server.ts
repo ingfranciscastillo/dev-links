@@ -1,77 +1,35 @@
 import type { FetchResult, ProductHuntPayload } from "./types";
 
-const TOKEN_URL = "https://api.producthunt.com/v2/oauth/token";
 const GRAPHQL_URL = "https://api.producthunt.com/v2/api/graphql";
 
-// Token is app-level (client_credentials), not per-user — one token serves
-// every DevLinks user's Product Hunt fetches, so it's worth caching in
-// module scope across requests within the same server process.
-let cachedToken: { token: string; expiresAt: number } | null = null;
-
-async function getAppToken(): Promise<string> {
-	const clientId = process.env.PRODUCTHUNT_CLIENT_ID;
-	const clientSecret = process.env.PRODUCTHUNT_CLIENT_SECRET;
-	if (!clientId || !clientSecret) {
-		throw new Error(
-			"Product Hunt integration is not configured on this server",
-		);
-	}
-
-	if (cachedToken && cachedToken.expiresAt > Date.now()) {
-		return cachedToken.token;
-	}
-
-	const res = await fetch(TOKEN_URL, {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({
-			client_id: clientId,
-			client_secret: clientSecret,
-			grant_type: "client_credentials",
-		}),
-	});
-
-	if (!res.ok) {
-		throw new Error(
-			`Product Hunt token ${res.status}: ${await res.text().catch(() => res.statusText)}`,
-		);
-	}
-
-	const json = (await res.json()) as {
-		access_token?: string;
-		expires_in?: number;
-	};
-	if (!json.access_token) {
-		throw new Error("Product Hunt: token response had no access_token");
-	}
-
-	cachedToken = {
-		token: json.access_token,
-		expiresAt: Date.now() + (json.expires_in ?? 3600) * 1000 - 60_000,
-	};
-	return cachedToken.token;
-}
-
+// User(username: ...).madePosts is empty for every account when queried
+// with any app-level or third-party token — verified live against the
+// real API, including for Product Hunt's own founder. Only
+// viewer.user.madePosts (yourself, authenticated as yourself) resolves,
+// which is why this integration connects via OAuth (see
+// routes/api/integrations/producthunt/) instead of a typed handle.
 const QUERY = `
-	query UserProfile($username: String!) {
-		user(username: $username) {
-			name
-			username
-			headline
-			profileImage
-			url
-			followersCount
-			madePosts(first: 6) {
-				edges {
-					node {
-						id
-						name
-						tagline
-						url
-						votesCount
-						commentsCount
-						createdAt
-						thumbnail { url }
+	query Viewer {
+		viewer {
+			user {
+				name
+				username
+				headline
+				profileImage
+				url
+				followersCount
+				madePosts(first: 6) {
+					edges {
+						node {
+							id
+							name
+							tagline
+							url
+							votesCount
+							commentsCount
+							createdAt
+							thumbnail { url }
+						}
 					}
 				}
 			}
@@ -102,20 +60,29 @@ type PHUser = {
 
 export async function fetchProductHunt(input: {
 	handle: string;
+	config: Record<string, unknown>;
 }): Promise<FetchResult[]> {
-	const handle = input.handle.trim().replace(/^@/, "");
-	if (!handle) throw new Error("Empty Product Hunt username");
-
-	const token = await getAppToken();
+	const accessToken = input.config.access_token;
+	if (typeof accessToken !== "string" || !accessToken) {
+		throw new Error(
+			"Product Hunt isn't connected — reconnect it from the dashboard.",
+		);
+	}
 
 	const res = await fetch(GRAPHQL_URL, {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
-			Authorization: `Bearer ${token}`,
+			Authorization: `Bearer ${accessToken}`,
 		},
-		body: JSON.stringify({ query: QUERY, variables: { username: handle } }),
+		body: JSON.stringify({ query: QUERY }),
 	});
+
+	if (res.status === 401) {
+		throw new Error(
+			"Product Hunt session expired — reconnect it from the dashboard.",
+		);
+	}
 
 	if (!res.ok) {
 		throw new Error(
@@ -124,7 +91,7 @@ export async function fetchProductHunt(input: {
 	}
 
 	const json = (await res.json()) as {
-		data?: { user: PHUser | null };
+		data?: { viewer: { user: PHUser } | null };
 		errors?: Array<{ message: string }>;
 	};
 
@@ -133,8 +100,12 @@ export async function fetchProductHunt(input: {
 		throw new Error(`Product Hunt: ${firstError.message}`);
 	}
 
-	const user = json.data?.user;
-	if (!user) throw new Error("Product Hunt user not found");
+	const user = json.data?.viewer?.user;
+	if (!user) {
+		throw new Error(
+			"Product Hunt session expired — reconnect it from the dashboard.",
+		);
+	}
 
 	const payload: ProductHuntPayload = {
 		profile: {

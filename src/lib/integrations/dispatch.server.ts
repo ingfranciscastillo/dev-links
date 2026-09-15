@@ -51,6 +51,9 @@ export async function runProviderFetch(
 		case "huggingface":
 			return fetchHuggingface({ handle: input.handle });
 		case "producthunt":
-			return fetchProductHunt({ handle: input.handle });
+			return fetchProductHunt({
+				handle: input.handle,
+				config: input.config,
+			});
 	}
 }

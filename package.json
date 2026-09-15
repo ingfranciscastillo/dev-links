@@ -1,6 +1,7 @@
 {
   "name": "dev-links",
   "private": true,
+  "license": "BUSL-1.1",
   "type": "module",
   "imports": {
     "#/*": "./src/*"

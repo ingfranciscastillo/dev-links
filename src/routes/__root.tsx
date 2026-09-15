@@ -11,6 +11,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Toaster } from "react-hot-toast";
 import { noFlashThemeScript } from "#/lib/theme";
+import { CookieConsentBanner } from "@/components/site/CookieConsentBanner";
 import { absoluteUrl } from "@/lib/site";
 import PostHogProvider from "../integrations/posthog/provider";
 import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
@@ -158,6 +159,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			<body>
 				<PostHogProvider>
 					{children}
+					<CookieConsentBanner />
 					<Toaster
 						position="bottom-right"
 						toastOptions={{

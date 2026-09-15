@@ -311,8 +311,16 @@ function PrivacyPage() {
 							We use a session cookie (to keep you signed in) and a short-lived
 							cookie during the OAuth connection flow for Product Hunt,
 							Dribbble, and Pinterest (to prevent cross-site request forgery —
-							it's deleted immediately after the connection completes). We don't
-							use advertising or cross-site tracking cookies.
+							it's deleted immediately after the connection completes). Both are
+							strictly necessary — the site doesn't work without them, so
+							they're not something you can opt out of.
+						</p>
+						<p>
+							Product analytics (PostHog) is different: it only runs if you
+							accept it in the cookie banner shown on your first visit. Nothing
+							is captured before you choose, and you can change your mind at any
+							time by clearing your browser's site data for devlinks.app. We
+							don't use advertising or cross-site tracking cookies at all.
 						</p>
 					</Section>
 

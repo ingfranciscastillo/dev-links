@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Cta } from "@/components/landing/cta";
-import { Examples } from "@/components/landing/Examples";
 import { Faq } from "@/components/landing/Faq";
 import { Features } from "@/components/landing/Features";
 import { Hero } from "@/components/landing/Hero";
@@ -41,7 +40,6 @@ function Landing() {
 			<main>
 				<Hero />
 				<Features />
-				<Examples />
 				<Pricing />
 				<Faq />
 				<Cta />

@@ -9,7 +9,6 @@ import { ThemeToggle } from "./ThemeToggle";
 
 const nav = [
 	{ label: "Features", href: "/#features" },
-	{ label: "Examples", href: "/#examples" },
 	{ label: "Pricing", href: "/#pricing" },
 	{ label: "Discover", href: "/discover" },
 ];

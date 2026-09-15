@@ -150,7 +150,7 @@ export function Hero() {
 						</a>
 
 						<a
-							href="/francis"
+							href="/ingfranciscastillo"
 							className="inline-flex items-center gap-2 px-1 py-3 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
 						>
 							See example

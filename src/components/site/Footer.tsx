@@ -91,9 +91,18 @@ export function Footer() {
 						© {new Date().getFullYear()} DevLinks. Built for developers.
 					</p>
 
-					<p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-						v0.1.0
-					</p>
+					<div className="flex items-center gap-6">
+						<Link
+							to="/privacy"
+							className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+						>
+							Privacy
+						</Link>
+
+						<p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+							v0.1.0
+						</p>
+					</div>
 				</motion.div>
 			</div>
 		</footer>

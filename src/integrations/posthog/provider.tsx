@@ -11,6 +11,16 @@ if (typeof window !== "undefined" && import.meta.env.VITE_POSTHOG_KEY) {
 		// Nothing gets captured until the cookie consent banner calls
 		// posthog.opt_in_capturing() — see CookieConsentBanner.tsx.
 		opt_out_capturing_by_default: true,
+		// Session replay/heatmaps/dead-click tracking are on by default in
+		// PostHog unless a project admin turns them off — none of this is what
+		// privacy.tsx describes ("which pages get visited, which features get
+		// used"), and it's how we ended up loading posthog-recorder.js and
+		// dead-clicks-autocapture.js from PostHog's CDN, which load their own
+		// fonts and get blocked by our font-src 'self' CSP (confirmed: those
+		// two scripts stopped requesting anything once this landed).
+		disable_session_recording: true,
+		capture_heatmaps: false,
+		capture_dead_clicks: false,
 	});
 }
 

@@ -1,4 +1,5 @@
 import {
+	ArrowRightIcon,
 	ArrowRightUpIcon,
 	CodeIcon,
 	FolderWithFilesIcon,
@@ -769,25 +770,27 @@ function ProjectsSection({
 							{p.github && (
 								<a
 									href={p.github}
-									className={
-										themed ? "hover:opacity-80" : "hover:text-foreground"
-									}
+									className={cx(
+										"inline-flex items-center gap-1",
+										themed ? "hover:opacity-80" : "hover:text-foreground",
+									)}
 									target="_blank"
 									rel="noreferrer"
 								>
-									GitHub →
+									GitHub <ArrowRightIcon className="h-3 w-3" />
 								</a>
 							)}
 							{p.demo && (
 								<a
 									href={p.demo}
-									className={
-										themed ? "hover:opacity-80" : "hover:text-foreground"
-									}
+									className={cx(
+										"inline-flex items-center gap-1",
+										themed ? "hover:opacity-80" : "hover:text-foreground",
+									)}
 									target="_blank"
 									rel="noreferrer"
 								>
-									Live demo →
+									Live demo <ArrowRightIcon className="h-3 w-3" />
 								</a>
 							)}
 						</div>

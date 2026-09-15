@@ -100,6 +100,13 @@ export function Footer() {
 							Privacy
 						</Link>
 
+						<Link
+							to="/terms-of-service"
+							className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
+						>
+							Terms
+						</Link>
+
 						<p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
 							v0.1.0
 						</p>

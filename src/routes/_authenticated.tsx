@@ -12,6 +12,15 @@ export const Route = createFileRoute("/_authenticated")({
 			});
 		}
 
+		// GitHub/Google sign-in creates the account directly — there's no
+		// signup form to require a username (unlike email/password, see
+		// /signup). Without this, a first-time OAuth user reaches the
+		// dashboard with username: null and everything reading it breaks
+		// silently (empty profile URL, etc).
+		if (!session.user.username && location.pathname !== "/onboarding") {
+			throw redirect({ to: "/onboarding" });
+		}
+
 		return { user: session.user };
 	},
 	component: AuthenticatedLayout,

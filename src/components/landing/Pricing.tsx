@@ -5,7 +5,7 @@ import { SectionHeader } from "./Features";
 
 const rows = [
 	["All integrations", "All", "All"],
-	["Connected sources", "Up to 5", "Unlimited"],
+	["Integration limit", "Up to 5", "Unlimited"],
 	["Sync frequency", "Daily", "Frequent"],
 	["Links", "Up to 5", "Unlimited"],
 	["Projects", "Up to 5", "Unlimited"],

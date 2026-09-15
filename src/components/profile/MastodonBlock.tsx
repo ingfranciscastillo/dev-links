@@ -13,6 +13,7 @@ export function MastodonBlock({
 	payload: MastodonPayload;
 	themed?: boolean;
 }) {
+	if (payload.posts.length === 0) return null;
 	return (
 		<section>
 			<h2

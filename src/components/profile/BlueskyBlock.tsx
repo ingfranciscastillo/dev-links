@@ -13,6 +13,7 @@ export function BlueskyBlock({
 	payload: BlueskyPayload;
 	themed?: boolean;
 }) {
+	if (payload.posts.length === 0) return null;
 	return (
 		<section>
 			<h2

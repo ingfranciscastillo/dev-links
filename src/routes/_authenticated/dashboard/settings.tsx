@@ -154,7 +154,6 @@ function SettingsPage() {
 									id="currentPassword"
 									name="currentPassword"
 									autoComplete="current-password"
-									className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 								/>
 							</div>
 
@@ -170,7 +169,6 @@ function SettingsPage() {
 									id="password"
 									name="password"
 									autoComplete="new-password"
-									className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 								/>
 							</div>
 						</div>

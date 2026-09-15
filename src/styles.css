@@ -369,6 +369,17 @@
   }
 
   /*
+   * Edge/IE injects its own "reveal password" eye icon inside
+   * type="password" inputs (Chrome's saved-credential icon sits in the same
+   * spot) — it overlaps our own toggle in PasswordInput, looking like a
+   * second, misaligned button. Hide the native one everywhere.
+   */
+  input[type="password"]::-ms-reveal,
+  input[type="password"]::-ms-clear {
+    display: none;
+  }
+
+  /*
    * Snippets are highlighted server-side with Shiki's "css-variables" theme
    * (see src/lib/highlight.server.ts) — each token already carries an inline
    * style="color:var(--shiki-token-*)", so this just points those variables

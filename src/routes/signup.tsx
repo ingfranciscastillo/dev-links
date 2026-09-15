@@ -251,7 +251,6 @@ function SignupPage() {
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 
 									{invalid ? (

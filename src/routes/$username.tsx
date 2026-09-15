@@ -5,7 +5,7 @@ import {
 	GlobalIcon,
 	LinkMinimalistic2Icon,
 	MapPointIcon,
-	Notebook2Icon,
+	NotesIcon,
 	ShareIcon,
 } from "@solar-icons/react/linear";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
@@ -835,7 +835,7 @@ function ArticlesSection({
 	if (articles.length === 0) return null;
 	return (
 		<section>
-			<SectionTitle icon={Notebook2Icon} title="Writing" themed={themed} />
+			<SectionTitle icon={NotesIcon} title="Writing" themed={themed} />
 			<div
 				className={cx(
 					"divide-y overflow-hidden rounded-xl border",

@@ -152,7 +152,7 @@ function SignupPage() {
 										Username
 									</FieldLabel>
 
-									<InputGroup className="mt-2 rounded-none border-x-0 border-t-0 border-b-border bg-transparent shadow-none focus-within:border-brand focus-within:ring-0 dark:bg-transparent">
+									<InputGroup className="mt-2 rounded-none border-x-0 border-t-0 border-b-border bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-brand has-[[data-slot=input-group-control]:focus-visible]:ring-0">
 										<InputGroupAddon className="pl-0">
 											<span className="font-mono text-[11px] text-muted-foreground">
 												devlinks.com/

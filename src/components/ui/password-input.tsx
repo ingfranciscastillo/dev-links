@@ -20,11 +20,15 @@ function PasswordInput({
 	return (
 		<InputGroup
 			className={cn(
-				// dark:bg-transparent is not redundant with bg-transparent — InputGroup's
-				// own base classes set dark:bg-input/30, which wins over a plain
-				// bg-transparent in dark mode (see input-group.tsx). Confirmed via computed
-				// styles: without this, backgroundColor stayed oklab(.../0.3) in dark mode.
-				"mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent shadow-none focus-within:border-brand focus-within:ring-0 dark:bg-transparent",
+				"mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent shadow-none",
+				// InputGroup's own base sets the focus ring/border via
+				// has-[[data-slot=input-group-control]:focus-visible]:*, not
+				// :focus-within — a plain focus-within:ring-0 override doesn't
+				// conflict with that (different selector), so the 3px ring stayed
+				// visible around the whole box. Matching the exact same has-[...]
+				// selector is what lets it actually override. Confirmed via
+				// computed boxShadow before/after this fix.
+				"has-[[data-slot=input-group-control]:focus-visible]:border-brand has-[[data-slot=input-group-control]:focus-visible]:ring-0",
 				className,
 			)}
 		>

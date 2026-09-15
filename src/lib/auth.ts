@@ -271,32 +271,39 @@ export const auth = betterAuth({
 		},
 	},
 
+	// NOTA: with-hooks.mjs (better-auth 1.7.4) llama a cada hook create/update
+	// como toRun(record, context) — el primer argumento es la fila cruda
+	// (user/session), no un wrapper { data, oldData }. La versión anterior de
+	// estos hooks asumía ese wrapper: session.create/delete usaban `?.` así
+	// que solo logueaban undefined en silencio, pero user.update accedía
+	// data.email sin `?.` y tiraba abajo CUALQUIER update-user con un
+	// TypeError no capturado (confirmado: rompía tanto el cambio de avatar
+	// como el refresco de sesión después de onboarding). No hay `oldData`
+	// disponible en esta versión, así que no se puede detectar el email
+	// anterior desde acá.
 	databaseHooks: {
 		user: {
 			create: {
 				after: (user) => bestEffortCreateDodoCustomer(user),
 			},
 			update: {
-				after: async (ctx) => {
-					const data = ctx.data as { id: string; email: string };
-					const oldData = ctx.oldData as { email?: string } | undefined;
-					if (oldData?.email !== data.email) {
-						console.info("[auth] user.email_changed", { userId: data.id });
-					}
+				after: async (user) => {
+					const u = user as { id?: string } | undefined;
+					console.info("[auth] user.updated", { userId: u?.id });
 				},
 			},
 		},
 		session: {
 			create: {
-				after: async (ctx) => {
-					const data = ctx.data as { userId?: string };
-					console.info("[auth] session.created", { userId: data?.userId });
+				after: async (session) => {
+					const s = session as { userId?: string } | undefined;
+					console.info("[auth] session.created", { userId: s?.userId });
 				},
 			},
 			delete: {
-				before: async (ctx) => {
-					const data = ctx.data as { id?: string };
-					console.info("[auth] session.revoked", { sessionId: data?.id });
+				before: async (session) => {
+					const s = session as { id?: string } | undefined;
+					console.info("[auth] session.revoked", { sessionId: s?.id });
 				},
 			},
 		},

@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { uploadMyAvatar } from "@/lib/api/avatar.functions";
-import { authClient } from "@/lib/auth-client";
 import {
 	addArticle,
 	addLink,
@@ -31,6 +30,7 @@ import {
 	upsertMyProfile,
 	wipeProfileData,
 } from "@/lib/api/profile-data.functions";
+import { authClient } from "@/lib/auth-client";
 import {
 	type ArticleItem,
 	defaultTheme,
@@ -68,13 +68,30 @@ export function useProfileCore() {
 export function useUpdateProfile() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: (input: {
+		mutationFn: async (input: {
 			name: string;
 			username: string;
 			bio?: string;
 			location?: string;
 			website?: string;
-		}) => upsertMyProfile({ data: input }),
+		}) => {
+			const result = await upsertMyProfile({ data: input });
+
+			// Mismo motivo que en useUploadAvatar: upsertMyProfile escribe
+			// name/username directo en la tabla user, pero la cookie de sesión
+			// cacheada (5 min, jwe) no se entera — sin esto, _authenticated.tsx
+			// sigue viendo username: null después de /onboarding y te devuelve
+			// para allá en vez de dejarte entrar al dashboard.
+			const { error } = await authClient.updateUser({
+				name: input.name,
+				username: input.username,
+			});
+			if (error) {
+				throw new Error(error.message ?? "Couldn't refresh your session");
+			}
+
+			return result;
+		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: profileCoreKey });
 		},

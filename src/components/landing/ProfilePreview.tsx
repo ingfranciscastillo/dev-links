@@ -7,7 +7,7 @@ import {
 import { motion, useReducedMotion } from "motion/react";
 import type { SVGProps } from "react";
 
-import { GithubIcon, XIcon } from "@/components/brand-icons";
+import { GithubIcon } from "@/components/brand-icons";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -191,19 +191,11 @@ export function ProfilePreview() {
 						className="mt-6 flex items-center gap-4"
 					>
 						<a
-							href="https://github.com"
+							href="https://github.com/ingfranciscastillo"
 							aria-label="GitHub"
 							className="text-muted-foreground transition-colors hover:text-foreground"
 						>
 							<GithubIcon size={15} />
-						</a>
-
-						<a
-							href="https://x.com"
-							aria-label="X"
-							className="text-muted-foreground transition-colors hover:text-foreground"
-						>
-							<XIcon size={15} />
 						</a>
 					</motion.div>
 				</motion.div>

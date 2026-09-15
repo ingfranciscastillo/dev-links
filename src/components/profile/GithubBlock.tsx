@@ -43,7 +43,11 @@ export function GithubBlock({
 			</div>
 
 			{payload.heatmap.length > 0 && (
-				<Heatmap heatmap={payload.heatmap} themed={themed} />
+				<Heatmap
+					heatmap={payload.heatmap}
+					total={payload.totals.contributions}
+					themed={themed}
+				/>
 			)}
 
 			<div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -108,24 +112,32 @@ export function GithubBlock({
 function buildWeeks(heatmap: GithubPayload["heatmap"]) {
 	if (heatmap.length === 0) return [];
 
-	const byDate = new Map(heatmap.map((c) => [c.date, c.level]));
+	const byDate = new Map(
+		heatmap.map((c) => [c.date, { level: c.level, count: c.count ?? 0 }]),
+	);
 	const start = new Date(`${heatmap[0].date}T00:00:00Z`);
 	const end = new Date(`${heatmap[heatmap.length - 1].date}T00:00:00Z`);
 
 	const gridStart = new Date(start);
 	gridStart.setUTCDate(gridStart.getUTCDate() - gridStart.getUTCDay());
 
-	const days: Array<{ date: string; level: number }> = [];
+	const days: Array<{ date: string; level: number; count: number }> = [];
 	for (
 		let d = new Date(gridStart);
 		d <= end;
 		d.setUTCDate(d.getUTCDate() + 1)
 	) {
 		const iso = d.toISOString().slice(0, 10);
-		days.push({ date: iso, level: byDate.get(iso) ?? 0 });
+		const entry = byDate.get(iso);
+		days.push({
+			date: iso,
+			level: entry?.level ?? 0,
+			count: entry?.count ?? 0,
+		});
 	}
 
-	const weeks: Array<Array<{ date: string; level: number }>> = [];
+	const weeks: Array<Array<{ date: string; level: number; count: number }>> =
+		[];
 	for (let i = 0; i < days.length; i += 7) {
 		weeks.push(days.slice(i, i + 7));
 	}
@@ -155,12 +167,15 @@ const THEMED_LEVEL_BG = [
 
 function Heatmap({
 	heatmap,
+	total,
 	themed,
 }: {
 	heatmap: GithubPayload["heatmap"];
+	total: number;
 	themed?: boolean;
 }) {
 	const weeks = buildWeeks(heatmap);
+	const mutedClass = themed ? "tt-muted" : "text-muted-foreground";
 	return (
 		<div
 			className={cx(
@@ -168,13 +183,22 @@ function Heatmap({
 				themed ? "tt-panel" : "border-hairline bg-surface",
 			)}
 		>
+			<p
+				className={cx(
+					"mb-2 font-mono text-[10px] uppercase tracking-wider",
+					mutedClass,
+				)}
+			>
+				{total.toLocaleString()} contributions / last year
+			</p>
+
 			<div className="flex gap-0.75">
 				{weeks.map((week) => (
 					<div key={week[0].date} className="flex flex-col gap-0.75">
 						{week.map((c) => (
 							<span
 								key={c.date}
-								title={c.date}
+								title={`${c.count} contribution${c.count === 1 ? "" : "s"} on ${c.date}`}
 								className={cx(
 									"h-2.5 w-2.5 rounded-[2px]",
 									!themed &&
@@ -192,6 +216,41 @@ function Heatmap({
 						))}
 					</div>
 				))}
+			</div>
+
+			<div className="mt-2 flex items-center justify-end gap-1.5">
+				<span
+					className={cx(
+						"font-mono text-[9px] uppercase tracking-wider",
+						mutedClass,
+					)}
+				>
+					Less
+				</span>
+				{[0, 1, 2, 3, 4].map((level) => (
+					<span
+						key={level}
+						className={cx(
+							"h-2.5 w-2.5 rounded-[2px]",
+							!themed && (LEDGER_LEVEL_COLORS[level] ?? LEDGER_LEVEL_COLORS[0]),
+						)}
+						style={
+							themed
+								? {
+										background: THEMED_LEVEL_BG[level] ?? THEMED_LEVEL_BG[0],
+									}
+								: undefined
+						}
+					/>
+				))}
+				<span
+					className={cx(
+						"font-mono text-[9px] uppercase tracking-wider",
+						mutedClass,
+					)}
+				>
+					More
+				</span>
 			</div>
 		</div>
 	);

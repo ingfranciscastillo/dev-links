@@ -132,7 +132,7 @@ export type GithubPayload = {
 		url: string;
 	}>;
 	heatmap: Array<{ date: string; level: number; count?: number }>;
-	totals: { stars: number; forks: number };
+	totals: { stars: number; forks: number; contributions: number };
 	topLanguages: Array<{ language: string; count: number }>;
 };
 

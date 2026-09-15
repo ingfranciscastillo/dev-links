@@ -221,7 +221,7 @@ function IntegrationsPage() {
 
 			<div className="mt-8 flex flex-col gap-3 border border-dashed border-border p-6 sm:flex-row sm:items-center sm:justify-between">
 				<p className="text-sm text-muted-foreground">
-					Missing a technology? Tell us what to add next.
+					Missing an integration? Tell us what to add next.
 				</p>
 
 				<a

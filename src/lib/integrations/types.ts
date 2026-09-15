@@ -55,12 +55,14 @@ export type ProviderSegment =
 	| "designer"
 	| "developer"
 	| "builder"
+	| "social"
 	| "professional";
 
 export const PROVIDER_SEGMENTS: ProviderSegment[] = [
 	"designer",
 	"developer",
 	"builder",
+	"social",
 	"professional",
 ];
 
@@ -76,14 +78,15 @@ export const PROVIDER_SEGMENT: Record<Provider, ProviderSegment> = {
 	devto: "builder",
 	medium: "builder",
 	youtube: "builder",
-	bluesky: "builder",
-	mastodon: "builder",
 	producthunt: "builder",
+	bluesky: "social",
+	mastodon: "social",
 	dribbble: "designer",
 };
 
 export const SEGMENT_LABEL: Record<ProviderSegment, string> = {
 	designer: "Designer",
+	social: "Social",
 	developer: "Developer",
 	builder: "Builder",
 	professional: "Professional",

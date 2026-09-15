@@ -30,8 +30,8 @@ import {
 	useUpdateTheme,
 } from "@/lib/queries/profile-data";
 import {
-	fontOptions,
 	type FontCategory,
+	fontOptions,
 	type ThemeV2,
 	themeToStyleTag,
 } from "@/lib/theme-config";
@@ -855,7 +855,10 @@ function ThemePreview({
 	bio: string;
 }) {
 	const styleTag = useMemo(
-		() => themeToStyleTag(theme, ".tt-preview"),
+		() =>
+			themeToStyleTag(theme, ".tt-preview", {
+				scrollbarTarget: ".tt-preview",
+			}),
 		[theme],
 	);
 

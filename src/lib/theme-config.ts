@@ -295,7 +295,11 @@ export function themeToCssVars(t: ThemeV2): Record<string, string> {
 	};
 }
 
-export function themeToStyleTag(t: ThemeV2, scope = ".tt-scope"): string {
+export function themeToStyleTag(
+	t: ThemeV2,
+	scope = ".tt-scope",
+	options?: { scrollbarTarget?: string },
+): string {
 	const vars = themeToCssVars(t);
 	const body = Object.entries(vars)
 		.map(([k, v]) => `  ${k}: ${v};`)
@@ -327,11 +331,12 @@ export function themeToStyleTag(t: ThemeV2, scope = ".tt-scope"): string {
 
 	const container = `${scope} .tt-container { max-width: var(--tt-max-width); margin-inline: auto; }`;
 
-	// El scrollbar visible lo pinta html/body, no .tt-scope (ese div no es su
-	// propio contenedor de scroll) — por eso va sin scope y con colores
-	// literales: las custom properties de arriba solo llegan a descendientes
-	// de .tt-scope, y html/body son ancestros.
-	const scrollbar = scrollbarCss(t);
+	// En la página pública real, .tt-scope no es su propio contenedor de
+	// scroll (el documento lo es) — el scrollbar visible hay que pintarlo en
+	// html. Pero en el preview del dashboard, .tt-preview SÍ es el elemento
+	// con overflow-auto, así que ahí hay que escoparlo a él o el tema de un
+	// perfil se filtra al scrollbar de todo el dashboard. El caller decide.
+	const scrollbar = scrollbarCss(t, options?.scrollbarTarget ?? "html");
 
 	return `${scope} {\n${body}\n}\n${scopeBase}\n${headings}\n${monoEls}\n${card}\n${muted}\n${surface}\n${borderC}\n${panel}\n${container}\n${glass}\n${hover}\n${btn}\n${scrollbar}\n${custom}`;
 }
@@ -367,13 +372,13 @@ function buttonCss(t: ThemeV2, scope: string): string {
 	}
 }
 
-function scrollbarCss(t: ThemeV2): string {
+function scrollbarCss(t: ThemeV2, target: string): string {
 	return [
-		`html, body { scrollbar-color: ${t.accent} ${t.surface}; scrollbar-width: thin; }`,
-		`html::-webkit-scrollbar, body::-webkit-scrollbar { width: 10px; height: 10px; }`,
-		`html::-webkit-scrollbar-track, body::-webkit-scrollbar-track { background: ${t.surface}; }`,
-		`html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb { background: ${t.accent}; border-radius: 999px; border: 2px solid ${t.surface}; }`,
-		`html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover { background: ${mix(t.accent, t.fg, 0.15)}; }`,
+		`${target} { scrollbar-color: ${t.accent} ${t.surface}; scrollbar-width: thin; }`,
+		`${target}::-webkit-scrollbar { width: 10px; height: 10px; }`,
+		`${target}::-webkit-scrollbar-track { background: ${t.surface}; }`,
+		`${target}::-webkit-scrollbar-thumb { background: ${t.accent}; border-radius: 999px; border: 2px solid ${t.surface}; }`,
+		`${target}::-webkit-scrollbar-thumb:hover { background: ${mix(t.accent, t.fg, 0.15)}; }`,
 	].join("\n");
 }
 

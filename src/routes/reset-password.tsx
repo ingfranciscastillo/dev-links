@@ -10,7 +10,7 @@ import {
 	FieldGroup,
 	FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { useResetPassword } from "@/lib/queries/use-reset-password";
 import { passwordSchema, resetPasswordSchema } from "@/lib/schemas/auth";
 import { zodField } from "@/lib/schemas/field";
@@ -107,16 +107,15 @@ function ResetPage() {
 										New password
 									</FieldLabel>
 
-									<Input
+									<PasswordInput
 										id={field.name}
 										name={field.name}
-										type="password"
 										autoComplete="new-password"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 
 									{invalid ? (
@@ -164,16 +163,15 @@ function ResetPage() {
 										Confirm password
 									</FieldLabel>
 
-									<Input
+									<PasswordInput
 										id={field.name}
 										name={field.name}
-										type="password"
 										autoComplete="new-password"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 
 									{invalid ? (

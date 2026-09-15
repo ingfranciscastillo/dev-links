@@ -9,6 +9,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { getSession } from "@/lib/auth.functions";
 import { useSignIn } from "@/lib/queries/use-sign-in";
 import { signInSchema } from "@/lib/schemas/auth";
@@ -127,17 +128,16 @@ function LoginPage() {
 											Forgot?
 										</Link>
 									</div>
-									<Input
+									<PasswordInput
 										id={field.name}
 										name={field.name}
-										type="password"
 										autoComplete="current-password"
 										placeholder="••••••••"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 									{invalid ? (
 										<FieldError>

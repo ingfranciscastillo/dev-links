@@ -20,6 +20,7 @@ import {
 	InputGroupAddon,
 	InputGroupInput,
 } from "@/components/ui/input-group";
+import { PasswordInput } from "@/components/ui/password-input";
 import { getSession } from "@/lib/auth.functions";
 import { useSignUp } from "@/lib/queries/use-sign-up";
 import {
@@ -241,17 +242,16 @@ function SignupPage() {
 										Password
 									</FieldLabel>
 
-									<Input
+									<PasswordInput
 										id={field.name}
 										name={field.name}
-										type="password"
 										autoComplete="new-password"
 										placeholder="At least 6 characters"
 										value={field.state.value}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										aria-invalid={invalid || undefined}
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 									/>
 
 									{invalid ? (

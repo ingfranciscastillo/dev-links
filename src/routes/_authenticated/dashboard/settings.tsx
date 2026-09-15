@@ -11,6 +11,7 @@ import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 import { openBillingPortal, startProCheckout } from "@/lib/billing";
 import { useProfileCore, useWipeProfileData } from "@/lib/queries/profile-data";
@@ -149,12 +150,11 @@ function SettingsPage() {
 									Current password
 								</Label>
 
-								<Input
+								<PasswordInput
 									id="currentPassword"
 									name="currentPassword"
-									type="password"
 									autoComplete="current-password"
-									className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+									className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 								/>
 							</div>
 
@@ -166,12 +166,11 @@ function SettingsPage() {
 									New password
 								</Label>
 
-								<Input
+								<PasswordInput
 									id="password"
 									name="password"
-									type="password"
 									autoComplete="new-password"
-									className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+									className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent pl-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 								/>
 							</div>
 						</div>

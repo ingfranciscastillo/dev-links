@@ -24,6 +24,7 @@ import { LeetcodeBlock } from "@/components/profile/LeetcodeBlock";
 import { MastodonBlock } from "@/components/profile/MastodonBlock";
 import { MediumBlock } from "@/components/profile/MediumBlock";
 import { NpmBlock } from "@/components/profile/NpmBlock";
+import { PinterestBlock } from "@/components/profile/PinterestBlock";
 import { ProducthuntBlock } from "@/components/profile/ProducthuntBlock";
 import { StackOverflowBlock } from "@/components/profile/StackOverflowBlock";
 import {
@@ -55,6 +56,7 @@ import type {
 	MastodonPayload,
 	MediumPayload,
 	NpmPayload,
+	PinterestPayload,
 	ProductHuntPayload,
 	StackOverflowPayload,
 	WakatimePayload,
@@ -336,6 +338,7 @@ function IntegrationBlocks({
 		| ProductHuntPayload
 		| undefined;
 	const dribbble = by("dribbble", "profile") as DribbblePayload | undefined;
+	const pinterest = by("pinterest", "profile") as PinterestPayload | undefined;
 
 	return (
 		<div className="space-y-10">
@@ -359,6 +362,7 @@ function IntegrationBlocks({
 				<ProducthuntBlock payload={producthunt} themed={themed} />
 			)}
 			{dribbble && <DribbbleBlock payload={dribbble} themed={themed} />}
+			{pinterest && <PinterestBlock payload={pinterest} themed={themed} />}
 		</div>
 	);
 }

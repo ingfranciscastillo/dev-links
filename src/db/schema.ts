@@ -49,6 +49,7 @@ export const integrationProvider = pgEnum("integration_provider", [
 	"huggingface",
 	"producthunt",
 	"dribbble",
+	"pinterest",
 ]);
 
 export const projectStatus = pgEnum("project_status", [

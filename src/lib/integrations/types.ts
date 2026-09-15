@@ -13,7 +13,8 @@ export type Provider =
 	| "youtube"
 	| "huggingface"
 	| "producthunt"
-	| "dribbble";
+	| "dribbble"
+	| "pinterest";
 
 export const PROVIDERS: Provider[] = [
 	"github",
@@ -31,6 +32,7 @@ export const PROVIDERS: Provider[] = [
 	"huggingface",
 	"producthunt",
 	"dribbble",
+	"pinterest",
 ];
 
 export const PROVIDER_LABEL: Record<Provider, string> = {
@@ -49,6 +51,7 @@ export const PROVIDER_LABEL: Record<Provider, string> = {
 	huggingface: "Hugging Face",
 	producthunt: "Product Hunt",
 	dribbble: "Dribbble",
+	pinterest: "Pinterest",
 };
 
 export type ProviderSegment =
@@ -81,6 +84,7 @@ export const PROVIDER_SEGMENT: Record<Provider, ProviderSegment> = {
 	producthunt: "builder",
 	bluesky: "social",
 	mastodon: "social",
+	pinterest: "social",
 	dribbble: "designer",
 };
 
@@ -337,6 +341,25 @@ export type DribbblePayload = {
 		likes: number;
 		views: number;
 		published_at: string | null;
+	}>;
+};
+
+export type PinterestPayload = {
+	profile: {
+		username: string;
+		website_url: string | null;
+		avatar_url: string | null;
+		followers: number;
+		pin_count: number;
+		url: string;
+	};
+	pins: Array<{
+		id: string;
+		title: string | null;
+		description: string | null;
+		image: string | null;
+		url: string;
+		created_at: string | null;
 	}>;
 };
 

@@ -11,6 +11,7 @@ import { fetchLeetcode } from "./leetcode.server";
 import { fetchMastodon } from "./mastodon.server";
 import { fetchMedium } from "./medium.server";
 import { fetchNpm } from "./npm.server";
+import { fetchPinterest } from "./pinterest.server";
 import { fetchProductHunt } from "./producthunt.server";
 import { fetchStackOverflow } from "./stackoverflow.server";
 import type { FetchResult, Provider } from "./types";
@@ -58,6 +59,11 @@ export async function runProviderFetch(
 			});
 		case "dribbble":
 			return fetchDribbble({
+				handle: input.handle,
+				config: input.config,
+			});
+		case "pinterest":
+			return fetchPinterest({
 				handle: input.handle,
 				config: input.config,
 			});

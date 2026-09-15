@@ -36,6 +36,8 @@ import { Route as AuthenticatedDashboardThemeRouteImport } from './routes/_authe
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiIntegrationsDribbbleAuthorizeRouteImport } from './routes/api/integrations/dribbble/authorize'
 import { Route as ApiIntegrationsDribbbleCallbackRouteImport } from './routes/api/integrations/dribbble/callback'
+import { Route as ApiIntegrationsPinterestAuthorizeRouteImport } from './routes/api/integrations/pinterest/authorize'
+import { Route as ApiIntegrationsPinterestCallbackRouteImport } from './routes/api/integrations/pinterest/callback'
 import { Route as ApiIntegrationsProducthuntAuthorizeRouteImport } from './routes/api/integrations/producthunt/authorize'
 import { Route as ApiIntegrationsProducthuntCallbackRouteImport } from './routes/api/integrations/producthunt/callback'
 import { Route as ApiPublicHooksIntegrationsRefreshRouteImport } from './routes/api/public/hooks/integrations-refresh'
@@ -190,6 +192,18 @@ const ApiIntegrationsDribbbleCallbackRoute =
     path: '/api/integrations/dribbble/callback',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiIntegrationsPinterestAuthorizeRoute =
+  ApiIntegrationsPinterestAuthorizeRouteImport.update({
+    id: '/api/integrations/pinterest/authorize',
+    path: '/api/integrations/pinterest/authorize',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiIntegrationsPinterestCallbackRoute =
+  ApiIntegrationsPinterestCallbackRouteImport.update({
+    id: '/api/integrations/pinterest/callback',
+    path: '/api/integrations/pinterest/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiIntegrationsProducthuntAuthorizeRoute =
   ApiIntegrationsProducthuntAuthorizeRouteImport.update({
     id: '/api/integrations/producthunt/authorize',
@@ -247,6 +261,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
   '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
+  '/api/integrations/pinterest/authorize': typeof ApiIntegrationsPinterestAuthorizeRoute
+  '/api/integrations/pinterest/callback': typeof ApiIntegrationsPinterestCallbackRoute
   '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
   '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
@@ -279,6 +295,8 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
   '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
   '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
+  '/api/integrations/pinterest/authorize': typeof ApiIntegrationsPinterestAuthorizeRoute
+  '/api/integrations/pinterest/callback': typeof ApiIntegrationsPinterestCallbackRoute
   '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
   '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
@@ -314,6 +332,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
   '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
   '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
+  '/api/integrations/pinterest/authorize': typeof ApiIntegrationsPinterestAuthorizeRoute
+  '/api/integrations/pinterest/callback': typeof ApiIntegrationsPinterestCallbackRoute
   '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
   '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
@@ -349,6 +369,8 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/api/integrations/dribbble/authorize'
     | '/api/integrations/dribbble/callback'
+    | '/api/integrations/pinterest/authorize'
+    | '/api/integrations/pinterest/callback'
     | '/api/integrations/producthunt/authorize'
     | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
@@ -381,6 +403,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/api/integrations/dribbble/authorize'
     | '/api/integrations/dribbble/callback'
+    | '/api/integrations/pinterest/authorize'
+    | '/api/integrations/pinterest/callback'
     | '/api/integrations/producthunt/authorize'
     | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
@@ -415,6 +439,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/'
     | '/api/integrations/dribbble/authorize'
     | '/api/integrations/dribbble/callback'
+    | '/api/integrations/pinterest/authorize'
+    | '/api/integrations/pinterest/callback'
     | '/api/integrations/producthunt/authorize'
     | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
@@ -437,6 +463,8 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiIntegrationsDribbbleAuthorizeRoute: typeof ApiIntegrationsDribbbleAuthorizeRoute
   ApiIntegrationsDribbbleCallbackRoute: typeof ApiIntegrationsDribbbleCallbackRoute
+  ApiIntegrationsPinterestAuthorizeRoute: typeof ApiIntegrationsPinterestAuthorizeRoute
+  ApiIntegrationsPinterestCallbackRoute: typeof ApiIntegrationsPinterestCallbackRoute
   ApiIntegrationsProducthuntAuthorizeRoute: typeof ApiIntegrationsProducthuntAuthorizeRoute
   ApiIntegrationsProducthuntCallbackRoute: typeof ApiIntegrationsProducthuntCallbackRoute
   ApiPublicHooksIntegrationsRefreshRoute: typeof ApiPublicHooksIntegrationsRefreshRoute
@@ -635,6 +663,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIntegrationsDribbbleCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/integrations/pinterest/authorize': {
+      id: '/api/integrations/pinterest/authorize'
+      path: '/api/integrations/pinterest/authorize'
+      fullPath: '/api/integrations/pinterest/authorize'
+      preLoaderRoute: typeof ApiIntegrationsPinterestAuthorizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/integrations/pinterest/callback': {
+      id: '/api/integrations/pinterest/callback'
+      path: '/api/integrations/pinterest/callback'
+      fullPath: '/api/integrations/pinterest/callback'
+      preLoaderRoute: typeof ApiIntegrationsPinterestCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/integrations/producthunt/authorize': {
       id: '/api/integrations/producthunt/authorize'
       path: '/api/integrations/producthunt/authorize'
@@ -737,6 +779,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiIntegrationsDribbbleAuthorizeRoute: ApiIntegrationsDribbbleAuthorizeRoute,
   ApiIntegrationsDribbbleCallbackRoute: ApiIntegrationsDribbbleCallbackRoute,
+  ApiIntegrationsPinterestAuthorizeRoute:
+    ApiIntegrationsPinterestAuthorizeRoute,
+  ApiIntegrationsPinterestCallbackRoute: ApiIntegrationsPinterestCallbackRoute,
   ApiIntegrationsProducthuntAuthorizeRoute:
     ApiIntegrationsProducthuntAuthorizeRoute,
   ApiIntegrationsProducthuntCallbackRoute:

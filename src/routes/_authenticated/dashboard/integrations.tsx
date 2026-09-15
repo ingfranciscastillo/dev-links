@@ -122,6 +122,10 @@ const PROVIDER_HELP: Record<
 		helper: "Connect your Dribbble account to show your shots.",
 		oauth: true,
 	},
+	pinterest: {
+		helper: "Connect your Pinterest account to show your pins.",
+		oauth: true,
+	},
 };
 
 function IntegrationsPage() {

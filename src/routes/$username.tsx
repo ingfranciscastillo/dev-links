@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import { BlueskyBlock } from "@/components/profile/BlueskyBlock";
 import { DevtoBlock } from "@/components/profile/DevtoBlock";
 import { DockerhubBlock } from "@/components/profile/DockerhubBlock";
+import { DribbbleBlock } from "@/components/profile/DribbbleBlock";
 import { GithubBlock } from "@/components/profile/GithubBlock";
 import { GitlabBlock } from "@/components/profile/GitlabBlock";
 import { HuggingfaceBlock } from "@/components/profile/HuggingfaceBlock";
@@ -45,6 +46,7 @@ import type {
 	BlueskyPayload,
 	DevtoPayload,
 	DockerhubPayload,
+	DribbblePayload,
 	GithubPayload,
 	GitlabPayload,
 	HuggingfacePayload,
@@ -332,6 +334,7 @@ function IntegrationBlocks({
 	const producthunt = by("producthunt", "profile") as
 		| ProductHuntPayload
 		| undefined;
+	const dribbble = by("dribbble", "profile") as DribbblePayload | undefined;
 
 	return (
 		<div className="space-y-10">
@@ -354,6 +357,7 @@ function IntegrationBlocks({
 			{producthunt && (
 				<ProducthuntBlock payload={producthunt} themed={themed} />
 			)}
+			{dribbble && <DribbbleBlock payload={dribbble} themed={themed} />}
 		</div>
 	);
 }

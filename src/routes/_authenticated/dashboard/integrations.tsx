@@ -118,6 +118,10 @@ const PROVIDER_HELP: Record<
 		helper: "Connect your Product Hunt account to show your launches.",
 		oauth: true,
 	},
+	dribbble: {
+		helper: "Connect your Dribbble account to show your shots.",
+		oauth: true,
+	},
 };
 
 function IntegrationsPage() {
@@ -127,18 +131,23 @@ function IntegrationsPage() {
 		PROVIDERS.filter((provider) => PROVIDER_SEGMENT[provider] === segment),
 	);
 
-	// The Product Hunt OAuth callback redirects back here with a status —
-	// surface it once, then strip it so a refresh doesn't re-toast.
+	// OAuth callbacks (Product Hunt, Dribbble, ...) redirect back here with
+	// a per-provider status — surface it once, then strip it so a refresh
+	// doesn't re-toast.
 	useEffect(() => {
 		const params = new URLSearchParams(window.location.search);
-		const status = params.get("producthunt");
-		if (!status) return;
+		const oauthProvider = PROVIDERS.find(
+			(provider) => PROVIDER_HELP[provider].oauth && params.get(provider),
+		);
+		if (!oauthProvider) return;
 
+		const status = params.get(oauthProvider);
 		if (status === "connected") {
-			toast.success("Product Hunt connected");
+			toast.success(`${PROVIDER_LABEL[oauthProvider]} connected`);
 		} else {
 			toast.error(
-				params.get("producthunt_error") || "Couldn't connect Product Hunt",
+				params.get(`${oauthProvider}_error`) ||
+					`Couldn't connect ${PROVIDER_LABEL[oauthProvider]}`,
 			);
 		}
 
@@ -404,7 +413,7 @@ function IntegrationRow({
 				<div className="flex flex-wrap items-center gap-3 lg:justify-end">
 					{help.oauth && !account ? (
 						<a
-							href="/api/integrations/producthunt/authorize"
+							href={`/api/integrations/${provider}/authorize`}
 							className="inline-flex h-9 items-center rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none transition-colors hover:bg-brand hover:text-brand-foreground"
 						>
 							Connect

@@ -3,6 +3,7 @@
 import { fetchBluesky } from "./bluesky.server";
 import { fetchDevto } from "./devto.server";
 import { fetchDockerhub } from "./dockerhub.server";
+import { fetchDribbble } from "./dribbble.server";
 import { fetchGithub } from "./github.server";
 import { fetchGitlab } from "./gitlab.server";
 import { fetchHuggingface } from "./huggingface.server";
@@ -52,6 +53,11 @@ export async function runProviderFetch(
 			return fetchHuggingface({ handle: input.handle });
 		case "producthunt":
 			return fetchProductHunt({
+				handle: input.handle,
+				config: input.config,
+			});
+		case "dribbble":
+			return fetchDribbble({
 				handle: input.handle,
 				config: input.config,
 			});

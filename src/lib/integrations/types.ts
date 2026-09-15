@@ -12,7 +12,8 @@ export type Provider =
 	| "dockerhub"
 	| "youtube"
 	| "huggingface"
-	| "producthunt";
+	| "producthunt"
+	| "dribbble";
 
 export const PROVIDERS: Provider[] = [
 	"github",
@@ -29,6 +30,7 @@ export const PROVIDERS: Provider[] = [
 	"youtube",
 	"huggingface",
 	"producthunt",
+	"dribbble",
 ];
 
 export const PROVIDER_LABEL: Record<Provider, string> = {
@@ -46,6 +48,7 @@ export const PROVIDER_LABEL: Record<Provider, string> = {
 	youtube: "YouTube",
 	huggingface: "Hugging Face",
 	producthunt: "Product Hunt",
+	dribbble: "Dribbble",
 };
 
 export type ProviderSegment =
@@ -76,6 +79,7 @@ export const PROVIDER_SEGMENT: Record<Provider, ProviderSegment> = {
 	bluesky: "builder",
 	mastodon: "builder",
 	producthunt: "builder",
+	dribbble: "designer",
 };
 
 export const SEGMENT_LABEL: Record<ProviderSegment, string> = {
@@ -309,6 +313,27 @@ export type ProductHuntPayload = {
 		comments: number;
 		thumbnail: string | null;
 		created_at: string;
+	}>;
+};
+
+export type DribbblePayload = {
+	profile: {
+		username: string;
+		name: string | null;
+		avatar_url: string | null;
+		bio: string | null;
+		followers: number;
+		url: string;
+	};
+	shots: Array<{
+		id: number;
+		title: string;
+		description: string | null;
+		image: string | null;
+		url: string;
+		likes: number;
+		views: number;
+		published_at: string | null;
 	}>;
 };
 

@@ -34,6 +34,8 @@ import { Route as AuthenticatedDashboardSupportRouteImport } from './routes/_aut
 import { Route as AuthenticatedDashboardTalksRouteImport } from './routes/_authenticated/dashboard/talks'
 import { Route as AuthenticatedDashboardThemeRouteImport } from './routes/_authenticated/dashboard/theme'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiIntegrationsDribbbleAuthorizeRouteImport } from './routes/api/integrations/dribbble/authorize'
+import { Route as ApiIntegrationsDribbbleCallbackRouteImport } from './routes/api/integrations/dribbble/callback'
 import { Route as ApiIntegrationsProducthuntAuthorizeRouteImport } from './routes/api/integrations/producthunt/authorize'
 import { Route as ApiIntegrationsProducthuntCallbackRouteImport } from './routes/api/integrations/producthunt/callback'
 import { Route as ApiPublicHooksIntegrationsRefreshRouteImport } from './routes/api/public/hooks/integrations-refresh'
@@ -176,6 +178,18 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiIntegrationsDribbbleAuthorizeRoute =
+  ApiIntegrationsDribbbleAuthorizeRouteImport.update({
+    id: '/api/integrations/dribbble/authorize',
+    path: '/api/integrations/dribbble/authorize',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiIntegrationsDribbbleCallbackRoute =
+  ApiIntegrationsDribbbleCallbackRouteImport.update({
+    id: '/api/integrations/dribbble/callback',
+    path: '/api/integrations/dribbble/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiIntegrationsProducthuntAuthorizeRoute =
   ApiIntegrationsProducthuntAuthorizeRouteImport.update({
     id: '/api/integrations/producthunt/authorize',
@@ -231,6 +245,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
+  '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
   '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
   '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
@@ -261,6 +277,8 @@ export interface FileRoutesByTo {
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
+  '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
   '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
   '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
@@ -294,6 +312,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
+  '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
   '/api/integrations/producthunt/authorize': typeof ApiIntegrationsProducthuntAuthorizeRoute
   '/api/integrations/producthunt/callback': typeof ApiIntegrationsProducthuntCallbackRoute
   '/api/public/hooks/integrations-refresh': typeof ApiPublicHooksIntegrationsRefreshRoute
@@ -327,6 +347,8 @@ export interface FileRouteTypes {
     | '/dashboard/theme'
     | '/api/auth/$'
     | '/dashboard/'
+    | '/api/integrations/dribbble/authorize'
+    | '/api/integrations/dribbble/callback'
     | '/api/integrations/producthunt/authorize'
     | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
@@ -357,6 +379,8 @@ export interface FileRouteTypes {
     | '/dashboard/theme'
     | '/api/auth/$'
     | '/dashboard'
+    | '/api/integrations/dribbble/authorize'
+    | '/api/integrations/dribbble/callback'
     | '/api/integrations/producthunt/authorize'
     | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
@@ -389,6 +413,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/theme'
     | '/api/auth/$'
     | '/_authenticated/dashboard/'
+    | '/api/integrations/dribbble/authorize'
+    | '/api/integrations/dribbble/callback'
     | '/api/integrations/producthunt/authorize'
     | '/api/integrations/producthunt/callback'
     | '/api/public/hooks/integrations-refresh'
@@ -409,6 +435,8 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiIntegrationsDribbbleAuthorizeRoute: typeof ApiIntegrationsDribbbleAuthorizeRoute
+  ApiIntegrationsDribbbleCallbackRoute: typeof ApiIntegrationsDribbbleCallbackRoute
   ApiIntegrationsProducthuntAuthorizeRoute: typeof ApiIntegrationsProducthuntAuthorizeRoute
   ApiIntegrationsProducthuntCallbackRoute: typeof ApiIntegrationsProducthuntCallbackRoute
   ApiPublicHooksIntegrationsRefreshRoute: typeof ApiPublicHooksIntegrationsRefreshRoute
@@ -593,6 +621,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/integrations/dribbble/authorize': {
+      id: '/api/integrations/dribbble/authorize'
+      path: '/api/integrations/dribbble/authorize'
+      fullPath: '/api/integrations/dribbble/authorize'
+      preLoaderRoute: typeof ApiIntegrationsDribbbleAuthorizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/integrations/dribbble/callback': {
+      id: '/api/integrations/dribbble/callback'
+      path: '/api/integrations/dribbble/callback'
+      fullPath: '/api/integrations/dribbble/callback'
+      preLoaderRoute: typeof ApiIntegrationsDribbbleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/integrations/producthunt/authorize': {
       id: '/api/integrations/producthunt/authorize'
       path: '/api/integrations/producthunt/authorize'
@@ -693,6 +735,8 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiIntegrationsDribbbleAuthorizeRoute: ApiIntegrationsDribbbleAuthorizeRoute,
+  ApiIntegrationsDribbbleCallbackRoute: ApiIntegrationsDribbbleCallbackRoute,
   ApiIntegrationsProducthuntAuthorizeRoute:
     ApiIntegrationsProducthuntAuthorizeRoute,
   ApiIntegrationsProducthuntCallbackRoute:

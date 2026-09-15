@@ -179,80 +179,85 @@ function Heatmap({
 	const weeks = buildWeeks(heatmap);
 	const mutedClass = themed ? "tt-muted" : "text-muted-foreground";
 	return (
-		<div
-			className={cx(
-				"overflow-x-auto rounded-xl border p-3",
-				themed ? "tt-panel" : "border-hairline bg-surface",
-			)}
-		>
-			<p
+		<div>
+			<div
 				className={cx(
-					"mb-2 font-mono text-[10px] uppercase tracking-wider",
-					mutedClass,
+					"overflow-x-auto rounded-xl border p-3",
+					themed ? "tt-panel" : "border-hairline bg-surface",
 				)}
 			>
-				{total.toLocaleString()} contributions / last year
-			</p>
-
-			<div className="flex gap-0.75">
-				{weeks.map((week) => (
-					<div key={week[0].date} className="flex flex-col gap-0.75">
-						{week.map((c) => (
-							<span
-								key={c.date}
-								title={`${c.count} contribution${c.count === 1 ? "" : "s"} on ${c.date}`}
-								className={cx(
-									"h-2.5 w-2.5 rounded-[2px]",
-									!themed &&
-										(LEDGER_LEVEL_COLORS[c.level] ?? LEDGER_LEVEL_COLORS[0]),
-								)}
-								style={
-									themed
-										? {
-												background:
-													THEMED_LEVEL_BG[c.level] ?? THEMED_LEVEL_BG[0],
-											}
-										: undefined
-								}
-							/>
-						))}
-					</div>
-				))}
+				<div className="flex gap-0.75">
+					{weeks.map((week) => (
+						<div key={week[0].date} className="flex flex-col gap-0.75">
+							{week.map((c) => (
+								<span
+									key={c.date}
+									title={`${c.count} contribution${c.count === 1 ? "" : "s"} on ${c.date}`}
+									className={cx(
+										"h-2.5 w-2.5 rounded-[2px]",
+										!themed &&
+											(LEDGER_LEVEL_COLORS[c.level] ?? LEDGER_LEVEL_COLORS[0]),
+									)}
+									style={
+										themed
+											? {
+													background:
+														THEMED_LEVEL_BG[c.level] ?? THEMED_LEVEL_BG[0],
+												}
+											: undefined
+									}
+								/>
+							))}
+						</div>
+					))}
+				</div>
 			</div>
 
-			<div className="mt-2 flex items-center justify-end gap-1.5">
-				<span
+			<div className="mt-2 flex items-center justify-between gap-3">
+				<p
 					className={cx(
 						"font-mono text-[9px] uppercase tracking-wider",
 						mutedClass,
 					)}
 				>
-					Less
-				</span>
-				{[0, 1, 2, 3, 4].map((level) => (
+					{total.toLocaleString()} contributions / last year
+				</p>
+
+				<div className="flex shrink-0 items-center gap-1.5">
 					<span
-						key={level}
 						className={cx(
-							"h-2.5 w-2.5 rounded-[2px]",
-							!themed && (LEDGER_LEVEL_COLORS[level] ?? LEDGER_LEVEL_COLORS[0]),
+							"font-mono text-[9px] uppercase tracking-wider",
+							mutedClass,
 						)}
-						style={
-							themed
-								? {
-										background: THEMED_LEVEL_BG[level] ?? THEMED_LEVEL_BG[0],
-									}
-								: undefined
-						}
-					/>
-				))}
-				<span
-					className={cx(
-						"font-mono text-[9px] uppercase tracking-wider",
-						mutedClass,
-					)}
-				>
-					More
-				</span>
+					>
+						Less
+					</span>
+					{[0, 1, 2, 3, 4].map((level) => (
+						<span
+							key={level}
+							className={cx(
+								"h-2.5 w-2.5 rounded-[2px]",
+								!themed &&
+									(LEDGER_LEVEL_COLORS[level] ?? LEDGER_LEVEL_COLORS[0]),
+							)}
+							style={
+								themed
+									? {
+											background: THEMED_LEVEL_BG[level] ?? THEMED_LEVEL_BG[0],
+										}
+									: undefined
+							}
+						/>
+					))}
+					<span
+						className={cx(
+							"font-mono text-[9px] uppercase tracking-wider",
+							mutedClass,
+						)}
+					>
+						More
+					</span>
+				</div>
 			</div>
 		</div>
 	);

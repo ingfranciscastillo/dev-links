@@ -45,7 +45,9 @@ export function GithubBlock({
 			{payload.heatmap.length > 0 && (
 				<Heatmap
 					heatmap={payload.heatmap}
-					total={payload.totals.contributions}
+					// Cached payloads synced before this field existed won't
+					// have it — fall back rather than crash on undefined.
+					total={payload.totals.contributions ?? 0}
 					themed={themed}
 				/>
 			)}

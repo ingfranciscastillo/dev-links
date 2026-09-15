@@ -1,15 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import toast from "react-hot-toast";
 import { GithubIcon, GoogleIcon } from "@/components/brand-icons";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { authClient } from "@/lib/auth-client";
 
-const githubEnabled = Boolean(
-	import.meta.env.VITE_AUTH_GITHUB_ENABLED ?? false,
-);
-const googleEnabled = Boolean(
-	import.meta.env.VITE_AUTH_GOOGLE_ENABLED ?? false,
-);
+// Vite env vars are always strings, so `Boolean(...)` would treat the literal
+// string "false" as truthy — compare against "true" explicitly.
+const githubEnabled = import.meta.env.VITE_AUTH_GITHUB_ENABLED === "true";
+const googleEnabled = import.meta.env.VITE_AUTH_GOOGLE_ENABLED === "true";
 
 export function AuthShell({
 	title,
@@ -58,11 +57,14 @@ export function AuthShell({
 }
 
 export function OAuthRow({ callbackURL }: { callbackURL?: string } = {}) {
-	const handleSocial = (provider: "github" | "google") => () => {
-		void authClient.signIn.social({
+	const handleSocial = (provider: "github" | "google") => async () => {
+		const { error } = await authClient.signIn.social({
 			provider,
 			callbackURL: callbackURL ?? "/dashboard",
 		});
+		if (error) {
+			toast.error(error.message ?? `Couldn't sign in with ${provider}`);
+		}
 	};
 	const buttonClass = (enabled: boolean) =>
 		enabled

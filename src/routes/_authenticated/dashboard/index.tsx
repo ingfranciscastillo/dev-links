@@ -42,6 +42,17 @@ function DashboardHome() {
 		}
 	}, [user.id]);
 
+	// Dodo redirige acá después de un checkout exitoso (ver successUrl en
+	// auth.ts) — el plan real lo setea el webhook, esto es solo la
+	// confirmación visual de que el pago se completó.
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		if (params.get("upgraded") !== "1") return;
+
+		toast.success("Welcome to Pro — everything's unlocked.");
+		window.history.replaceState(null, "", window.location.pathname);
+	}, []);
+
 	const activeLinks = data.links.filter((link) => link.active).length;
 	const totals = analytics.data ?? { views: 0, clicks: 0 };
 

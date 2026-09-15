@@ -7,16 +7,16 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import {
-	type DiscoverResult,
-	searchProfiles,
-} from "@/lib/api/discover.functions";
-import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	type DiscoverResult,
+	searchProfiles,
+} from "@/lib/api/discover.functions";
 import { COUNTRIES, COUNTRY_NAME_BY_CODE } from "@/lib/countries";
 import { LANGUAGES } from "@/lib/languages";
 
@@ -183,45 +183,28 @@ function Discover() {
 								Language
 							</p>
 
-							<motion.div
-								className="mt-3 flex flex-wrap gap-x-4 gap-y-2"
-								initial="hidden"
-								animate="visible"
-								variants={{
-									hidden: {},
-									visible: {
-										transition: {
-											staggerChildren: reduceMotion ? 0 : 0.025,
-										},
-									},
-								}}
+							<Select
+								value={language ?? "ALL"}
+								onValueChange={(value) =>
+									setLanguage(value === "ALL" ? null : value)
+								}
 							>
-								{LANGUAGES.map((item) => (
-									<motion.div
-										key={item}
-										variants={{
-											hidden: reduceMotion ? {} : { opacity: 0, y: 6 },
-											visible: {
-												opacity: 1,
-												y: 0,
-												transition: {
-													duration: reduceMotion ? 0.01 : 0.3,
-													ease,
-												},
-											},
-										}}
-									>
-										<FilterButton
-											active={language === item}
-											onClick={() =>
-												setLanguage(language === item ? null : item)
-											}
-										>
+								<SelectTrigger
+									aria-label="Language"
+									className="mt-3 h-9 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground shadow-none focus:ring-0"
+								>
+									<SelectValue />
+								</SelectTrigger>
+
+								<SelectContent>
+									<SelectItem value="ALL">All</SelectItem>
+									{LANGUAGES.map((item) => (
+										<SelectItem key={item} value={item}>
 											{item}
-										</FilterButton>
-									</motion.div>
-								))}
-							</motion.div>
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 
 						<div>

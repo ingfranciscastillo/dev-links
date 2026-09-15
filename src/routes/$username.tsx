@@ -40,6 +40,7 @@ import {
 	getPublicProfile,
 	type PublicIntegration,
 	type PublicProfile,
+	type PublicSnippet,
 } from "@/lib/api/public-profile.functions";
 import { authClient } from "@/lib/auth-client";
 import { COUNTRY_NAME_BY_CODE } from "@/lib/countries";
@@ -371,7 +372,7 @@ function SnippetsSection({
 	snippets,
 	themed,
 }: {
-	snippets: ProfileData["snippets"];
+	snippets: PublicSnippet[];
 	themed: boolean;
 }) {
 	return (
@@ -402,14 +403,14 @@ function SnippetsSection({
 								{s.language}
 							</span>
 						</header>
-						<pre
+						<div
 							className={cx(
-								"overflow-x-auto p-4 font-mono text-xs leading-relaxed",
+								"overflow-x-auto p-4 font-mono text-xs leading-relaxed [&_pre]:overflow-visible [&_pre]:whitespace-pre",
 								themed ? "tt-surface" : "bg-background/60",
 							)}
-						>
-							<code>{s.code}</code>
-						</pre>
+							// biome-ignore lint/security/noDangerouslySetInnerHtml: server-rendered Shiki output, not user-controlled HTML
+							dangerouslySetInnerHTML={{ __html: s.html }}
+						/>
 					</article>
 				))}
 			</div>

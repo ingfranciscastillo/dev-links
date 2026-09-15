@@ -329,6 +329,13 @@ export function themeToStyleTag(
 	const borderC = `${scope} .tt-border-c { border-color: var(--tt-border) !important; }`;
 	const panel = `${scope} .tt-panel { background: var(--tt-surface) !important; border-color: var(--tt-border) !important; }`;
 
+	// Los snippets se resaltan server-side con el tema "css-variables" de
+	// Shiki (ver src/lib/highlight.server.ts) — cada token ya trae un
+	// style="color:var(--shiki-token-*)" inline, así que solo hace falta
+	// definir esas variables aquí para que el resaltado combine con el tema
+	// del creador en vez de quedar sin color (var no definida = currentColor).
+	const shikiVars = `${scope} pre.shiki { background-color: var(--tt-surface) !important; --shiki-foreground: var(--tt-fg); --shiki-background: var(--tt-surface); --shiki-token-constant: var(--tt-accent); --shiki-token-string: var(--tt-accent-2); --shiki-token-comment: var(--tt-muted); --shiki-token-keyword: var(--tt-accent); --shiki-token-parameter: var(--tt-fg); --shiki-token-function: var(--tt-fg); --shiki-token-string-expression: var(--tt-accent-2); --shiki-token-punctuation: var(--tt-muted); --shiki-token-link: var(--tt-accent); }`;
+
 	const container = `${scope} .tt-container { max-width: var(--tt-max-width); margin-inline: auto; }`;
 
 	// En la página pública real, .tt-scope no es su propio contenedor de
@@ -338,7 +345,7 @@ export function themeToStyleTag(
 	// perfil se filtra al scrollbar de todo el dashboard. El caller decide.
 	const scrollbar = scrollbarCss(t, options?.scrollbarTarget ?? "html");
 
-	return `${scope} {\n${body}\n}\n${scopeBase}\n${headings}\n${monoEls}\n${card}\n${muted}\n${surface}\n${borderC}\n${panel}\n${container}\n${glass}\n${hover}\n${btn}\n${scrollbar}\n${custom}`;
+	return `${scope} {\n${body}\n}\n${scopeBase}\n${headings}\n${monoEls}\n${card}\n${muted}\n${surface}\n${borderC}\n${panel}\n${shikiVars}\n${container}\n${glass}\n${hover}\n${btn}\n${scrollbar}\n${custom}`;
 }
 
 function hoverCss(kind: ThemeV2["hover"], scope: string): string {

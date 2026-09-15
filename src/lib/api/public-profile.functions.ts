@@ -15,8 +15,9 @@ import {
 	themes,
 } from "@/db/schema";
 import type { Json } from "@/lib/api/integrations/account.functions";
+import { highlightSnippet } from "@/lib/highlight.server";
 import type { Provider } from "@/lib/integrations/types";
-import type { ProfileData } from "@/lib/schemas";
+import type { ProfileData, SnippetItem } from "@/lib/schemas";
 import { parseThemeConfig } from "@/lib/theme-config";
 
 export type PublicIntegration = {
@@ -25,6 +26,8 @@ export type PublicIntegration = {
 	payload: Json;
 	fetchedAt: string;
 };
+
+export type PublicSnippet = SnippetItem & { html: string };
 
 export type PublicProfile = {
 	id: string;
@@ -36,7 +39,7 @@ export type PublicProfile = {
 	country: string;
 	website: string;
 	available: boolean;
-	data: ProfileData;
+	data: Omit<ProfileData, "snippets"> & { snippets: PublicSnippet[] };
 	integrations: PublicIntegration[];
 } | null;
 
@@ -122,7 +125,19 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				.orderBy(asc(supportLinks.position)),
 		]);
 
-		const profileData: ProfileData = {
+		const highlightedSnippets: PublicSnippet[] = await Promise.all(
+			snippetRows.map(async (r) => ({
+				id: r.id,
+				title: r.title,
+				language: r.language,
+				code: r.code,
+				html: await highlightSnippet(r.code, r.language),
+			})),
+		);
+
+		const profileData: Omit<ProfileData, "snippets"> & {
+			snippets: PublicSnippet[];
+		} = {
 			links: linkRows.map((r) => ({
 				id: r.id,
 				title: r.title,
@@ -139,12 +154,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				demo: r.demo ?? "",
 				status: r.status,
 			})),
-			snippets: snippetRows.map((r) => ({
-				id: r.id,
-				title: r.title,
-				language: r.language,
-				code: r.code,
-			})),
+			snippets: highlightedSnippets,
 			articles: articleRows.map((r) => ({
 				id: r.id,
 				title: r.title,

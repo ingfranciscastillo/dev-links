@@ -367,6 +367,28 @@
   samp {
     font-family: var(--font-mono);
   }
+
+  /*
+   * Snippets are highlighted server-side with Shiki's "css-variables" theme
+   * (see src/lib/highlight.server.ts) — each token already carries an inline
+   * style="color:var(--shiki-token-*)", so this just points those variables
+   * at the app's own palette instead of a fixed editor theme. Falls through
+   * to .dark automatically since --color-* already flips there.
+   */
+  pre.shiki {
+    background-color: transparent !important;
+    --shiki-foreground: var(--color-foreground);
+    --shiki-background: transparent;
+    --shiki-token-constant: var(--color-brand);
+    --shiki-token-string: var(--color-brand);
+    --shiki-token-comment: var(--color-muted-foreground);
+    --shiki-token-keyword: var(--color-brand);
+    --shiki-token-parameter: var(--color-foreground);
+    --shiki-token-function: var(--color-foreground);
+    --shiki-token-string-expression: var(--color-brand);
+    --shiki-token-punctuation: var(--color-muted-foreground);
+    --shiki-token-link: var(--color-brand);
+  }
 }
 
 /* =========================================================

@@ -49,7 +49,12 @@ export const searchProfiles = createServerFn({ method: "GET" })
 			// Búsqueda de texto simple (ILIKE) sobre name/username/bio/location.
 			// Pendiente: full-text vía profiles.search_tsv cuando exista el
 			// trigger de mantenimiento (columna declarada + GIN, aún sin poblar).
-			const conditions: SQL[] = [];
+			//
+			// discoverable = true SIEMPRE va, sin importar los demás filtros —
+			// no es un filtro de búsqueda, es consentimiento: sin esto, una
+			// cuenta nueva sin configurar nada aparecía en /discover solo por
+			// existir. Opt-in explícito desde "Be discoverable" en /profile.
+			const conditions: SQL[] = [eq(profiles.discoverable, true)];
 
 			const query = data.q.trim();
 			if (query) {
@@ -81,7 +86,7 @@ export const searchProfiles = createServerFn({ method: "GET" })
 			}
 
 			const rows = await baseQuery
-				.where(conditions.length > 0 ? and(...conditions) : undefined)
+				.where(and(...conditions))
 				.orderBy(desc(profiles.updatedAt))
 				.limit(data.limit);
 

@@ -69,6 +69,7 @@ type DiscoveryFormValues = {
 	seniority: string;
 	technologies: string[];
 	available: boolean;
+	discoverable: boolean;
 };
 
 export const Route = createFileRoute("/_authenticated/dashboard/profile")({
@@ -520,6 +521,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 		seniority: core.seniority,
 		technologies: core.technologies,
 		available: core.available,
+		discoverable: core.discoverable,
 	}));
 	const [techInput, setTechInput] = useState("");
 	const [techFocused, setTechFocused] = useState(false);
@@ -590,6 +592,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 				seniority: disc.seniority,
 				technologies: disc.technologies,
 				available: disc.available,
+				discoverable: disc.discoverable,
 			});
 
 			toast.success("Discovery info saved");
@@ -600,6 +603,31 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 
 	return (
 		<form onSubmit={saveDiscovery}>
+			<label className="mb-6 flex cursor-pointer items-start gap-3 border border-border p-4">
+				<input
+					type="checkbox"
+					checked={disc.discoverable}
+					onChange={(event) =>
+						setDisc({ ...disc, discoverable: event.target.checked })
+					}
+					className="mt-0.5 h-4 w-4 shrink-0 accent-(--color-brand)"
+				/>
+
+				<span>
+					<span className="block text-sm font-medium">List me on Discover</span>
+					<span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+						Off by default. Turn this on to appear in{" "}
+						<a
+							href="/discover"
+							className="underline decoration-border underline-offset-4 hover:text-foreground hover:decoration-brand"
+						>
+							/discover
+						</a>{" "}
+						search results — your profile stays reachable at its URL either way.
+					</span>
+				</span>
+			</label>
+
 			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 				<div>
 					<Label

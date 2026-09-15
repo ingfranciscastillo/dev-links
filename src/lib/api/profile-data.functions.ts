@@ -203,6 +203,7 @@ export type ProfileCore = {
 	bio: string;
 	website: string;
 	available: boolean;
+	discoverable: boolean;
 	country: string;
 	primaryLanguage: string;
 	seniority: string;
@@ -218,6 +219,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 				bio: profiles.bio,
 				website: profiles.website,
 				available: profiles.available,
+				discoverable: profiles.discoverable,
 				country: profiles.country,
 				primaryLanguage: profiles.primaryLanguage,
 				seniority: profiles.seniority,
@@ -231,6 +233,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 			bio: row?.bio ?? "",
 			website: row?.website ?? "",
 			available: row?.available ?? false,
+			discoverable: row?.discoverable ?? false,
 			country: row?.country ?? "",
 			primaryLanguage: row?.primaryLanguage ?? "",
 			seniority: row?.seniority ?? "",
@@ -312,6 +315,7 @@ const discoveryInput = z.object({
 	seniority: z.string().max(40).optional().or(z.literal("")),
 	technologies: z.array(z.string().min(1).max(40)).max(20).default([]),
 	available: z.boolean().default(false),
+	discoverable: z.boolean().default(false),
 });
 
 export const updateDiscovery = createServerFn({ method: "POST" })
@@ -324,6 +328,7 @@ export const updateDiscovery = createServerFn({ method: "POST" })
 			seniority: data.seniority || null,
 			technologies: data.technologies,
 			available: data.available,
+			discoverable: data.discoverable,
 		};
 		// Upsert: la fila profiles puede no existir aún si el usuario nunca
 		// guardó el perfil core — un UPDATE plano sería un no-op silencioso.

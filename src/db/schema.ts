@@ -80,6 +80,10 @@ export const profiles = pgTable(
 		plan: text("plan").notNull().default("free"),
 		country: text("country"),
 		available: boolean("available").notNull().default(false),
+		// Opt-in gate for /discover — off by default so a brand-new signup
+		// with nothing filled in doesn't show up in the directory just for
+		// existing. Turned on explicitly from "Be discoverable" in /profile.
+		discoverable: boolean("discoverable").notNull().default(false),
 		seniority: text("seniority"),
 		technologies: text("technologies").array().notNull().default([]),
 		primaryLanguage: text("primary_language"),

@@ -133,6 +133,7 @@ export function useUpdateDiscovery() {
 			seniority?: string;
 			technologies?: string[];
 			available?: boolean;
+			discoverable?: boolean;
 		}) => updateDiscovery({ data: input }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: profileDataKey });

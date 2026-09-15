@@ -87,7 +87,7 @@ export function UsernameField({
 				Username
 			</FieldLabel>
 
-			<div className="mt-2 flex h-11 items-center border-b border-border">
+			<div className="mt-2 flex h-11 items-center border-b border-border transition-colors focus-within:border-brand">
 				<span className="shrink-0 font-mono text-[11px] text-muted-foreground">
 					devlinks.com/
 				</span>

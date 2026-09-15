@@ -48,6 +48,9 @@ function PasswordInput({
 					tabIndex={-1}
 					onClick={() => setVisible((v) => !v)}
 					aria-label={visible ? "Hide password" : "Show password"}
+					// ghost's own hover:bg-accent/dark:hover:bg-accent draws a filled
+					// square behind the icon — only the icon itself should light up.
+					className="hover:bg-transparent hover:text-foreground dark:hover:bg-transparent"
 				>
 					{visible ? (
 						<EyeClosedIcon className=" h-4 w-4" strokeWidth={1.5} />

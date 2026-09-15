@@ -10,6 +10,7 @@ import { admin } from "better-auth/plugins/admin";
 import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import DodoPayments from "dodopayments";
+import { eq } from "drizzle-orm";
 import * as authSchema from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { profiles } from "@/db/schema";
@@ -40,6 +41,40 @@ async function setPlan(userId: string, plan: "free" | "pro") {
 			target: profiles.id,
 			set: { plan, updatedAt: new Date() },
 		});
+}
+
+// El plugin de Dodo también ofrece `createCustomerOnSignUp`, pero su hook
+// *lanza* si la llamada a Dodo falla — eso aborta el signup entero (probado:
+// sin DODO_PAYMENTS_API_KEY, /api/auth/sign-up/email devuelve 500 con
+// cualquier método, no solo email). checkout() y portal() ya resuelven o
+// crean el customer por su cuenta si no existe (ver getOrCreateCustomerId en
+// @dodopayments/better-auth), así que crearlo acá es solo un best-effort para
+// que el metadata quede listo antes del primer pago — nunca debe poder
+// romper el registro de un usuario.
+async function bestEffortCreateDodoCustomer(user: {
+	id: string;
+	email: string;
+	name: string;
+}) {
+	try {
+		const customer = await dodoClient.customers.create(
+			{
+				email: user.email,
+				name: user.name,
+				metadata: { better_auth_user_id: user.id },
+			},
+			{ idempotencyKey: user.id },
+		);
+		await db
+			.update(authSchema.user)
+			.set({ dodoCustomerId: customer.customer_id })
+			.where(eq(authSchema.user.id, user.id));
+	} catch (e) {
+		console.warn(
+			`[dodo] best-effort customer creation failed for ${user.id}`,
+			e instanceof Error ? e.message : e,
+		);
+	}
 }
 
 // Catálogo completo de eventos de suscripción de Dodo — cualquier tipo no
@@ -145,7 +180,9 @@ export const auth = betterAuth({
 		}),
 		dodopayments({
 			client: dodoClient,
-			createCustomerOnSignUp: true,
+			// false porque el hook propio del plugin lanza si Dodo falla, lo que
+			// aborta el signup entero — ver bestEffortCreateDodoCustomer arriba.
+			createCustomerOnSignUp: false,
 			getCustomerParams: (user) => ({
 				metadata: { better_auth_user_id: user.id },
 			}),
@@ -235,6 +272,20 @@ export const auth = betterAuth({
 	},
 
 	databaseHooks: {
+		user: {
+			create: {
+				after: (user) => bestEffortCreateDodoCustomer(user),
+			},
+			update: {
+				after: async (ctx) => {
+					const data = ctx.data as { id: string; email: string };
+					const oldData = ctx.oldData as { email?: string } | undefined;
+					if (oldData?.email !== data.email) {
+						console.info("[auth] user.email_changed", { userId: data.id });
+					}
+				},
+			},
+		},
 		session: {
 			create: {
 				after: async (ctx) => {
@@ -246,17 +297,6 @@ export const auth = betterAuth({
 				before: async (ctx) => {
 					const data = ctx.data as { id?: string };
 					console.info("[auth] session.revoked", { sessionId: data?.id });
-				},
-			},
-		},
-		user: {
-			update: {
-				after: async (ctx) => {
-					const data = ctx.data as { id: string; email: string };
-					const oldData = ctx.oldData as { email?: string } | undefined;
-					if (oldData?.email !== data.email) {
-						console.info("[auth] user.email_changed", { userId: data.id });
-					}
 				},
 			},
 		},

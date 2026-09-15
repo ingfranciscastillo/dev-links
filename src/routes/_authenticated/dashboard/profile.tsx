@@ -46,6 +46,7 @@ import {
 	useUploadAvatar,
 } from "@/lib/queries/profile-data";
 import { zodField } from "@/lib/schemas/field";
+import { TECHNOLOGY_SUGGESTIONS } from "@/lib/technologies";
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
@@ -641,6 +642,16 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 		available: core.available,
 	}));
 	const [techInput, setTechInput] = useState("");
+	const [techFocused, setTechFocused] = useState(false);
+
+	const techSuggestions = (() => {
+		const query = techInput.trim().toLowerCase();
+		if (!query) return [];
+		const chosen = new Set(disc.technologies.map((t) => t.toLowerCase()));
+		return TECHNOLOGY_SUGGESTIONS.filter(
+			(t) => t.toLowerCase().includes(query) && !chosen.has(t.toLowerCase()),
+		).slice(0, 8);
+	})();
 
 	// Preserva un valor libre guardado antes de que este campo fuera un
 	// select (o cualquiera fuera de la lista curada) en vez de ocultarlo.
@@ -840,38 +851,67 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						Technologies
 					</Label>
 
-					<div className="mt-2 flex flex-wrap items-center gap-2 border-b border-border py-2">
-						{disc.technologies.map((tech) => (
-							<span
-								key={tech}
-								className="inline-flex items-center gap-1.5 border border-border bg-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.04em]"
-							>
-								{tech}
-								<button
-									type="button"
-									onClick={() => removeTech(tech)}
-									aria-label={`Remove ${tech}`}
-									className="text-muted-foreground transition-colors hover:text-foreground"
+					<div className="relative">
+						<div className="mt-2 flex flex-wrap items-center gap-2 border-b border-border py-2">
+							{disc.technologies.map((tech) => (
+								<span
+									key={tech}
+									className="inline-flex items-center gap-1.5 border border-border bg-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.04em]"
 								>
-									<CloseIcon className="h-3 w-3" />
-								</button>
-							</span>
-						))}
+									{tech}
+									<button
+										type="button"
+										onClick={() => removeTech(tech)}
+										aria-label={`Remove ${tech}`}
+										className="text-muted-foreground transition-colors hover:text-foreground"
+									>
+										<CloseIcon className="h-3 w-3" />
+									</button>
+								</span>
+							))}
 
-						<input
-							id="technologies"
-							value={techInput}
-							onChange={(event) => setTechInput(event.target.value)}
-							onKeyDown={handleTechKeyDown}
-							onBlur={() => commitTech(techInput)}
-							placeholder={
-								disc.technologies.length === 0
-									? "React, Node.js, Postgres…"
-									: undefined
-							}
-							disabled={disc.technologies.length >= 20}
-							className="h-7 min-w-24 flex-1 bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
-						/>
+							<input
+								id="technologies"
+								value={techInput}
+								onChange={(event) => setTechInput(event.target.value)}
+								onKeyDown={handleTechKeyDown}
+								onFocus={() => setTechFocused(true)}
+								onBlur={() => {
+									commitTech(techInput);
+									setTechFocused(false);
+								}}
+								placeholder={
+									disc.technologies.length === 0
+										? "React, Node.js, Postgres…"
+										: undefined
+								}
+								disabled={disc.technologies.length >= 20}
+								autoComplete="off"
+								className="h-7 min-w-24 flex-1 bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
+							/>
+						</div>
+
+						{techFocused && techSuggestions.length > 0 ? (
+							<ul className="absolute inset-x-0 top-full z-10 mt-1 border border-border bg-surface shadow-sm">
+								{techSuggestions.map((suggestion) => (
+									<li key={suggestion}>
+										<button
+											type="button"
+											// onMouseDown (not onClick) fires before the input's onBlur,
+											// and preventDefault keeps focus in the input instead of
+											// letting blur commit the raw partial text first.
+											onMouseDown={(event) => {
+												event.preventDefault();
+												commitTech(suggestion);
+											}}
+											className="block w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-background"
+										>
+											{suggestion}
+										</button>
+									</li>
+								))}
+							</ul>
+						) : null}
 					</div>
 
 					<p className="mt-2 font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground">

@@ -8,13 +8,15 @@ export function CookieConsentBanner() {
 	const [visible, setVisible] = useState(false);
 
 	useEffect(() => {
-		// posthog-js persists the decision itself (opt_out_capturing_by_default
-		// in provider.tsx) — only show the banner if neither choice has been
-		// made yet, and only once PostHog is actually configured.
+		// has_opted_out_capturing() is NOT "the user chose no" — it also
+		// returns true from opt_out_capturing_by_default (provider.tsx) before
+		// anyone has made a choice, so the banner never showed. Confirmed by
+		// reading posthog-js's own source: get_explicit_consent_status() is
+		// the method it documents for exactly this — "whether the user has
+		// made an explicit choice... to determine whether to show an initial
+		// cookie banner." "pending" means no choice yet.
 		if (!import.meta.env.VITE_POSTHOG_KEY) return;
-		if (posthog.has_opted_in_capturing() || posthog.has_opted_out_capturing()) {
-			return;
-		}
+		if (posthog.get_explicit_consent_status() !== "pending") return;
 		setVisible(true);
 	}, []);
 

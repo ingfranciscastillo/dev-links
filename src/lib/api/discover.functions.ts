@@ -59,10 +59,16 @@ export const searchProfiles = createServerFn({ method: "GET" })
 			const query = data.q.trim();
 			if (query) {
 				const pattern = `%${query.replace(/[%_\\]/g, "\\$&")}%`;
+				// technologies es text[] — ilike() no aplica a un array directo,
+				// hay que unnest() y buscar si algún elemento matchea. Sin esto,
+				// el placeholder ("Name, bio, technologies...") prometía un campo
+				// que nunca se buscaba de verdad.
+				const techMatch = sql`EXISTS (SELECT 1 FROM unnest(${profiles.technologies}) AS tech WHERE tech ILIKE ${pattern})`;
 				const textMatch = or(
 					ilike(userTable.name, pattern),
 					ilike(userTable.username, pattern),
 					ilike(profiles.bio, pattern),
+					techMatch,
 				);
 				if (textMatch) conditions.push(textMatch);
 			}

@@ -1,4 +1,5 @@
 import {
+	ArrowRightUpIcon,
 	DangerCircleIcon,
 	DisketteIcon,
 	RefreshIcon,
@@ -48,6 +49,9 @@ type ConfigField = {
 	label: string;
 	placeholder: string;
 };
+
+const INTEGRATION_REQUEST_URL =
+	"https://github.com/ingfranciscastillo/dev-links/issues/new?template=integration-request.yml";
 
 const PROVIDER_HELP: Record<
 	Provider,
@@ -213,6 +217,25 @@ function IntegrationsPage() {
 						</section>
 					);
 				})}
+			</div>
+
+			<div className="mt-8 flex flex-col gap-3 border border-dashed border-border p-6 sm:flex-row sm:items-center sm:justify-between">
+				<p className="text-sm text-muted-foreground">
+					Missing a technology? Tell us what to add next.
+				</p>
+
+				<a
+					href={INTEGRATION_REQUEST_URL}
+					target="_blank"
+					rel="noreferrer"
+					className="group inline-flex shrink-0 items-center gap-2 border border-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
+				>
+					Request an integration
+					<ArrowRightUpIcon
+						size={13}
+						className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+					/>
+				</a>
 			</div>
 		</>
 	);

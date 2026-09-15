@@ -1,0 +1,38 @@
+name: Integration request
+description: Ask for a service/technology to be supported as a DevLinks integration
+title: "[Integration] "
+labels: ["integration request"]
+body:
+  - type: input
+    id: service
+    attributes:
+      label: Service or technology
+      description: What should DevLinks connect to?
+      placeholder: e.g. Codeberg, Bluesky, Notion
+    validations:
+      required: true
+
+  - type: input
+    id: profile-url
+    attributes:
+      label: Link to your public profile on that service
+      description: Helps show what the integration would actually display.
+      placeholder: https://example.com/your-username
+    validations:
+      required: false
+
+  - type: textarea
+    id: why
+    attributes:
+      label: What would you want your DevLinks profile to show from it?
+      placeholder: e.g. my published packages, my latest posts, my star count...
+    validations:
+      required: false
+
+  - type: input
+    id: api-docs
+    attributes:
+      label: Link to the service's public API docs (if you know of one)
+      placeholder: https://...
+    validations:
+      required: false

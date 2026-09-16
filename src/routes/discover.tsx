@@ -1,9 +1,15 @@
 import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	stripSearchParams,
+	useNavigate,
+} from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { motion, useReducedMotion } from "motion/react";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import {
@@ -19,93 +25,180 @@ import {
 } from "@/lib/api/discover.functions";
 import { COUNTRIES, COUNTRY_NAME_BY_CODE } from "@/lib/countries";
 import { LANGUAGES } from "@/lib/languages";
+import { absoluteUrl } from "@/lib/site";
 
-const SENIORITIES = ["junior", "mid", "senior", "staff", "principal"];
+const SENIORITIES = ["junior", "mid", "senior", "staff", "principal"] as const;
 
-const DEFAULT_FILTERS = {
-	q: "",
-	language: null as string | null,
-	seniority: null as string | null,
-	available: null as boolean | null,
-	country: null as string | null,
-	technologies: [] as string[],
-	limit: 24,
-};
+// .catch() (not .default()) so a malformed/hand-edited query string falls
+// back cleanly instead of 500ing the loader — every field tolerates being
+// absent or the wrong type.
+const discoverSearchSchema = z.object({
+	q: z.string().max(120).catch(""),
+	language: z.string().max(40).nullable().catch(null),
+	seniority: z.enum(SENIORITIES).nullable().catch(null),
+	available: z.boolean().catch(false),
+	country: z.string().max(4).nullable().catch(null),
+	technologies: z.array(z.string().max(40)).max(8).catch([]),
+});
 
-function isDefaultFilters(filters: typeof DEFAULT_FILTERS) {
+type DiscoverSearch = z.infer<typeof discoverSearchSchema>;
+
+// Cada combinación de filtros es ahora una URL propia (/discover?language=…)
+// — bueno para SEO programático, pero una combinación con pocos resultados
+// es justo el "thin content" que Google penaliza si se indexa. Por debajo
+// de este umbral, la página sigue siendo usable pero se marca noindex.
+const MIN_INDEXABLE_RESULTS = 5;
+
+function hasActiveFilters(search: DiscoverSearch) {
 	return (
-		filters.q === "" &&
-		filters.language === null &&
-		filters.seniority === null &&
-		filters.available === null &&
-		filters.country === null &&
-		filters.technologies.length === 0
+		search.q.trim() !== "" ||
+		search.language !== null ||
+		search.seniority !== null ||
+		search.available ||
+		search.country !== null ||
+		search.technologies.length > 0
 	);
+}
+
+// Reconstruye la URL con solo los params no-default, en un orden fijo, para
+// que el canonical sea estable sin importar en qué orden se tocaron los
+// filtros. Nota: technologies (array) se serializa distinto a como lo hace
+// el querystring por defecto del router para arrays — es el único campo
+// donde el canonical puede no ser byte-idéntico a la URL real; no afecta a
+// los filtros simples (language/seniority/country/available) que son el
+// objetivo real de estas páginas.
+function buildDiscoverPath(search: DiscoverSearch) {
+	const params = new URLSearchParams();
+	if (search.q.trim()) params.set("q", search.q.trim());
+	if (search.language) params.set("language", search.language);
+	if (search.seniority) params.set("seniority", search.seniority);
+	if (search.available) params.set("available", "true");
+	if (search.country) params.set("country", search.country);
+	if (search.technologies.length > 0)
+		params.set("technologies", JSON.stringify(search.technologies));
+	const qs = params.toString();
+	return qs ? `/discover?${qs}` : "/discover";
+}
+
+function filterLabel(search: DiscoverSearch): string | null {
+	const parts: string[] = [];
+	if (search.language) parts.push(search.language);
+	if (search.seniority) parts.push(search.seniority);
+	if (search.country)
+		parts.push(COUNTRY_NAME_BY_CODE[search.country] ?? search.country);
+	if (search.available) parts.push("available for hire");
+	return parts.length > 0 ? parts.join(", ") : null;
 }
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
 export const Route = createFileRoute("/discover")({
-	// Sin loader, el primer render llega vacío y espera un round-trip
-	// completo cliente → server function → Neon (con cold start) antes de
-	// mostrar resultados. Precargarlos en el server durante el SSR evita
-	// ese waterfall en la primera visita.
-	loader: async () => searchProfiles({ data: DEFAULT_FILTERS }),
-	head: () => ({
-		meta: [
-			{ title: "Discover developers — DevLinks" },
-			{
-				name: "description",
-				content:
-					"Search developer profiles on DevLinks. Filter by language, country, technologies, seniority and availability.",
-			},
-			{
-				property: "og:title",
-				content: "Discover developers — DevLinks",
-			},
-			{
-				property: "og:description",
-				content:
-					"Search developer profiles. Filter by language, country, technologies, seniority and availability.",
-			},
-			{ property: "og:url", content: "/discover" },
+	validateSearch: discoverSearchSchema,
+	search: {
+		middlewares: [
+			stripSearchParams({
+				q: "",
+				language: null,
+				seniority: null,
+				available: false,
+				country: null,
+				technologies: [],
+			}),
 		],
-		links: [{ rel: "canonical", href: "/discover" }],
-	}),
+	},
+	// El loader depende de los search params validados — sin loaderDeps,
+	// TanStack Router no vuelve a llamarlo cuando solo cambian los filtros
+	// (misma ruta, mismo componente), y la navegación por URL (compartir un
+	// link filtrado, ir/volver) mostraría datos de otra combinación de filtros.
+	loaderDeps: ({ search }) => search,
+	loader: async ({ deps }) => searchProfiles({ data: { ...deps, limit: 24 } }),
+	head: ({ match, loaderData }) => {
+		const search = match.search as DiscoverSearch;
+		const resultCount = loaderData?.length ?? 0;
+		const filtered = hasActiveFilters(search);
+		const label = filterLabel(search);
+
+		const title = label
+			? `${label} developers — Discover — DevLinks`
+			: "Discover developers — DevLinks";
+		const description = label
+			? `Browse developer profiles matching ${label} on DevLinks.`
+			: "Search developer profiles on DevLinks. Filter by language, country, technologies, seniority and availability.";
+
+		const shouldNoindex = filtered && resultCount < MIN_INDEXABLE_RESULTS;
+		const canonicalPath = buildDiscoverPath(search);
+
+		return {
+			meta: [
+				{ title },
+				{ name: "description", content: description },
+				{
+					name: "robots",
+					content: shouldNoindex ? "noindex, follow" : "index, follow",
+				},
+				{ property: "og:title", content: title },
+				{ property: "og:description", content: description },
+				{ property: "og:url", content: absoluteUrl(canonicalPath) },
+			],
+			links: [{ rel: "canonical", href: absoluteUrl(canonicalPath) }],
+		};
+	},
 	component: Discover,
 });
 
 function Discover() {
 	const searchProfilesFn = useServerFn(searchProfiles);
 	const loaderData = Route.useLoaderData();
+	const search = Route.useSearch();
+	const navigate = useNavigate({ from: Route.fullPath });
 	const reduceMotion = useReducedMotion();
 
-	const [q, setQ] = useState("");
-	const [language, setLanguage] = useState<string | null>(null);
-	const [seniority, setSeniority] = useState<string | null>(null);
-	const [available, setAvailable] = useState(false);
-	const [country, setCountry] = useState("");
+	// El input de texto queda local + debounced antes de escribir a la URL —
+	// escribir a la URL (y por tanto re-disparar el loader) en cada tecla
+	// sería tanto una navegación de más como un re-fetch de más.
+	const [qInput, setQInput] = useState(search.q);
 
-	const deferredQ = useDeferredValue(q);
+	useEffect(() => {
+		setQInput(search.q);
+	}, [search.q]);
+
+	useEffect(() => {
+		const trimmed = qInput.trim();
+		if (trimmed === search.q) return;
+		const timer = setTimeout(() => {
+			navigate({
+				search: (prev) => ({ ...prev, q: trimmed }),
+				replace: true,
+			});
+		}, 400);
+		return () => clearTimeout(timer);
+	}, [navigate, qInput, search.q]);
 
 	const filters = useMemo(
 		() => ({
-			q: deferredQ,
-			language,
-			seniority,
-			available: available ? true : null,
-			country: country.trim() || null,
-			technologies: [] as string[],
+			q: search.q,
+			language: search.language,
+			seniority: search.seniority,
+			available: search.available ? true : null,
+			country: search.country,
+			technologies: search.technologies,
 			limit: 24,
 		}),
-		[deferredQ, language, seniority, available, country],
+		[
+			search.q,
+			search.language,
+			search.seniority,
+			search.available,
+			search.country,
+			search.technologies,
+		],
 	);
 
 	const { data, isFetching } = useQuery({
 		queryKey: ["discover", filters],
 		queryFn: () => searchProfilesFn({ data: filters }),
 		placeholderData: (previous) => previous,
-		initialData: isDefaultFilters(filters) ? loaderData : undefined,
+		initialData: loaderData,
 	});
 
 	const results = data ?? [];
@@ -158,8 +251,8 @@ function Discover() {
 						</span>
 
 						<input
-							value={q}
-							onChange={(event) => setQ(event.target.value)}
+							value={qInput}
+							onChange={(event) => setQInput(event.target.value)}
 							placeholder="Name, bio, technologies..."
 							aria-label="Search developers"
 							className="min-w-0 flex-1 bg-transparent font-display text-xl tracking-[-0.02em] text-foreground placeholder:text-muted-foreground focus:outline-none sm:text-2xl"
@@ -184,9 +277,15 @@ function Discover() {
 							</p>
 
 							<Select
-								value={language ?? "ALL"}
+								value={search.language ?? "ALL"}
 								onValueChange={(value) =>
-									setLanguage(value === "ALL" ? null : value)
+									navigate({
+										search: (prev) => ({
+											...prev,
+											language: value === "ALL" ? null : value,
+										}),
+										replace: true,
+									})
 								}
 							>
 								<SelectTrigger
@@ -241,9 +340,15 @@ function Discover() {
 										}}
 									>
 										<FilterButton
-											active={seniority === item}
+											active={search.seniority === item}
 											onClick={() =>
-												setSeniority(seniority === item ? null : item)
+												navigate({
+													search: (prev) => ({
+														...prev,
+														seniority: prev.seniority === item ? null : item,
+													}),
+													replace: true,
+												})
 											}
 										>
 											{item}
@@ -259,9 +364,15 @@ function Discover() {
 							</p>
 
 							<Select
-								value={country || "ALL"}
+								value={search.country ?? "ALL"}
 								onValueChange={(value) =>
-									setCountry(value === "ALL" ? "" : value)
+									navigate({
+										search: (prev) => ({
+											...prev,
+											country: value === "ALL" ? null : value,
+										}),
+										replace: true,
+									})
 								}
 							>
 								<SelectTrigger
@@ -289,12 +400,20 @@ function Discover() {
 
 							<div className="mt-3">
 								<FilterButton
-									active={available}
-									onClick={() => setAvailable((value) => !value)}
+									active={search.available}
+									onClick={() =>
+										navigate({
+											search: (prev) => ({
+												...prev,
+												available: !prev.available,
+											}),
+											replace: true,
+										})
+									}
 								>
 									<span
 										className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
-											available ? "bg-brand" : "bg-muted-foreground/40"
+											search.available ? "bg-brand" : "bg-muted-foreground/40"
 										}`}
 									/>
 									Available for hire

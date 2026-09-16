@@ -24,6 +24,10 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as CompareIndexRouteImport } from './routes/compare/index'
+import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
+import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
+import { Route as IntegrationsProviderRouteImport } from './routes/integrations/$provider'
 import { Route as AuthenticatedDashboardIndexRouteImport } from './routes/_authenticated/dashboard/index'
 import { Route as AuthenticatedDashboardAnalyticsRouteImport } from './routes/_authenticated/dashboard/analytics'
 import { Route as AuthenticatedDashboardArticlesRouteImport } from './routes/_authenticated/dashboard/articles'
@@ -120,6 +124,26 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const CompareIndexRoute = CompareIndexRouteImport.update({
+  id: '/compare/',
+  path: '/compare/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareSlugRoute = CompareSlugRouteImport.update({
+  id: '/compare/$slug',
+  path: '/compare/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsIndexRoute = IntegrationsIndexRouteImport.update({
+  id: '/integrations/',
+  path: '/integrations/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegrationsProviderRoute = IntegrationsProviderRouteImport.update({
+  id: '/integrations/$provider',
+  path: '/integrations/$provider',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardIndexRoute =
   AuthenticatedDashboardIndexRouteImport.update({
@@ -267,6 +291,10 @@ export interface FileRoutesByFullPath {
   '/terms-of-service': typeof TermsOfServiceRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/compare/$slug': typeof CompareSlugRoute
+  '/integrations/$provider': typeof IntegrationsProviderRoute
+  '/compare/': typeof CompareIndexRoute
+  '/integrations/': typeof IntegrationsIndexRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
@@ -304,6 +332,10 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/compare/$slug': typeof CompareSlugRoute
+  '/integrations/$provider': typeof IntegrationsProviderRoute
+  '/compare': typeof CompareIndexRoute
+  '/integrations': typeof IntegrationsIndexRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
   '/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
@@ -344,6 +376,10 @@ export interface FileRoutesById {
   '/terms-of-service': typeof TermsOfServiceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/compare/$slug': typeof CompareSlugRoute
+  '/integrations/$provider': typeof IntegrationsProviderRoute
+  '/compare/': typeof CompareIndexRoute
+  '/integrations/': typeof IntegrationsIndexRoute
   '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
   '/_authenticated/dashboard/articles': typeof AuthenticatedDashboardArticlesRoute
   '/_authenticated/dashboard/integrations': typeof AuthenticatedDashboardIntegrationsRoute
@@ -384,6 +420,10 @@ export interface FileRouteTypes {
     | '/terms-of-service'
     | '/dashboard'
     | '/onboarding'
+    | '/compare/$slug'
+    | '/integrations/$provider'
+    | '/compare/'
+    | '/integrations/'
     | '/dashboard/analytics'
     | '/dashboard/articles'
     | '/dashboard/integrations'
@@ -421,6 +461,10 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms-of-service'
     | '/onboarding'
+    | '/compare/$slug'
+    | '/integrations/$provider'
+    | '/compare'
+    | '/integrations'
     | '/dashboard/analytics'
     | '/dashboard/articles'
     | '/dashboard/integrations'
@@ -460,6 +504,10 @@ export interface FileRouteTypes {
     | '/terms-of-service'
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
+    | '/compare/$slug'
+    | '/integrations/$provider'
+    | '/compare/'
+    | '/integrations/'
     | '/_authenticated/dashboard/analytics'
     | '/_authenticated/dashboard/articles'
     | '/_authenticated/dashboard/integrations'
@@ -498,6 +546,10 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
+  CompareSlugRoute: typeof CompareSlugRoute
+  IntegrationsProviderRoute: typeof IntegrationsProviderRoute
+  CompareIndexRoute: typeof CompareIndexRoute
+  IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiIntegrationsDribbbleAuthorizeRoute: typeof ApiIntegrationsDribbbleAuthorizeRoute
   ApiIntegrationsDribbbleCallbackRoute: typeof ApiIntegrationsDribbbleCallbackRoute
@@ -616,6 +668,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/compare/': {
+      id: '/compare/'
+      path: '/compare'
+      fullPath: '/compare/'
+      preLoaderRoute: typeof CompareIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare/$slug': {
+      id: '/compare/$slug'
+      path: '/compare/$slug'
+      fullPath: '/compare/$slug'
+      preLoaderRoute: typeof CompareSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations/': {
+      id: '/integrations/'
+      path: '/integrations'
+      fullPath: '/integrations/'
+      preLoaderRoute: typeof IntegrationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations/$provider': {
+      id: '/integrations/$provider'
+      path: '/integrations/$provider'
+      fullPath: '/integrations/$provider'
+      preLoaderRoute: typeof IntegrationsProviderRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard/': {
       id: '/_authenticated/dashboard/'
@@ -839,6 +919,10 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
+  CompareSlugRoute: CompareSlugRoute,
+  IntegrationsProviderRoute: IntegrationsProviderRoute,
+  CompareIndexRoute: CompareIndexRoute,
+  IntegrationsIndexRoute: IntegrationsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiIntegrationsDribbbleAuthorizeRoute: ApiIntegrationsDribbbleAuthorizeRoute,
   ApiIntegrationsDribbbleCallbackRoute: ApiIntegrationsDribbbleCallbackRoute,

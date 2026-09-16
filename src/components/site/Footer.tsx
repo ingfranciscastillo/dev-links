@@ -50,6 +50,8 @@ export function Footer() {
 								{ label: "Features", href: "/#features" },
 								{ label: "Pricing", href: "/#pricing" },
 								{ label: "Discover", href: "/discover" },
+								{ label: "Integrations", href: "/integrations" },
+								{ label: "Compare", href: "/compare" },
 								{ label: "Contact", href: "/contact" },
 							]}
 						/>

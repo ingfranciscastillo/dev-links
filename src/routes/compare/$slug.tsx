@@ -1,9 +1,12 @@
 import { ArrowRightIcon } from "@solar-icons/react/linear";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { motion, useReducedMotion } from "motion/react";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { COMPARISONS, getComparison } from "@/lib/comparisons";
 import { absoluteUrl } from "@/lib/site";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export const Route = createFileRoute("/compare/$slug")({
 	loader: ({ params }) => {
@@ -49,25 +52,38 @@ export const Route = createFileRoute("/compare/$slug")({
 function ComparePage() {
 	const comparison = Route.useLoaderData();
 	const others = COMPARISONS.filter((c) => c.slug !== comparison.slug);
+	const reduceMotion = useReducedMotion();
 
 	return (
 		<div className="min-h-dvh bg-background text-foreground">
 			<Header />
 
 			<main className="mx-auto max-w-editorial px-5 py-24 sm:px-8 sm:py-32">
-				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
-					Comparisons
-				</p>
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: reduceMotion ? 0.01 : 0.7, ease }}
+				>
+					<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+						Comparisons
+					</p>
 
-				<h1 className="mt-6 max-w-3xl font-display text-4xl leading-[1.02] tracking-[-0.03em] sm:text-5xl">
-					{comparison.headline}
-				</h1>
+					<h1 className="mt-6 max-w-3xl font-display text-4xl leading-[1.02] tracking-[-0.03em] sm:text-5xl">
+						{comparison.headline}
+					</h1>
 
-				<p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
-					{comparison.intro}
-				</p>
+					<p className="mt-6 max-w-xl text-sm leading-relaxed text-muted-foreground">
+						{comparison.intro}
+					</p>
+				</motion.div>
 
-				<div className="mt-16 border-t border-border">
+				<motion.div
+					className="mt-16 border-t border-border"
+					initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+					whileInView={{ opacity: 1, y: 0 }}
+					viewport={{ once: true, amount: 0.2 }}
+					transition={{ duration: reduceMotion ? 0.01 : 0.6, ease }}
+				>
 					<div className="grid grid-cols-[minmax(0,1fr)_1fr_1fr] gap-4 border-b border-border py-4 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
 						<span>Feature</span>
 						<span className="text-foreground">DevLinks</span>
@@ -86,7 +102,7 @@ function ComparePage() {
 							</span>
 						</div>
 					))}
-				</div>
+				</motion.div>
 
 				<div className="mt-16 grid gap-8 border-t border-border pt-10 sm:grid-cols-2">
 					<div>

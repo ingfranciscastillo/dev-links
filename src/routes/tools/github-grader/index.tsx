@@ -1,9 +1,12 @@
 import { ArrowRightIcon } from "@solar-icons/react/linear";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { motion, useReducedMotion } from "motion/react";
 import { type FormEvent, useState } from "react";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { absoluteUrl } from "@/lib/site";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export const Route = createFileRoute("/tools/github-grader/")({
 	head: () => ({
@@ -31,6 +34,7 @@ export const Route = createFileRoute("/tools/github-grader/")({
 
 function GithubGraderLanding() {
 	const navigate = useNavigate();
+	const reduceMotion = useReducedMotion();
 	const [username, setUsername] = useState("");
 	const [error, setError] = useState<string | null>(null);
 
@@ -49,21 +53,37 @@ function GithubGraderLanding() {
 			<Header />
 
 			<main className="mx-auto max-w-editorial px-5 py-24 sm:px-8 sm:py-32">
-				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
-					Free tool
-				</p>
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: reduceMotion ? 0.01 : 0.7, ease }}
+				>
+					<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+						Free tool
+					</p>
 
-				<h1 className="mt-6 max-w-2xl font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
-					GitHub Profile Grader.
-				</h1>
+					<h1 className="mt-6 max-w-2xl font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+						GitHub Profile Grader.
+					</h1>
 
-				<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground">
-					Enter a GitHub username. We check bio, profile README, recent
-					activity, and consistency — no sign-up, no GitHub login, no data
-					stored beyond a one-hour cache.
-				</p>
+					<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground">
+						Enter a GitHub username. We check bio, profile README, recent
+						activity, and consistency — no sign-up, no GitHub login, no data
+						stored beyond a one-hour cache.
+					</p>
+				</motion.div>
 
-				<form onSubmit={handleSubmit} className="mt-10 max-w-md">
+				<motion.form
+					onSubmit={handleSubmit}
+					className="mt-10 max-w-md"
+					initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.6,
+						delay: reduceMotion ? 0 : 0.15,
+						ease,
+					}}
+				>
 					<div className="flex border-b border-foreground pb-2">
 						<span className="shrink-0 font-mono text-[12px] text-muted-foreground">
 							github.com/
@@ -96,7 +116,7 @@ function GithubGraderLanding() {
 							{error}
 						</p>
 					)}
-				</form>
+				</motion.form>
 			</main>
 
 			<Footer />

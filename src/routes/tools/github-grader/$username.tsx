@@ -1,5 +1,6 @@
 import { ArrowRightIcon, CheckCircleIcon, CloseCircleIcon } from "@solar-icons/react/linear";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
 import { useEffect, useRef } from "react";
 import { XIcon } from "@/components/brand-icons";
@@ -20,6 +21,8 @@ function shareGradeUrl(result: GithubGraderResult, pageUrl: string) {
 	const params = new URLSearchParams({ text, url: pageUrl });
 	return `https://twitter.com/intent/tweet?${params.toString()}`;
 }
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export const Route = createFileRoute("/tools/github-grader/$username")({
 	loader: async ({ params }) => {
@@ -106,6 +109,7 @@ export const Route = createFileRoute("/tools/github-grader/$username")({
 function GithubGraderResultPage() {
 	const result: GithubGraderResult = Route.useLoaderData();
 	const { profile, totals, topLanguages, report } = result;
+	const reduceMotion = useReducedMotion();
 
 	// Guards against firing twice on a fast-refresh/re-render in dev, and
 	// against re-firing if the same mounted component re-renders — this
@@ -125,61 +129,94 @@ function GithubGraderResultPage() {
 			<Header />
 
 			<main className="mx-auto max-w-editorial px-5 py-24 sm:px-8 sm:py-32">
-				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
-					GitHub Profile Grader
-				</p>
-
-				<div className="mt-6 flex flex-wrap items-end justify-between gap-6">
-					<div>
-						<h1 className="font-display text-4xl tracking-[-0.03em] sm:text-5xl">
-							{profile.name || profile.login}
-						</h1>
-						<p className="mt-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-							@{profile.login}
-						</p>
-					</div>
-
-					<div className="text-right">
-						<p className="font-display text-6xl leading-none tracking-tight text-brand">
-							{report.grade}
-						</p>
-						<p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-							{report.score}/100
-						</p>
-						<a
-							href={shareGradeUrl(
-								result,
-								absoluteUrl(`/tools/github-grader/${result.username}`),
-							)}
-							target="_blank"
-							rel="noreferrer"
-							className="group mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
-						>
-							<XIcon size={11} />
-							Share your grade
-						</a>
-					</div>
-				</div>
-
-				{profile.bio && (
-					<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground">
-						{profile.bio}
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: reduceMotion ? 0.01 : 0.7, ease }}
+				>
+					<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+						GitHub Profile Grader
 					</p>
-				)}
 
-				<div className="mt-8 flex flex-wrap gap-6 border-y border-border py-5 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-					<span>{profile.public_repos} repos</span>
-					<span>{totals.stars} stars</span>
-					<span>{totals.contributions} contributions</span>
-					{topLanguages.length > 0 && (
-						<span>Mostly {topLanguages[0]?.language}</span>
+					<div className="mt-6 flex flex-wrap items-end justify-between gap-6">
+						<div>
+							<h1 className="font-display text-4xl tracking-[-0.03em] sm:text-5xl">
+								{profile.name || profile.login}
+							</h1>
+							<p className="mt-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+								@{profile.login}
+							</p>
+						</div>
+
+						<motion.div
+							className="text-right"
+							initial={reduceMotion ? false : { opacity: 0, scale: 0.9 }}
+							animate={{ opacity: 1, scale: 1 }}
+							transition={{
+								duration: reduceMotion ? 0.01 : 0.6,
+								delay: reduceMotion ? 0 : 0.2,
+								ease,
+							}}
+						>
+							<p className="font-display text-6xl leading-none tracking-tight text-brand">
+								{report.grade}
+							</p>
+							<p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+								{report.score}/100
+							</p>
+							<a
+								href={shareGradeUrl(
+									result,
+									absoluteUrl(`/tools/github-grader/${result.username}`),
+								)}
+								target="_blank"
+								rel="noreferrer"
+								className="group mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+							>
+								<XIcon size={11} />
+								Share your grade
+							</a>
+						</motion.div>
+					</div>
+
+					{profile.bio && (
+						<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground">
+							{profile.bio}
+						</p>
 					)}
-				</div>
 
-				<div className="mt-12 border-t border-border">
+					<div className="mt-8 flex flex-wrap gap-6 border-y border-border py-5 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
+						<span>{profile.public_repos} repos</span>
+						<span>{totals.stars} stars</span>
+						<span>{totals.contributions} contributions</span>
+						{topLanguages.length > 0 && (
+							<span>Mostly {topLanguages[0]?.language}</span>
+						)}
+					</div>
+				</motion.div>
+
+				<motion.div
+					className="mt-12 border-t border-border"
+					initial="hidden"
+					animate="visible"
+					variants={{
+						hidden: {},
+						visible: {
+							transition: { staggerChildren: reduceMotion ? 0 : 0.05, delayChildren: reduceMotion ? 0 : 0.3 },
+						},
+					}}
+				>
 					{report.checks.map((check) => (
-						<div
+						<motion.div
 							key={check.id}
+							variants={{
+								hidden: reduceMotion ? {} : { opacity: 0, y: 10 },
+								visible: {
+									opacity: 1,
+									y: 0,
+									transition: { duration: reduceMotion ? 0.01 : 0.4, ease },
+								},
+							}}
 							className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-4 border-b border-border py-5 sm:grid-cols-[1.5rem_minmax(0,1fr)_20rem]"
 						>
 							{check.passed ? (
@@ -193,9 +230,9 @@ function GithubGraderResultPage() {
 									{check.tip}
 								</p>
 							)}
-						</div>
+						</motion.div>
 					))}
-				</div>
+				</motion.div>
 
 				<div className="mt-16 border-t border-border pt-10">
 					<h2 className="font-display text-2xl tracking-tight">

@@ -1,6 +1,7 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
+import { motion, useReducedMotion } from "motion/react";
 import { useState } from "react";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
@@ -15,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { contactSchema, sendContactMessage } from "@/lib/api/contact.functions";
 import { zodField } from "@/lib/schemas/field";
+
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export const Route = createFileRoute("/contact")({
 	head: () => ({
@@ -32,6 +35,7 @@ export const Route = createFileRoute("/contact")({
 
 function ContactPage() {
 	const [sent, setSent] = useState(false);
+	const reduceMotion = useReducedMotion();
 
 	const send = useMutation({
 		mutationFn: (input: {
@@ -60,21 +64,32 @@ function ContactPage() {
 			<Header />
 
 			<main className="mx-auto max-w-editorial px-5 py-24 sm:px-8 sm:py-32">
-				<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
-					Contact
-				</p>
+				<motion.div
+					initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ duration: reduceMotion ? 0.01 : 0.7, ease }}
+				>
+					<p className="font-mono text-[10px] uppercase tracking-[0.14em] text-brand">
+						Contact
+					</p>
 
-				<h1 className="mt-6 max-w-2xl font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-7xl">
-					Get in touch.
-				</h1>
+					<h1 className="mt-6 max-w-2xl font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-7xl">
+						Get in touch.
+					</h1>
 
-				<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-					Questions, bugs, feedback, or anything else — send it over and we'll
-					get back to you.
-				</p>
+					<p className="mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
+						Questions, bugs, feedback, or anything else — send it over and
+						we'll get back to you.
+					</p>
+				</motion.div>
 
 				{sent ? (
-					<div className="mt-12 max-w-lg border-t border-border pt-8">
+					<motion.div
+						initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: reduceMotion ? 0.01 : 0.5, ease }}
+						className="mt-12 max-w-lg border-t border-border pt-8"
+					>
 						<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
 							Sent
 						</p>
@@ -85,9 +100,16 @@ function ContactPage() {
 							We read every message and usually reply within a couple of
 							business days.
 						</p>
-					</div>
+					</motion.div>
 				) : (
-					<form
+					<motion.form
+						initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.6,
+							delay: reduceMotion ? 0 : 0.1,
+							ease,
+						}}
 						onSubmit={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
@@ -267,7 +289,7 @@ function ContactPage() {
 								</Button>
 							)}
 						</form.Subscribe>
-					</form>
+					</motion.form>
 				)}
 			</main>
 

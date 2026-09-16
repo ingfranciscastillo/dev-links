@@ -10,7 +10,7 @@ export function Footer() {
 	return (
 		<footer className="border-t border-border">
 			<div className="mx-auto max-w-editorial px-5 py-16 sm:px-8 sm:py-20">
-				<div className="grid gap-12 md:grid-cols-[minmax(0,1.5fr)_1fr_1fr] md:gap-16">
+				<div className="grid gap-12 md:grid-cols-[minmax(0,1.2fr)_1fr_1fr_1fr] md:gap-12">
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}
 						whileInView={{ opacity: 1, y: 0 }}
@@ -50,10 +50,27 @@ export function Footer() {
 								{ label: "Features", href: "/#features" },
 								{ label: "Pricing", href: "/#pricing" },
 								{ label: "Discover", href: "/discover" },
+								{ label: "Contact", href: "/contact" },
+							]}
+						/>
+					</motion.div>
+
+					<motion.div
+						initial={{ opacity: 0, y: 16 }}
+						whileInView={{ opacity: 1, y: 0 }}
+						viewport={{ once: true, amount: 0.3 }}
+						transition={{
+							duration: reduceMotion ? 0.01 : 0.6,
+							delay: 0.12,
+							ease,
+						}}
+					>
+						<FooterCol
+							title="Resources"
+							items={[
 								{ label: "Integrations", href: "/integrations" },
 								{ label: "Compare", href: "/compare" },
 								{ label: "GitHub Grader", href: "/tools/github-grader" },
-								{ label: "Contact", href: "/contact" },
 							]}
 						/>
 					</motion.div>

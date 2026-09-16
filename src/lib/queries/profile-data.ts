@@ -74,6 +74,7 @@ export function useUpdateProfile() {
 			bio?: string;
 			location?: string;
 			website?: string;
+			calendarLink?: string;
 		}) => {
 			const result = await upsertMyProfile({ data: input });
 

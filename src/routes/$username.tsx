@@ -1,6 +1,7 @@
 import {
 	ArrowRightIcon,
 	ArrowRightUpIcon,
+	CalendarIcon,
 	CodeIcon,
 	FolderWithFilesIcon,
 	GlobalIcon,
@@ -246,6 +247,7 @@ function ProfilePage() {
 							: ""
 					}
 					website={live.website}
+					calendarLink={live.calendarLink}
 					available={live.available}
 					avatarHue={avatarHue}
 					themed={themed}
@@ -492,6 +494,7 @@ function ProfileSidebar({
 	bio,
 	location,
 	website,
+	calendarLink,
 	available,
 	avatarHue,
 	themed,
@@ -503,6 +506,7 @@ function ProfileSidebar({
 	bio: string;
 	location: string;
 	website: string;
+	calendarLink: string;
 	available: boolean;
 	avatarHue: number;
 	themed: boolean;
@@ -603,6 +607,23 @@ function ProfileSidebar({
 								rel="noreferrer"
 							>
 								{website.replace(/^https?:\/\//, "")}
+							</a>
+						</li>
+					)}
+
+					{calendarLink && (
+						<li className="flex items-center gap-2">
+							<CalendarIcon className="h-3.5 w-3.5" />
+
+							<a
+								href={calendarLink}
+								className={
+									themed ? "hover:opacity-80" : "hover:text-foreground"
+								}
+								target="_blank"
+								rel="noreferrer"
+							>
+								Book a call
 							</a>
 						</li>
 					)}

@@ -38,6 +38,7 @@ export type PublicProfile = {
 	bio: string;
 	country: string;
 	website: string;
+	calendarLink: string;
 	available: boolean;
 	data: Omit<ProfileData, "snippets"> & { snippets: PublicSnippet[] };
 	integrations: PublicIntegration[];
@@ -56,6 +57,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				bio: profiles.bio,
 				country: profiles.country,
 				website: profiles.website,
+				calendarLink: profiles.calendarLink,
 				available: profiles.available,
 				plan: profiles.plan,
 				username: authUserTable.username,
@@ -193,6 +195,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			bio: profile.bio ?? "",
 			country: profile.country ?? "",
 			website: profile.website ?? "",
+			calendarLink: profile.calendarLink ?? "",
 			available: profile.available,
 			data: profileData,
 			// "linkedin" stays in the DB enum but isn't a valid Provider

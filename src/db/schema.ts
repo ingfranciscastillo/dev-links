@@ -77,6 +77,7 @@ export const profiles = pgTable(
 		bio: text("bio"),
 		location: text("location"),
 		website: text("website"),
+		calendarLink: text("calendar_link"),
 		plan: text("plan").notNull().default("free"),
 		country: text("country"),
 		available: boolean("available").notNull().default(false),

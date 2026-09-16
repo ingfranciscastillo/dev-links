@@ -165,6 +165,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 			username: user.username ?? "",
 			bio: core.bio,
 			website: core.website,
+			calendarLink: core.calendarLink,
 		},
 		onSubmit: async ({ value }) => {
 			try {
@@ -258,7 +259,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 				</div>
 
 				<FieldGroup>
-					<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+					<div className="grid gap-6 sm:grid-cols-2">
 						<form.Field
 							name="name"
 							validators={{
@@ -321,47 +322,6 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 										onBlur={field.handleBlur}
 										onStatusChange={setUsernameStatus}
 									/>
-								);
-							}}
-						</form.Field>
-						<form.Field
-							name="website"
-							validators={{
-								onChange: zodField(profileInput.shape.website),
-							}}
-						>
-							{(field) => {
-								const invalid =
-									field.state.meta.isTouched &&
-									field.state.meta.errors.length > 0;
-
-								return (
-									<Field data-invalid={invalid}>
-										<FieldLabel
-											htmlFor={field.name}
-											className="font-mono text-[10px] uppercase tracking-[0.08em]"
-										>
-											Website
-										</FieldLabel>
-
-										<Input
-											id={field.name}
-											name={field.name}
-											type="url"
-											value={field.state.value ?? ""}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="https://your.dev"
-											aria-invalid={invalid || undefined}
-											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-										/>
-
-										{invalid ? (
-											<FieldError>
-												{field.state.meta.errors.join(", ")}
-											</FieldError>
-										) : null}
-									</Field>
 								);
 							}}
 						</form.Field>
@@ -437,6 +397,96 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 							);
 						}}
 					</form.Field>
+
+					<div className="mt-6 grid gap-6 sm:grid-cols-2">
+						<form.Field
+							name="website"
+							validators={{
+								onChange: zodField(profileInput.shape.website),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
+
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Website
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											type="url"
+											value={field.state.value ?? ""}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											placeholder="https://your.dev"
+											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : null}
+									</Field>
+								);
+							}}
+						</form.Field>
+
+						<form.Field
+							name="calendarLink"
+							validators={{
+								onChange: zodField(profileInput.shape.calendarLink),
+							}}
+						>
+							{(field) => {
+								const invalid =
+									field.state.meta.isTouched &&
+									field.state.meta.errors.length > 0;
+
+								return (
+									<Field data-invalid={invalid}>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Calendar link
+										</FieldLabel>
+
+										<Input
+											id={field.name}
+											name={field.name}
+											type="url"
+											value={field.state.value ?? ""}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											placeholder="https://cal.com/your-name"
+											aria-invalid={invalid || undefined}
+											className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
+										/>
+
+										{invalid ? (
+											<FieldError>
+												{field.state.meta.errors.join(", ")}
+											</FieldError>
+										) : (
+											<p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+												Cal.com or Calendly URL
+											</p>
+										)}
+									</Field>
+								);
+							}}
+						</form.Field>
+					</div>
 				</FieldGroup>
 			</section>
 

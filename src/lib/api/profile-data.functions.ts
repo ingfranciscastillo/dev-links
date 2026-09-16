@@ -202,6 +202,7 @@ export const getMyProfileData = createServerFn({ method: "GET" }).handler(
 export type ProfileCore = {
 	bio: string;
 	website: string;
+	calendarLink: string;
 	available: boolean;
 	discoverable: boolean;
 	country: string;
@@ -218,6 +219,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 			.select({
 				bio: profiles.bio,
 				website: profiles.website,
+				calendarLink: profiles.calendarLink,
 				available: profiles.available,
 				discoverable: profiles.discoverable,
 				country: profiles.country,
@@ -232,6 +234,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 		return {
 			bio: row?.bio ?? "",
 			website: row?.website ?? "",
+			calendarLink: row?.calendarLink ?? "",
 			available: row?.available ?? false,
 			discoverable: row?.discoverable ?? false,
 			country: row?.country ?? "",
@@ -258,6 +261,7 @@ export const profileInput = z.object({
 		.regex(/^[a-z0-9_-]+$/, "Only a-z, 0-9, _ and -"),
 	bio: z.string().max(BIO_MAX_LENGTH).optional().or(z.literal("")),
 	website: z.string().url().optional().or(z.literal("")),
+	calendarLink: z.string().url().optional().or(z.literal("")),
 });
 
 export const upsertMyProfile = createServerFn({ method: "POST" })
@@ -284,12 +288,14 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 						id: userId,
 						bio: data.bio || null,
 						website: data.website || null,
+						calendarLink: data.calendarLink || null,
 					})
 					.onConflictDoUpdate({
 						target: profiles.id,
 						set: {
 							bio: data.bio || null,
 							website: data.website || null,
+							calendarLink: data.calendarLink || null,
 							updatedAt: new Date(),
 						},
 					}),

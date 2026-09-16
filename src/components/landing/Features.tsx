@@ -19,7 +19,7 @@ const items = [
 	},
 	{
 		title: "Discover",
-		desc: "Help people find developers by stack, language and availability.",
+		desc: "Get found — opt in and show up in searches by stack, language and availability.",
 	},
 	{
 		title: "Auto-imports",

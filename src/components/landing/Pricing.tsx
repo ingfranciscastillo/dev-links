@@ -13,7 +13,7 @@ const rows = [
 	["Basic themes", "Included", "Included"],
 	["Analytics", "—", "Included"],
 	["Custom CSS", "—", "Included"],
-	["DevLinks branding", "Included", "Removed"],
+	["Remove DevLinks branding", "—", "Included"],
 	["Priority support", "—", "Included"],
 ];
 

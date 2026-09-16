@@ -11,7 +11,7 @@ import { SectionHeader } from "./Features";
 const faqs = [
 	{
 		q: "Is DevLinks really free?",
-		a: "Yes. The Free plan covers a public profile, GitHub sync, up to 10 links, 5 projects and 5 snippets. Forever.",
+		a: "Yes. The Free plan covers a public profile, GitHub sync, up to 5 links, 5 projects and 5 snippets. Forever.",
 	},
 	{
 		q: "What gets imported automatically?",

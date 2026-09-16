@@ -96,8 +96,7 @@ export function Hero() {
 							ease,
 						}}
 					>
-						One page for your work, writing, projects, profiles, and everything
-						you want people to find.
+						Your repos, writing, and projects — one link, always current.
 					</motion.p>
 				</div>
 
@@ -142,7 +141,7 @@ export function Hero() {
 							href="/#cta"
 							className="group inline-flex items-center gap-2 border border-foreground px-5 py-3 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
 						>
-							Create your profile
+							Claim your profile
 							<ArrowRightIcon
 								size={13}
 								className="transition-transform duration-300 group-hover:translate-x-1"

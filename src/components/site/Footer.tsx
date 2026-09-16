@@ -52,6 +52,7 @@ export function Footer() {
 								{ label: "Discover", href: "/discover" },
 								{ label: "Integrations", href: "/integrations" },
 								{ label: "Compare", href: "/compare" },
+								{ label: "GitHub Grader", href: "/tools/github-grader" },
 								{ label: "Contact", href: "/contact" },
 							]}
 						/>

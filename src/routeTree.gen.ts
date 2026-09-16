@@ -41,6 +41,8 @@ import { Route as AuthenticatedDashboardSupportRouteImport } from './routes/_aut
 import { Route as AuthenticatedDashboardTalksRouteImport } from './routes/_authenticated/dashboard/talks'
 import { Route as AuthenticatedDashboardThemeRouteImport } from './routes/_authenticated/dashboard/theme'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ToolsGithubGraderIndexRouteImport } from './routes/tools/github-grader/index'
+import { Route as ToolsGithubGraderUsernameRouteImport } from './routes/tools/github-grader/$username'
 import { Route as ApiIntegrationsDribbbleAuthorizeRouteImport } from './routes/api/integrations/dribbble/authorize'
 import { Route as ApiIntegrationsDribbbleCallbackRouteImport } from './routes/api/integrations/dribbble/callback'
 import { Route as ApiIntegrationsPinterestAuthorizeRouteImport } from './routes/api/integrations/pinterest/authorize'
@@ -222,6 +224,17 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ToolsGithubGraderIndexRoute = ToolsGithubGraderIndexRouteImport.update({
+  id: '/tools/github-grader/',
+  path: '/tools/github-grader/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsGithubGraderUsernameRoute =
+  ToolsGithubGraderUsernameRouteImport.update({
+    id: '/tools/github-grader/$username',
+    path: '/tools/github-grader/$username',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiIntegrationsDribbbleAuthorizeRoute =
   ApiIntegrationsDribbbleAuthorizeRouteImport.update({
     id: '/api/integrations/dribbble/authorize',
@@ -307,7 +320,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/tools/github-grader/$username': typeof ToolsGithubGraderUsernameRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/tools/github-grader/': typeof ToolsGithubGraderIndexRoute
   '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
   '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
   '/api/integrations/pinterest/authorize': typeof ApiIntegrationsPinterestAuthorizeRoute
@@ -348,7 +363,9 @@ export interface FileRoutesByTo {
   '/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/tools/github-grader/$username': typeof ToolsGithubGraderUsernameRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
+  '/tools/github-grader': typeof ToolsGithubGraderIndexRoute
   '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
   '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
   '/api/integrations/pinterest/authorize': typeof ApiIntegrationsPinterestAuthorizeRoute
@@ -392,7 +409,9 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/_authenticated/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/tools/github-grader/$username': typeof ToolsGithubGraderUsernameRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
+  '/tools/github-grader/': typeof ToolsGithubGraderIndexRoute
   '/api/integrations/dribbble/authorize': typeof ApiIntegrationsDribbbleAuthorizeRoute
   '/api/integrations/dribbble/callback': typeof ApiIntegrationsDribbbleCallbackRoute
   '/api/integrations/pinterest/authorize': typeof ApiIntegrationsPinterestAuthorizeRoute
@@ -436,7 +455,9 @@ export interface FileRouteTypes {
     | '/dashboard/talks'
     | '/dashboard/theme'
     | '/api/auth/$'
+    | '/tools/github-grader/$username'
     | '/dashboard/'
+    | '/tools/github-grader/'
     | '/api/integrations/dribbble/authorize'
     | '/api/integrations/dribbble/callback'
     | '/api/integrations/pinterest/authorize'
@@ -477,7 +498,9 @@ export interface FileRouteTypes {
     | '/dashboard/talks'
     | '/dashboard/theme'
     | '/api/auth/$'
+    | '/tools/github-grader/$username'
     | '/dashboard'
+    | '/tools/github-grader'
     | '/api/integrations/dribbble/authorize'
     | '/api/integrations/dribbble/callback'
     | '/api/integrations/pinterest/authorize'
@@ -520,7 +543,9 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/talks'
     | '/_authenticated/dashboard/theme'
     | '/api/auth/$'
+    | '/tools/github-grader/$username'
     | '/_authenticated/dashboard/'
+    | '/tools/github-grader/'
     | '/api/integrations/dribbble/authorize'
     | '/api/integrations/dribbble/callback'
     | '/api/integrations/pinterest/authorize'
@@ -551,6 +576,8 @@ export interface RootRouteChildren {
   CompareIndexRoute: typeof CompareIndexRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ToolsGithubGraderUsernameRoute: typeof ToolsGithubGraderUsernameRoute
+  ToolsGithubGraderIndexRoute: typeof ToolsGithubGraderIndexRoute
   ApiIntegrationsDribbbleAuthorizeRoute: typeof ApiIntegrationsDribbbleAuthorizeRoute
   ApiIntegrationsDribbbleCallbackRoute: typeof ApiIntegrationsDribbbleCallbackRoute
   ApiIntegrationsPinterestAuthorizeRoute: typeof ApiIntegrationsPinterestAuthorizeRoute
@@ -788,6 +815,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tools/github-grader/': {
+      id: '/tools/github-grader/'
+      path: '/tools/github-grader'
+      fullPath: '/tools/github-grader/'
+      preLoaderRoute: typeof ToolsGithubGraderIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/github-grader/$username': {
+      id: '/tools/github-grader/$username'
+      path: '/tools/github-grader/$username'
+      fullPath: '/tools/github-grader/$username'
+      preLoaderRoute: typeof ToolsGithubGraderUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/integrations/dribbble/authorize': {
       id: '/api/integrations/dribbble/authorize'
       path: '/api/integrations/dribbble/authorize'
@@ -924,6 +965,8 @@ const rootRouteChildren: RootRouteChildren = {
   CompareIndexRoute: CompareIndexRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ToolsGithubGraderUsernameRoute: ToolsGithubGraderUsernameRoute,
+  ToolsGithubGraderIndexRoute: ToolsGithubGraderIndexRoute,
   ApiIntegrationsDribbbleAuthorizeRoute: ApiIntegrationsDribbbleAuthorizeRoute,
   ApiIntegrationsDribbbleCallbackRoute: ApiIntegrationsDribbbleCallbackRoute,
   ApiIntegrationsPinterestAuthorizeRoute:

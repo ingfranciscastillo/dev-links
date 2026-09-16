@@ -12,6 +12,7 @@ const STATIC_PATHS = [
 	"/discover",
 	"/compare",
 	"/integrations",
+	"/tools/github-grader",
 	...COMPARISONS.map((c) => `/compare/${c.slug}`),
 	...SEO_PROVIDERS.map((p) => `/integrations/${p}`),
 ];

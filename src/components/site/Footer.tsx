@@ -68,6 +68,7 @@ export function Footer() {
 						<FooterCol
 							title="Resources"
 							items={[
+								{ label: "Blog", href: "/blog" },
 								{ label: "Integrations", href: "/integrations" },
 								{ label: "Compare", href: "/compare" },
 								{ label: "GitHub Grader", href: "/tools/github-grader" },

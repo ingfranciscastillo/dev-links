@@ -1,0 +1,29 @@
+Every developer I know has the same problem: the proof that they're good at this is real, and it's scattered.
+
+It's commits on GitHub. It's an answer on Stack Overflow someone upvoted. It's a Dev.to post that actually helped someone. It's a side project with three stars that took a weekend. None of that lives in one place, and none of it is what shows up when you hand someone a link.
+
+What usually shows up instead is a resume PDF that's already a little out of date, or a portfolio site you built once and haven't touched since, or a generic link-in-bio page that treats a GitHub profile the same way it treats a Spotify playlist — as one more manual entry in a list.
+
+## The actual problem isn't a missing link. It's upkeep.
+
+I don't think developers are missing a "link in bio" tool. Linktree and Bento already exist, and they're fine at what they do. The problem is that none of them understand what a developer actually has to show, so keeping a profile current means manually re-entering the same things you already did somewhere else — pasting in a new repo, writing a new blurb, updating a link every time something ships.
+
+That's the part that actually doesn't get done. Not because developers don't care how they come across, but because the update is friction, and friction loses to everything else on a Tuesday.
+
+## So DevLinks starts from GitHub, not from a blank page
+
+A DevLinks profile isn't something you fill out once. It syncs from the places the work already lives — GitHub repos and contributions, Dev.to and Medium posts, Stack Overflow reputation, LeetCode stats, and more. You still shape it — the theme, the layout, what you highlight — but the parts that go stale on every other tool are the parts that update themselves here.
+
+The test I kept coming back to while building this: would the profile still be accurate if I didn't touch it for two months? On DevLinks, it is. On the last portfolio site I built for myself, it very much was not.
+
+## Why the code is public, but not free to clone
+
+DevLinks ships under the Business Source License — the source is public and you're free to read it, self-host it, and modify it for your own use. What you can't do is stand up a competing hosted version of it. I'd rather have the code visible and the trust that comes with that than keep it closed, but I also built this to be a real product, not a reference implementation for someone else's SaaS.
+
+If you want to see exactly how something works — how the GitHub sync pulls contribution data, how the theme builder generates styles — it's there to read. That felt like the right trade for a tool aimed at developers specifically, who are going to ask "how does this actually work" more than most audiences would.
+
+## Try the part that doesn't require an account
+
+Before asking anyone to sign up, I wanted there to be something useful even if you never do. The [GitHub Profile Grader](/tools/github-grader) checks a public GitHub profile — bio, a profile README, recent activity, consistency, language diversity — and tells you what's missing, for free, with no login. It deliberately doesn't score followers or stars; grading on popularity would just punish people earlier in their career, which is the opposite of the point.
+
+If a green checkmark shows you something worth fixing, that's the whole product, in miniature: a profile that actually reflects the work, without babysitting it.

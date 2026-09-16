@@ -24,6 +24,8 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsOfServiceRouteImport } from './routes/terms-of-service'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as BlogIndexRouteImport } from './routes/blog/index'
+import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as CompareIndexRouteImport } from './routes/compare/index'
 import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
 import { Route as IntegrationsIndexRouteImport } from './routes/integrations/index'
@@ -126,6 +128,16 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRoute,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CompareIndexRoute = CompareIndexRouteImport.update({
   id: '/compare/',
@@ -304,8 +316,10 @@ export interface FileRoutesByFullPath {
   '/terms-of-service': typeof TermsOfServiceRoute
   '/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/integrations/$provider': typeof IntegrationsProviderRoute
+  '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -347,8 +361,10 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-of-service': typeof TermsOfServiceRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/integrations/$provider': typeof IntegrationsProviderRoute
+  '/blog': typeof BlogIndexRoute
   '/compare': typeof CompareIndexRoute
   '/integrations': typeof IntegrationsIndexRoute
   '/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -393,8 +409,10 @@ export interface FileRoutesById {
   '/terms-of-service': typeof TermsOfServiceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/integrations/$provider': typeof IntegrationsProviderRoute
+  '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
   '/integrations/': typeof IntegrationsIndexRoute
   '/_authenticated/dashboard/analytics': typeof AuthenticatedDashboardAnalyticsRoute
@@ -439,8 +457,10 @@ export interface FileRouteTypes {
     | '/terms-of-service'
     | '/dashboard'
     | '/onboarding'
+    | '/blog/$slug'
     | '/compare/$slug'
     | '/integrations/$provider'
+    | '/blog/'
     | '/compare/'
     | '/integrations/'
     | '/dashboard/analytics'
@@ -482,8 +502,10 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms-of-service'
     | '/onboarding'
+    | '/blog/$slug'
     | '/compare/$slug'
     | '/integrations/$provider'
+    | '/blog'
     | '/compare'
     | '/integrations'
     | '/dashboard/analytics'
@@ -527,8 +549,10 @@ export interface FileRouteTypes {
     | '/terms-of-service'
     | '/_authenticated/dashboard'
     | '/_authenticated/onboarding'
+    | '/blog/$slug'
     | '/compare/$slug'
     | '/integrations/$provider'
+    | '/blog/'
     | '/compare/'
     | '/integrations/'
     | '/_authenticated/dashboard/analytics'
@@ -571,8 +595,10 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsOfServiceRoute: typeof TermsOfServiceRoute
+  BlogSlugRoute: typeof BlogSlugRoute
   CompareSlugRoute: typeof CompareSlugRoute
   IntegrationsProviderRoute: typeof IntegrationsProviderRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   CompareIndexRoute: typeof CompareIndexRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -695,6 +721,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/compare/': {
       id: '/compare/'
@@ -960,8 +1000,10 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsOfServiceRoute: TermsOfServiceRoute,
+  BlogSlugRoute: BlogSlugRoute,
   CompareSlugRoute: CompareSlugRoute,
   IntegrationsProviderRoute: IntegrationsProviderRoute,
+  BlogIndexRoute: BlogIndexRoute,
   CompareIndexRoute: CompareIndexRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

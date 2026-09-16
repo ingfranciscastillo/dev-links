@@ -11,6 +11,7 @@ const nav = [
 	{ label: "Features", href: "/#features" },
 	{ label: "Pricing", href: "/#pricing" },
 	{ label: "Discover", href: "/discover" },
+	{ label: "Blog", href: "/blog" },
 ];
 
 const ease = [0.16, 1, 0.3, 1] as const;

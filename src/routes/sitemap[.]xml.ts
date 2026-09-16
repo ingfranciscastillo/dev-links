@@ -3,6 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { user as authUserTable } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { profiles } from "@/db/schema";
+import { BLOG_POSTS } from "@/content/blog/posts";
 import { COMPARISONS } from "@/lib/comparisons";
 import { SEO_PROVIDERS } from "@/lib/integrations/seo-content";
 import { SITE_URL } from "@/lib/site";
@@ -13,8 +14,10 @@ const STATIC_PATHS = [
 	"/compare",
 	"/integrations",
 	"/tools/github-grader",
+	"/blog",
 	...COMPARISONS.map((c) => `/compare/${c.slug}`),
 	...SEO_PROVIDERS.map((p) => `/integrations/${p}`),
+	...BLOG_POSTS.map((p) => `/blog/${p.slug}`),
 ];
 
 function xmlEscape(value: string) {

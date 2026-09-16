@@ -1,3 +1,4 @@
+import mdx from "@mdx-js/rollup";
 import tailwindcss from "@tailwindcss/vite";
 import { devtools } from "@tanstack/devtools-vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
@@ -104,6 +105,10 @@ const config = defineConfig(({ command, mode }) => {
 		},
 
 		plugins: [
+			// enforce: "pre" is required when combined with @vitejs/plugin-react —
+			// MDX must compile .mdx to JSX before react's own transform runs.
+			{ enforce: "pre", ...mdx() },
+
 			devtools(),
 
 			nitro({
@@ -126,7 +131,7 @@ const config = defineConfig(({ command, mode }) => {
 			}),
 			tailwindcss(),
 			tanstackStart(),
-			viteReact(),
+			viteReact({ include: /\.(jsx|js|mdx|md|tsx|ts)$/ }),
 		],
 	};
 });

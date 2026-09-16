@@ -11,3 +11,10 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
+
+# Local Claude Code skills/config and generated marketing docs — not part
+# of the app, and .claude/skills in particular pulls in third-party skill
+# content we don't want landing in a public BUSL repo.
+.claude
+.agents
+skills-lock.json

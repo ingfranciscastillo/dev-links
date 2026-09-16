@@ -13,7 +13,10 @@ export interface Comparison {
 	slug: string;
 	competitor: string;
 	headline: string;
+	/** Long-form, for the on-page intro paragraph. */
 	intro: string;
+	/** Short-form, ~150-160 chars — for <meta name="description"> and og:description. */
+	metaDescription: string;
 	rows: ComparisonRow[];
 	whenTheyFit: string;
 	whenDevlinksFits: string;
@@ -26,6 +29,8 @@ export const COMPARISONS: Comparison[] = [
 		headline: "DevLinks vs. Linktree",
 		intro:
 			"Linktree is built for creators managing a handful of manual links. DevLinks is built for developers whose proof of work already lives on GitHub, Dev.to, and Stack Overflow — and syncs it instead of asking you to re-enter it.",
+		metaDescription:
+			"See how DevLinks compares to Linktree for developers — GitHub sync, code snippets, and a developer directory Linktree doesn't have.",
 		rows: [
 			{
 				label: "GitHub sync",
@@ -69,6 +74,8 @@ export const COMPARISONS: Comparison[] = [
 		headline: "DevLinks vs. Bento",
 		intro:
 			"Bento is a flexible, visual link-in-bio grid — but every block is filled in by hand. DevLinks fills the equivalent blocks automatically from the developer platforms you already use.",
+		metaDescription:
+			"See how DevLinks compares to Bento for developers — automatic GitHub sync vs. a fully manual link grid.",
 		rows: [
 			{
 				label: "GitHub sync",
@@ -112,6 +119,8 @@ export const COMPARISONS: Comparison[] = [
 		headline: "DevLinks vs. a GitHub README (or building it yourself)",
 		intro:
 			"A GitHub profile README is free and already where developers live — but it's GitHub-only, limited to markdown, and just as easy to leave stale as any portfolio site you meant to keep updating.",
+		metaDescription:
+			"See how DevLinks compares to a GitHub README or DIY portfolio — writing, Stack Overflow, and code snippets in one auto-synced profile.",
 		rows: [
 			{
 				label: "Beyond GitHub",

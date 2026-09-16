@@ -525,7 +525,7 @@ function ProfileSidebar({
 				{image ? (
 					<img
 						src={image}
-						alt=""
+						alt={name}
 						className={cx(
 							"h-24 w-24 rounded-full object-cover",
 							!themed && "ring-4 ring-background",

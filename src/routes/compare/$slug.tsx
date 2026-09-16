@@ -13,13 +13,15 @@ export const Route = createFileRoute("/compare/$slug")({
 	},
 	head: ({ loaderData, params }) => {
 		if (!loaderData) return {};
-		const title = `${loaderData.headline} — DevLinks`;
+		// headline is already "DevLinks vs. X" — appending "— DevLinks" duplicated
+		// the brand name in the title tag.
+		const title = loaderData.headline;
 		return {
 			meta: [
 				{ title },
-				{ name: "description", content: loaderData.intro },
+				{ name: "description", content: loaderData.metaDescription },
 				{ property: "og:title", content: title },
-				{ property: "og:description", content: loaderData.intro },
+				{ property: "og:description", content: loaderData.metaDescription },
 			],
 			links: [
 				{ rel: "canonical", href: absoluteUrl(`/compare/${params.slug}`) },

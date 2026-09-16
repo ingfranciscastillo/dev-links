@@ -8,7 +8,8 @@ import {
 } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { motion, useReducedMotion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import posthog from "posthog-js";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
@@ -193,6 +194,21 @@ function Discover() {
 			search.technologies,
 		],
 	);
+
+	// Skips the initial mount — landing on /discover already counts as a
+	// pageview; this is specifically for the user changing filters, not for
+	// arriving at the page with some already in the URL.
+	const mounted = useRef(false);
+	useEffect(() => {
+		if (!mounted.current) {
+			mounted.current = true;
+			return;
+		}
+		posthog.capture("discover_search_performed", {
+			has_filters: hasActiveFilters(search),
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [filters]);
 
 	const { data, isFetching } = useQuery({
 		queryKey: ["discover", filters],

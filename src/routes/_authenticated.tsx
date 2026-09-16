@@ -1,4 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import posthog from "posthog-js";
+import { useEffect } from "react";
 import { getSession } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -27,5 +29,15 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthenticatedLayout() {
+	const { user } = Route.useRouteContext();
+
+	// Idempotent-safe to call on every authenticated page load — this is
+	// what actually links a pre-signup anonymous session (whatever brought
+	// them here: PH, Reddit, the OSS repo) to the real account, for OAuth
+	// signups too (they never go through use-sign-up.ts's identify call).
+	useEffect(() => {
+		posthog.identify(user.id);
+	}, [user.id]);
+
 	return <Outlet />;
 }

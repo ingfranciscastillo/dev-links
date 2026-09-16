@@ -1,6 +1,7 @@
 import { PostHogProvider as BasePostHogProvider } from "@posthog/react";
+import { useRouter } from "@tanstack/react-router";
 import posthog from "posthog-js";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 if (typeof window !== "undefined" && import.meta.env.VITE_POSTHOG_KEY) {
 	posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
@@ -29,5 +30,23 @@ interface PostHogProviderProps {
 }
 
 export default function PostHogProvider({ children }: PostHogProviderProps) {
+	const router = useRouter();
+
+	// capture_pageview: false above is correct for an SPA (PostHog's own
+	// automatic pageview only fires once, on the very first document load —
+	// it never sees client-side route changes) but it means WE own firing
+	// pageviews from here on. This was the missing half: without this
+	// listener, nothing was capturing which pages people visit at all.
+	useEffect(() => {
+		const unsubscribe = router.subscribe("onResolved", (event) => {
+			if (!event.pathChanged) return;
+			posthog.capture("$pageview", {
+				$current_url: event.toLocation.href,
+				path: event.toLocation.pathname,
+			});
+		});
+		return unsubscribe;
+	}, [router]);
+
 	return <BasePostHogProvider client={posthog}>{children}</BasePostHogProvider>;
 }

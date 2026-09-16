@@ -9,6 +9,7 @@ import {
 	ShareIcon,
 } from "@solar-icons/react/linear";
 import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import posthog from "posthog-js";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { PageTitle } from "@/components/motion/PageTitle";
@@ -58,6 +59,7 @@ function DashboardHome() {
 		if (params.get("upgraded") !== "1") return;
 
 		toast.success("Welcome to Pro — everything's unlocked.");
+		posthog.capture("upgrade_completed", { plan: "pro" });
 		window.history.replaceState(null, "", window.location.pathname);
 	}, []);
 
@@ -113,6 +115,7 @@ function DashboardHome() {
 				// Private browsing / storage disabled — non-critical, skip.
 			}
 			setHasShared(true);
+			posthog.capture("checklist_item_completed", { item: "share_page" });
 		} catch {
 			toast.error("Couldn't copy");
 		}
@@ -136,6 +139,7 @@ function DashboardHome() {
 			// Private browsing / storage disabled — non-critical, skip.
 		}
 		setHasLinkedBio(true);
+		posthog.capture("checklist_item_completed", { item: "add_link_to_bio" });
 	}
 
 	return (

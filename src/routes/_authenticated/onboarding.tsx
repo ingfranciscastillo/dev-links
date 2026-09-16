@@ -5,6 +5,7 @@ import {
 	useRouteContext,
 	useRouter,
 } from "@tanstack/react-router";
+import posthog from "posthog-js";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { AuthShell } from "@/components/auth/authShell";
@@ -54,6 +55,9 @@ function OnboardingPage() {
 					name: value.name,
 					username: value.username.toLowerCase(),
 				});
+				// Only reached by first-time OAuth signups (see beforeLoad) —
+				// email signups fire this in use-sign-up.ts instead.
+				posthog.capture("signup_completed", { method: "oauth" });
 				await router.invalidate();
 				await router.navigate({ to: "/dashboard" });
 			} catch (err) {

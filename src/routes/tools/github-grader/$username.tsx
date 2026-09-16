@@ -1,5 +1,7 @@
 import { ArrowRightIcon, CheckCircleIcon, CloseCircleIcon } from "@solar-icons/react/linear";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import posthog from "posthog-js";
+import { useEffect, useRef } from "react";
 import { XIcon } from "@/components/brand-icons";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
@@ -104,6 +106,19 @@ export const Route = createFileRoute("/tools/github-grader/$username")({
 function GithubGraderResultPage() {
 	const result: GithubGraderResult = Route.useLoaderData();
 	const { profile, totals, topLanguages, report } = result;
+
+	// Guards against firing twice on a fast-refresh/re-render in dev, and
+	// against re-firing if the same mounted component re-renders — this
+	// should fire once per page load, not once per render.
+	const tracked = useRef(false);
+	useEffect(() => {
+		if (tracked.current) return;
+		tracked.current = true;
+		posthog.capture("github_grader_completed", {
+			grade: report.grade,
+			score: report.score,
+		});
+	}, [report.grade, report.score]);
 
 	return (
 		<div className="min-h-dvh bg-background text-foreground">

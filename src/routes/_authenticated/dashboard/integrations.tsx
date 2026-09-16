@@ -6,6 +6,7 @@ import {
 	TrashBin2Icon,
 } from "@solar-icons/react/linear";
 import { createFileRoute } from "@tanstack/react-router";
+import posthog from "posthog-js";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -152,6 +153,10 @@ function IntegrationsPage() {
 		const status = params.get(oauthProvider);
 		if (status === "connected") {
 			toast.success(`${PROVIDER_LABEL[oauthProvider]} connected`);
+			posthog.capture("integration_connected", {
+				provider: oauthProvider,
+				method: "oauth",
+			});
 		} else {
 			toast.error(
 				params.get(`${oauthProvider}_error`) ||

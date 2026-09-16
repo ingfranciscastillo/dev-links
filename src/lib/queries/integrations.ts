@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import posthog from "posthog-js";
 import {
 	deleteIntegrationAccount,
 	listMyIntegrationAccounts,
@@ -24,8 +25,12 @@ export function useUpsertIntegrationAccount() {
 			handle: string;
 			config?: Record<string, unknown>;
 		}) => upsertIntegrationAccount({ data: input }),
-		onSuccess: () => {
+		onSuccess: (_data, variables) => {
 			queryClient.invalidateQueries({ queryKey: integrationAccountsKey });
+			posthog.capture("integration_connected", {
+				provider: variables.provider,
+				method: "handle",
+			});
 		},
 	});
 }

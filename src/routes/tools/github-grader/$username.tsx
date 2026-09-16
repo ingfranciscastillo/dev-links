@@ -1,5 +1,6 @@
 import { ArrowRightIcon, CheckCircleIcon, CloseCircleIcon } from "@solar-icons/react/linear";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { XIcon } from "@/components/brand-icons";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import {
@@ -7,6 +8,16 @@ import {
 	type GithubGraderResult,
 } from "@/lib/api/github-grader.functions";
 import { absoluteUrl } from "@/lib/site";
+
+// Fired right at the "aha" moment — the grade is the ego-driven result
+// people actually want to share, not the tool itself. Pre-written text
+// removes the only friction a share action has (X's intent URL needs no
+// auth/SDK — it just opens the composer with these fields pre-filled).
+function shareGradeUrl(result: GithubGraderResult, pageUrl: string) {
+	const text = `I scored a ${result.report.grade} (${result.report.score}/100) on the DevLinks GitHub Profile Grader — check yours:`;
+	const params = new URLSearchParams({ text, url: pageUrl });
+	return `https://twitter.com/intent/tweet?${params.toString()}`;
+}
 
 export const Route = createFileRoute("/tools/github-grader/$username")({
 	loader: async ({ params }) => {
@@ -120,6 +131,18 @@ function GithubGraderResultPage() {
 						<p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
 							{report.score}/100
 						</p>
+						<a
+							href={shareGradeUrl(
+								result,
+								absoluteUrl(`/tools/github-grader/${result.username}`),
+							)}
+							target="_blank"
+							rel="noreferrer"
+							className="group mt-3 inline-flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+						>
+							<XIcon size={11} />
+							Share your grade
+						</a>
 					</div>
 				</div>
 

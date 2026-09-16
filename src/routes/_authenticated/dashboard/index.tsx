@@ -20,6 +20,10 @@ function sharedStorageKey(userId: string) {
 	return `devlinks:shared:${userId}`;
 }
 
+function bioLinkedStorageKey(userId: string) {
+	return `devlinks:bio-linked:${userId}`;
+}
+
 export const Route = createFileRoute("/_authenticated/dashboard/")({
 	head: () => ({ meta: [{ title: "Dashboard — DevLinks" }] }),
 	component: DashboardHome,
@@ -33,10 +37,14 @@ function DashboardHome() {
 	const integrations = useIntegrationAccounts();
 
 	const [hasShared, setHasShared] = useState(false);
+	const [hasLinkedBio, setHasLinkedBio] = useState(false);
 
 	useEffect(() => {
 		try {
 			setHasShared(localStorage.getItem(sharedStorageKey(user.id)) === "1");
+			setHasLinkedBio(
+				localStorage.getItem(bioLinkedStorageKey(user.id)) === "1",
+			);
 		} catch {
 			// Private browsing / storage disabled — checklist item just stays open.
 		}
@@ -56,7 +64,7 @@ function DashboardHome() {
 	const activeLinks = data.links.filter((link) => link.active).length;
 	const totals = analytics.data ?? { views: 0, clicks: 0 };
 
-	const checklist: Array<[string, boolean]> = [
+	const checklist: Array<[string, boolean, (() => void)?]> = [
 		["Create your account", true],
 		["Add a bio and avatar", Boolean(core.data?.bio) && Boolean(user.image)],
 		[
@@ -64,7 +72,12 @@ function DashboardHome() {
 			integrations.data?.some((a) => a.provider === "github") ?? false,
 		],
 		["Add your first link", data.links.length > 0],
-		["Share your page", hasShared],
+		["Share your page", hasShared, share],
+		// Exposure loop: every place this link lives is a passive ad — the
+		// GitHub bio specifically because it's already the profile devs check
+		// each other's work through. Self-reported (like "Share your page"),
+		// no way to verify without re-scraping their GitHub profile.
+		["Add your link to your GitHub bio", hasLinkedBio, addLinkToGithubBio],
 	];
 
 	const stats = [
@@ -103,6 +116,26 @@ function DashboardHome() {
 		} catch {
 			toast.error("Couldn't copy");
 		}
+	}
+
+	async function addLinkToGithubBio() {
+		const url = `${window.location.origin}/${user.username ?? ""}`;
+
+		try {
+			await navigator.clipboard.writeText(url);
+			toast.success("Link copied — paste it into your GitHub bio");
+		} catch {
+			toast.error("Couldn't copy");
+		}
+
+		window.open("https://github.com/settings/profile", "_blank", "noopener");
+
+		try {
+			localStorage.setItem(bioLinkedStorageKey(user.id), "1");
+		} catch {
+			// Private browsing / storage disabled — non-critical, skip.
+		}
+		setHasLinkedBio(true);
 	}
 
 	return (
@@ -263,7 +296,7 @@ function DashboardHome() {
 					</h2>
 
 					<ul className="mt-6 border-t border-border">
-						{checklist.map(([label, done], index) => (
+						{checklist.map(([label, done, action], index) => (
 							<li
 								key={label}
 								className="flex items-center gap-3 border-b border-border py-4"
@@ -283,7 +316,7 @@ function DashboardHome() {
 								/>
 
 								<span
-									className={`text-sm transition-colors duration-300 ${
+									className={`flex-1 text-sm transition-colors duration-300 ${
 										done
 											? "text-muted-foreground line-through"
 											: "text-foreground"
@@ -291,6 +324,16 @@ function DashboardHome() {
 								>
 									{label}
 								</span>
+
+								{!done && action && (
+									<button
+										type="button"
+										onClick={action}
+										className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-brand transition-colors hover:text-foreground"
+									>
+										Do it →
+									</button>
+								)}
 							</li>
 						))}
 					</ul>

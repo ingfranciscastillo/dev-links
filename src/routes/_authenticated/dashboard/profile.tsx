@@ -823,7 +823,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 				</span>
 			</label>
 
-			<div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+			<div className="grid gap-6 sm:grid-cols-2">
 				<div>
 					<Label
 						htmlFor="location-select"
@@ -877,7 +877,9 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						className="mt-2 h-11 w-full rounded-none border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 					/>
 				</div>
+			</div>
 
+			<div className="mt-6 grid gap-6 sm:grid-cols-2">
 				<div>
 					<Label
 						htmlFor="seniority-select"
@@ -929,82 +931,82 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						<span className="text-sm">Available for hire</span>
 					</label>
 				</div>
+			</div>
 
-				<div className="sm:col-span-2 lg:col-span-4">
-					<Label
-						htmlFor="technologies"
-						className="font-mono text-[10px] uppercase tracking-[0.08em]"
-					>
-						Technologies
-					</Label>
+			<div className="mt-6">
+				<Label
+					htmlFor="technologies"
+					className="font-mono text-[10px] uppercase tracking-[0.08em]"
+				>
+					Technologies
+				</Label>
 
-					<div className="relative">
-						<div className="mt-2 flex flex-wrap items-center gap-2 border-b border-border py-2">
-							{disc.technologies.map((tech) => (
-								<span
-									key={tech}
-									className="inline-flex items-center gap-1.5 border border-border bg-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.04em]"
+				<div className="relative">
+					<div className="mt-2 flex flex-wrap items-center gap-2 border-b border-border py-2">
+						{disc.technologies.map((tech) => (
+							<span
+								key={tech}
+								className="inline-flex items-center gap-1.5 border border-border bg-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.04em]"
+							>
+								{tech}
+								<button
+									type="button"
+									onClick={() => removeTech(tech)}
+									aria-label={`Remove ${tech}`}
+									className="text-muted-foreground transition-colors hover:text-foreground"
 								>
-									{tech}
-									<button
-										type="button"
-										onClick={() => removeTech(tech)}
-										aria-label={`Remove ${tech}`}
-										className="text-muted-foreground transition-colors hover:text-foreground"
-									>
-										<CloseIcon className="h-3 w-3" />
-									</button>
-								</span>
-							))}
+									<CloseIcon className="h-3 w-3" />
+								</button>
+							</span>
+						))}
 
-							<input
-								id="technologies"
-								value={techInput}
-								onChange={(event) => setTechInput(event.target.value)}
-								onKeyDown={handleTechKeyDown}
-								onFocus={() => setTechFocused(true)}
-								onBlur={() => {
-									commitTech(techInput);
-									setTechFocused(false);
-								}}
-								placeholder={
-									disc.technologies.length === 0
-										? "React, Node.js, Postgres…"
-										: undefined
-								}
-								disabled={disc.technologies.length >= 20}
-								autoComplete="off"
-								className="h-7 min-w-24 flex-1 bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
-							/>
-						</div>
-
-						{techFocused && techSuggestions.length > 0 ? (
-							<ul className="absolute inset-x-0 top-full z-10 mt-1 border border-border bg-surface shadow-sm">
-								{techSuggestions.map((suggestion) => (
-									<li key={suggestion}>
-										<button
-											type="button"
-											// onMouseDown (not onClick) fires before the input's onBlur,
-											// and preventDefault keeps focus in the input instead of
-											// letting blur commit the raw partial text first.
-											onMouseDown={(event) => {
-												event.preventDefault();
-												commitTech(suggestion);
-											}}
-											className="block w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-background"
-										>
-											{suggestion}
-										</button>
-									</li>
-								))}
-							</ul>
-						) : null}
+						<input
+							id="technologies"
+							value={techInput}
+							onChange={(event) => setTechInput(event.target.value)}
+							onKeyDown={handleTechKeyDown}
+							onFocus={() => setTechFocused(true)}
+							onBlur={() => {
+								commitTech(techInput);
+								setTechFocused(false);
+							}}
+							placeholder={
+								disc.technologies.length === 0
+									? "React, Node.js, Postgres…"
+									: undefined
+							}
+							disabled={disc.technologies.length >= 20}
+							autoComplete="off"
+							className="h-7 min-w-24 flex-1 bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
+						/>
 					</div>
 
-					<p className="mt-2 font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground">
-						Press comma or enter to add · up to 20
-					</p>
+					{techFocused && techSuggestions.length > 0 ? (
+						<ul className="absolute inset-x-0 top-full z-10 mt-1 border border-border bg-surface shadow-sm">
+							{techSuggestions.map((suggestion) => (
+								<li key={suggestion}>
+									<button
+										type="button"
+										// onMouseDown (not onClick) fires before the input's onBlur,
+										// and preventDefault keeps focus in the input instead of
+										// letting blur commit the raw partial text first.
+										onMouseDown={(event) => {
+											event.preventDefault();
+											commitTech(suggestion);
+										}}
+										className="block w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-background"
+									>
+										{suggestion}
+									</button>
+								</li>
+							))}
+						</ul>
+					) : null}
 				</div>
+
+				<p className="mt-2 font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground">
+					Press comma or enter to add · up to 20
+				</p>
 			</div>
 
 			<div className="mt-7 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row sm:items-center sm:justify-between">

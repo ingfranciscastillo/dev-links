@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/index";
 import { linkClicks, pageViews, profiles } from "@/db/schema";
@@ -12,6 +12,14 @@ export type AnalyticsSummary = {
 		clicks: number;
 		ctr: number;
 		uniqueVisitors: number;
+	};
+	// % change vs. the prior 30-day window. `null` means there was no
+	// activity in the prior window to compare against (nothing to divide by).
+	changes: {
+		views: number | null;
+		clicks: number | null;
+		ctr: number | null;
+		uniqueVisitors: number | null;
 	};
 	daily: Array<{ date: string; views: number; clicks: number }>;
 	devices: Array<{ name: string; value: number }>;
@@ -29,6 +37,24 @@ const VIEW_WHERE = (userId: string, since: Date) =>
 	and(eq(pageViews.profileUserId, userId), gte(pageViews.viewedAt, since));
 const CLICK_WHERE = (userId: string, since: Date) =>
 	and(eq(linkClicks.profileUserId, userId), gte(linkClicks.clickedAt, since));
+const VIEW_WHERE_BETWEEN = (userId: string, since: Date, until: Date) =>
+	and(
+		eq(pageViews.profileUserId, userId),
+		gte(pageViews.viewedAt, since),
+		lt(pageViews.viewedAt, until),
+	);
+const CLICK_WHERE_BETWEEN = (userId: string, since: Date, until: Date) =>
+	and(
+		eq(linkClicks.profileUserId, userId),
+		gte(linkClicks.clickedAt, since),
+		lt(linkClicks.clickedAt, until),
+	);
+
+// null = no baseline to compare against, not a 0% change.
+function pctChange(current: number, previous: number): number | null {
+	if (previous === 0) return current === 0 ? 0 : null;
+	return Number((((current - previous) / previous) * 100).toFixed(1));
+}
 
 // Fecha UTC (YYYY-MM-DD) de un timestamptz, igual que toISOString().slice(0,10).
 const dayExpr = sql<string>`to_char(${pageViews.viewedAt} AT TIME ZONE 'UTC', 'YYYY-MM-DD')`;
@@ -41,6 +67,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 		const userId = session.user.id;
 
 		const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+		const previousSince = new Date(since.getTime() - 30 * 24 * 60 * 60 * 1000);
 
 		try {
 			const [
@@ -55,6 +82,9 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				referrerRows,
 				topLinkRows,
 				visitorRows,
+				previousVisitorRows,
+				[previousViewsRow],
+				[previousClicksRow],
 			] = await Promise.all([
 				db
 					.select({ plan: profiles.plan })
@@ -155,6 +185,20 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 					})
 					.from(pageViews)
 					.where(VIEW_WHERE(userId, since)),
+				db
+					.select({
+						v: sql<number>`count(DISTINCT ${pageViews.ipHash})`.mapWith(Number),
+					})
+					.from(pageViews)
+					.where(VIEW_WHERE_BETWEEN(userId, previousSince, since)),
+				db
+					.select({ count: sql<number>`count(*)`.mapWith(Number) })
+					.from(pageViews)
+					.where(VIEW_WHERE_BETWEEN(userId, previousSince, since)),
+				db
+					.select({ count: sql<number>`count(*)`.mapWith(Number) })
+					.from(linkClicks)
+					.where(CLICK_WHERE_BETWEEN(userId, previousSince, since)),
 			]);
 
 			const plan = profileRow[0]?.plan ?? "free";
@@ -208,6 +252,14 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 			const ctr = totalViews
 				? Number(((totalClicks / totalViews) * 100).toFixed(1))
 				: 0;
+			const uniqueVisitors = visitorRows[0]?.v ?? 0;
+
+			const previousViews = previousViewsRow?.count ?? 0;
+			const previousClicks = previousClicksRow?.count ?? 0;
+			const previousUniqueVisitors = previousVisitorRows[0]?.v ?? 0;
+			const previousCtr = previousViews
+				? Number(((previousClicks / previousViews) * 100).toFixed(1))
+				: 0;
 
 			return {
 				plan,
@@ -215,7 +267,13 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 					views: totalViews,
 					clicks: totalClicks,
 					ctr,
-					uniqueVisitors: visitorRows[0]?.v ?? 0,
+					uniqueVisitors,
+				},
+				changes: {
+					views: pctChange(totalViews, previousViews),
+					clicks: pctChange(totalClicks, previousClicks),
+					ctr: pctChange(ctr, previousCtr),
+					uniqueVisitors: pctChange(uniqueVisitors, previousUniqueVisitors),
 				},
 				daily: Array.from(dailyMap.entries()).map(([date, x]) => ({
 					date,
@@ -234,6 +292,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 			return {
 				plan: "free",
 				totals: { views: 0, clicks: 0, ctr: 0, uniqueVisitors: 0 },
+				changes: { views: null, clicks: null, ctr: null, uniqueVisitors: null },
 				daily: [],
 				devices: [],
 				browsers: [],

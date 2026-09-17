@@ -190,6 +190,7 @@ function UpgradeGate() {
 function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 	const {
 		totals,
+		changes,
 		daily,
 		devices,
 		browsers,
@@ -223,21 +224,29 @@ function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 						icon={EyeIcon}
 						label="Page views"
 						value={totals.views.toLocaleString()}
+						changePct={changes.views}
 					/>
 
 					<StatBlock
 						icon={UsersGroupRoundedIcon}
 						label="Unique visitors"
 						value={totals.uniqueVisitors.toLocaleString()}
+						changePct={changes.uniqueVisitors}
 					/>
 
 					<StatBlock
 						icon={CursorIcon}
 						label="Total clicks"
 						value={totals.clicks.toLocaleString()}
+						changePct={changes.clicks}
 					/>
 
-					<StatBlock icon={GraphUpIcon} label="CTR" value={`${totals.ctr}%`} />
+					<StatBlock
+						icon={GraphUpIcon}
+						label="CTR"
+						value={`${totals.ctr}%`}
+						changePct={changes.ctr}
+					/>
 				</div>
 			</section>
 
@@ -611,10 +620,12 @@ function StatBlock({
 	icon: Icon,
 	label,
 	value,
+	changePct,
 }: {
 	icon: React.ComponentType<{ className?: string }>;
 	label: string;
 	value: string;
+	changePct?: number | null;
 }) {
 	return (
 		<div className="border-b border-border py-6 sm:px-6 sm:py-7 sm:first:pl-0 sm:last:pr-0 sm:border-b-0 sm:first:border-l-0 sm:not-first:border-l">
@@ -626,9 +637,34 @@ function StatBlock({
 				</p>
 			</div>
 
-			<p className="mt-4 font-display text-4xl tracking-[-0.03em] sm:text-5xl">
-				{value}
-			</p>
+			<div className="mt-4 flex items-baseline gap-2">
+				<p className="font-display text-4xl tracking-[-0.03em] sm:text-5xl">
+					{value}
+				</p>
+
+				<ChangeBadge changePct={changePct} />
+			</div>
 		</div>
+	);
+}
+
+function ChangeBadge({ changePct }: { changePct?: number | null }) {
+	if (changePct === undefined || changePct === null) return null;
+
+	const isFlat = changePct === 0;
+	const isUp = changePct > 0;
+
+	return (
+		<span
+			className={`font-mono text-[10px] tabular-nums ${
+				isFlat
+					? "text-muted-foreground"
+					: isUp
+						? "text-emerald-500"
+						: "text-destructive"
+			}`}
+		>
+			{isFlat ? "—" : isUp ? "↑" : "↓"} {Math.abs(changePct)}%
+		</span>
 	);
 }

@@ -6,6 +6,7 @@ import {
 	UsersGroupRoundedIcon,
 } from "@solar-icons/react/linear";
 import { createFileRoute } from "@tanstack/react-router";
+import { motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
@@ -127,7 +128,7 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 			<Button
 				variant="outline"
 				onClick={onRetry}
-				className="mt-6 h-9 rounded-none border-border px-4 font-mono text-[10px] uppercase tracking-[0.08em]"
+				className="mt-6 h-9 rounded-none border-border px-4 font-mono text-[10px] uppercase tracking-[0.08em] transition-transform active:scale-[0.98]"
 			>
 				Retry
 			</Button>
@@ -176,7 +177,7 @@ function UpgradeGate() {
 
 					<Button
 						onClick={handleUpgrade}
-						className="mt-6 h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="mt-6 h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						Upgrade to Pro — $5/mo
 					</Button>
@@ -569,6 +570,8 @@ function RankedList({
 	items: Array<{ label: string; value: number }>;
 	empty: string;
 }) {
+	const reduceMotion = useReducedMotion();
+
 	if (items.length === 0) {
 		return <p className="py-8 text-sm text-muted-foreground">{empty}</p>;
 	}
@@ -576,7 +579,17 @@ function RankedList({
 	return (
 		<ol className="divide-y divide-border">
 			{items.slice(0, 8).map((item, index) => (
-				<li key={item.label} className="flex items-center gap-4 py-3">
+				<motion.li
+					key={item.label}
+					initial={reduceMotion ? false : { opacity: 0, x: -8 }}
+					animate={{ opacity: 1, x: 0 }}
+					transition={{
+						duration: reduceMotion ? 0.01 : 0.25,
+						delay: reduceMotion ? 0 : index * 0.03,
+						ease: [0.16, 1, 0.3, 1],
+					}}
+					className="flex items-center gap-4 py-3"
+				>
 					<span className="w-5 shrink-0 font-mono text-[9px] tabular-nums text-muted-foreground">
 						{String(index + 1).padStart(2, "0")}
 					</span>
@@ -588,7 +601,7 @@ function RankedList({
 					<span className="shrink-0 font-mono text-[10px] tabular-nums text-foreground">
 						{item.value.toLocaleString()}
 					</span>
-				</li>
+				</motion.li>
 			))}
 		</ol>
 	);

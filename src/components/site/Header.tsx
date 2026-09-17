@@ -96,7 +96,7 @@ export function Header() {
 						target="_blank"
 						rel="noreferrer"
 						aria-label="GitHub"
-						className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+						className="hidden text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground sm:inline-flex"
 					>
 						<GithubIcon size={16} />
 					</a>
@@ -106,7 +106,7 @@ export function Header() {
 					{isAuthenticated && user ? (
 						<Link
 							to="/dashboard"
-							className="group inline-flex items-center gap-2 border border-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
+							className="group inline-flex items-center gap-2 border border-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-[color,border-color,transform] active:scale-[0.97] hover:border-brand hover:text-brand"
 						>
 							Dashboard
 							<ArrowRightUpIcon
@@ -127,7 +127,7 @@ export function Header() {
 							<Link
 								to="/signup"
 								search={{ username: undefined }}
-								className="group inline-flex items-center gap-2 border border-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
+								className="group inline-flex items-center gap-2 border border-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-[color,border-color,transform] active:scale-[0.97] hover:border-brand hover:text-brand"
 							>
 								Get started
 								<ArrowRightUpIcon

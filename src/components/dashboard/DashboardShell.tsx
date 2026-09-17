@@ -6,7 +6,7 @@ import {
 	HamburgerMenuIcon,
 	HeartIcon,
 	Home2Icon,
-	LinkIcon,
+	LinkMinimalistic2Icon,
 	Logout2Icon,
 	MicrophoneIcon,
 	NotesIcon,
@@ -51,7 +51,7 @@ type NavItem = {
 const nav: NavItem[] = [
 	{ label: "Overview", to: "/dashboard", icon: Home2Icon, end: true },
 	{ label: "Profile", to: "/dashboard/profile", icon: UserIcon },
-	{ label: "Links", to: "/dashboard/links", icon: LinkIcon },
+	{ label: "Links", to: "/dashboard/links", icon: LinkMinimalistic2Icon },
 	{
 		label: "Projects",
 		to: "/dashboard/projects",

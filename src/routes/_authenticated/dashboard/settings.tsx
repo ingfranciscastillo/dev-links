@@ -200,7 +200,7 @@ function SettingsPage() {
 						type="button"
 						onClick={handleBilling}
 						disabled={billingLoading}
-						className="mt-6 h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-[color,background-color,transform] active:scale-[0.98] hover:bg-brand hover:text-brand-foreground disabled:opacity-50"
+						className="mt-6 h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground disabled:opacity-50"
 					>
 						{billingLoading
 							? "Loading…"
@@ -220,7 +220,7 @@ function SettingsPage() {
 					<button
 						type="button"
 						onClick={handleSignOut}
-						className="mt-6 border border-border px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-[color,border-color,transform] active:scale-[0.98] hover:border-foreground hover:text-foreground"
+						className="mt-6 border border-border px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-transform active:scale-[0.98] hover:border-foreground hover:text-foreground"
 					>
 						Sign out
 					</button>

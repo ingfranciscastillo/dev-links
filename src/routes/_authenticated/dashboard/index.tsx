@@ -5,7 +5,7 @@ import {
 	CursorIcon,
 	EyeIcon,
 	FolderIcon,
-	LinkIcon,
+	LinkMinimalistic2Icon,
 	NotesIcon,
 	ShareIcon,
 } from "@solar-icons/react/linear";
@@ -147,7 +147,7 @@ function DashboardHome() {
 			label: "Active links",
 			value: activeLinks.toString(),
 			meta: `of ${data.links.length}`,
-			icon: LinkIcon,
+			icon: LinkMinimalistic2Icon,
 			loading: false,
 		},
 	];
@@ -231,7 +231,7 @@ function DashboardHome() {
 							{justShared ? (
 								<CheckCircleIcon secondaryOpacity={0} size={15} />
 							) : (
-								<ShareIcon className="h-3.5 w-3.5" />
+								<ShareIcon className="h-3.5 w-3.5" strokeWidth={1} />
 							)}
 							{justShared ? "Copied" : "Share my page"}
 						</motion.span>
@@ -254,7 +254,7 @@ function DashboardHome() {
 								}`}
 							>
 								<div className="flex items-center gap-2 text-muted-foreground">
-									<Icon className="h-3.5 w-3.5" strokeWidth={1.7} />
+									<Icon className="size-3.5" strokeWidth={1.7} />
 									<p className="font-mono text-[9px] uppercase tracking-widest">
 										{stat.label}
 									</p>
@@ -480,7 +480,7 @@ function MiniStat({
 			className="group flex items-center justify-between border-b border-border py-5 transition-colors hover:bg-surface/60 hover:text-brand sm:border-b-0 sm:px-6 first:sm:pl-0 last:sm:pr-0"
 		>
 			<div className="flex items-center gap-3 text-sm text-muted-foreground">
-				<Icon className="h-4 w-4" strokeWidth={1.7} />
+				<Icon className="size-5" strokeWidth={1.7} />
 				<span>{label}</span>
 			</div>
 

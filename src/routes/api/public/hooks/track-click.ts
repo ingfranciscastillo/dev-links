@@ -5,12 +5,12 @@ import { user as userTable } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { linkClicks, profiles } from "@/db/schema";
 import {
-	detectInAppSource,
 	extractCountry,
 	extractIP,
 	hashIP,
 	parseUA,
 } from "@/lib/analytics-parse.server";
+import { detectInAppSource } from "@/lib/analytics-sources";
 
 const bodySchema = z.object({
 	username: z.string().min(1).max(64),

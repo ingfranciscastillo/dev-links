@@ -3,7 +3,7 @@ import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/index";
 import { linkClicks, pageViews, profiles } from "@/db/schema";
-import { knownSourceFromHostname } from "@/lib/analytics-parse.server";
+import { knownSourceFromHostname } from "@/lib/analytics-sources";
 import { ensureSession } from "@/lib/auth.functions";
 
 export type AnalyticsSummary = {

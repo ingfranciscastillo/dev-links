@@ -1,6 +1,7 @@
 import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import { LockKeyholeIcon, RestartIcon } from "@solar-icons/react/linear";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
+import { motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -205,6 +206,8 @@ function TabBtn({
 	onClick: () => void;
 	children: React.ReactNode;
 }) {
+	const reduceMotion = useReducedMotion();
+
 	return (
 		<button
 			type="button"
@@ -218,7 +221,16 @@ function TabBtn({
 		>
 			{children}
 
-			{active && <span className="absolute inset-x-0 bottom-0 h-px bg-brand" />}
+			{active && (
+				<motion.span
+					layoutId="theme-tab-indicator"
+					className="absolute inset-x-0 bottom-0 h-px bg-brand"
+					transition={{
+						duration: reduceMotion ? 0 : 0.25,
+						ease: [0.16, 1, 0.3, 1],
+					}}
+				/>
+			)}
 		</button>
 	);
 }
@@ -336,7 +348,7 @@ function TemplatesPane({
 							key={template.id}
 							onClick={() => onApply(template.id)}
 							className={cn(
-								"group relative min-w-0 border-0 p-5 text-left transition-all",
+								"group relative min-w-0 border-0 p-5 text-left transition-all active:scale-[0.98]",
 								active
 									? "ring-1 ring-inset ring-foreground"
 									: "hover:opacity-85",
@@ -796,7 +808,7 @@ function CssPane({
 
 						<Button
 							onClick={handleUpgrade}
-							className="mt-5 h-9 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+							className="mt-5 h-9 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 						>
 							Upgrade to Pro — $5/mo
 						</Button>
@@ -829,7 +841,7 @@ function CssPane({
 						set({ customCss: draft });
 						toast.success("Custom CSS applied");
 					}}
-					className="h-9 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					className="h-9 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 				>
 					Apply CSS
 				</Button>

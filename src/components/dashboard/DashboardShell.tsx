@@ -308,12 +308,12 @@ function WorkspaceNav({
 							/>
 
 							<Icon
-								className={`h-4 w-4 transition-colors ${
+								className={`size-5 transition-colors ${
 									active
 										? "text-brand"
 										: "text-muted-foreground group-hover:text-foreground"
 								}`}
-								strokeWidth={1.7}
+								strokeWidth={1}
 							/>
 
 							<span>{item.label}</span>

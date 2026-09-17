@@ -5,7 +5,7 @@ import {
 	useRouteContext,
 	useRouter,
 } from "@tanstack/react-router";
-import { useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
 	type ChangeEvent,
 	type KeyboardEvent,
@@ -293,7 +293,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								aria-label="Change avatar"
 								disabled={uploadAvatar.isPending}
 								onClick={() => fileInputRef.current?.click()}
-								className="absolute -bottom-2 -right-2 inline-flex h-7 w-7 items-center justify-center border border-border bg-background text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+								className="absolute -bottom-2 -right-2 inline-flex h-7 w-7 items-center justify-center border border-border bg-background text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground disabled:opacity-50"
 							>
 								<CameraIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
 							</button>
@@ -656,7 +656,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								usernameStatus === "checking" ||
 								usernameStatus === "taken"
 							}
-							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+							className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 						>
 							{updateProfile.isPending || isSubmitting
 								? "Saving…"
@@ -709,6 +709,7 @@ function DiscoverySection() {
 
 function DiscoveryForm({ core }: { core: ProfileCore }) {
 	const updateDiscovery = useUpdateDiscovery();
+	const reduceMotion = useReducedMotion();
 
 	const [disc, setDisc] = useState<DiscoveryFormValues>(() => ({
 		country: core.country,
@@ -943,22 +944,29 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 
 				<div className="relative">
 					<div className="mt-2 flex flex-wrap items-center gap-2 border-b border-border py-2">
-						{disc.technologies.map((tech) => (
-							<span
-								key={tech}
-								className="inline-flex items-center gap-1.5 border border-border bg-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.04em]"
-							>
-								{tech}
-								<button
-									type="button"
-									onClick={() => removeTech(tech)}
-									aria-label={`Remove ${tech}`}
-									className="text-muted-foreground transition-colors hover:text-foreground"
+						<AnimatePresence initial={false}>
+							{disc.technologies.map((tech) => (
+								<motion.span
+									key={tech}
+									layout={!reduceMotion}
+									initial={reduceMotion ? false : { opacity: 0, scale: 0.85 }}
+									animate={{ opacity: 1, scale: 1 }}
+									exit={reduceMotion ? undefined : { opacity: 0, scale: 0.85 }}
+									transition={{ duration: 0.15 }}
+									className="inline-flex items-center gap-1.5 border border-border bg-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.04em]"
 								>
-									<CloseIcon className="h-3 w-3" />
-								</button>
-							</span>
-						))}
+									{tech}
+									<button
+										type="button"
+										onClick={() => removeTech(tech)}
+										aria-label={`Remove ${tech}`}
+										className="text-muted-foreground transition-colors hover:text-foreground"
+									>
+										<CloseIcon className="h-3 w-3" />
+									</button>
+								</motion.span>
+							))}
+						</AnimatePresence>
 
 						<input
 							id="technologies"
@@ -1017,7 +1025,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 				<Button
 					type="submit"
 					disabled={updateDiscovery.isPending}
-					className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 				>
 					{updateDiscovery.isPending ? "Saving…" : "Save discovery info"}
 				</Button>

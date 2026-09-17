@@ -4,12 +4,13 @@ import {
 	getMyAnalyticsSummary,
 } from "@/lib/api/analytics.functions";
 
-export const myAnalyticsKey = ["analytics", "summary"] as const;
+export const myAnalyticsKey = (days: number) =>
+	["analytics", "summary", days] as const;
 
-export function useMyAnalytics() {
+export function useMyAnalytics(days: 7 | 30 | 90 = 30) {
 	return useQuery({
-		queryKey: myAnalyticsKey,
-		queryFn: () => getMyAnalytics(),
+		queryKey: myAnalyticsKey(days),
+		queryFn: () => getMyAnalytics({ data: { days } }),
 		staleTime: 60_000,
 	});
 }

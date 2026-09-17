@@ -8,7 +8,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import {
 	Bar,
@@ -45,8 +45,12 @@ const PIE_COLORS = [
 	"color-mix(in oklch, var(--color-brand) 20%, var(--color-background))",
 ];
 
+const RANGE_OPTIONS = [7, 30, 90] as const;
+type RangeDays = (typeof RANGE_OPTIONS)[number];
+
 function AnalyticsPage() {
-	const { data, isLoading, isError, refetch } = useMyAnalytics();
+	const [days, setDays] = useState<RangeDays>(30);
+	const { data, isLoading, isError, refetch } = useMyAnalytics(days);
 
 	return (
 		<div className="mx-auto w-full max-w-6xl">
@@ -55,15 +59,21 @@ function AnalyticsPage() {
 					09 / Analytics
 				</p>
 
-				<div className="mt-5">
-					<PageTitle className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
-						Analytics.
-					</PageTitle>
+				<div className="mt-5 flex flex-wrap items-end justify-between gap-6">
+					<div>
+						<PageTitle className="font-display text-5xl leading-[0.95] tracking-[-0.04em] sm:text-6xl">
+							Analytics.
+						</PageTitle>
 
-					<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
-						Understand how people discover and interact with your public
-						DevLinks page over the last 30 days.
-					</p>
+						<p className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+							Understand how people discover and interact with your public
+							DevLinks page over the last {days} days.
+						</p>
+					</div>
+
+					{data?.plan === "pro" && (
+						<RangeSwitcher value={days} onChange={setDays} />
+					)}
 				</div>
 			</header>
 
@@ -74,8 +84,35 @@ function AnalyticsPage() {
 			) : data?.plan !== "pro" ? (
 				<UpgradeGate />
 			) : data ? (
-				<AnalyticsBody data={data} />
+				<AnalyticsBody data={data} days={days} />
 			) : null}
+		</div>
+	);
+}
+
+function RangeSwitcher({
+	value,
+	onChange,
+}: {
+	value: RangeDays;
+	onChange: (days: RangeDays) => void;
+}) {
+	return (
+		<div className="flex shrink-0 border border-border">
+			{RANGE_OPTIONS.map((option) => (
+				<button
+					key={option}
+					type="button"
+					onClick={() => onChange(option)}
+					className={`h-8 px-3 font-mono text-[10px] uppercase tracking-[0.08em] transition-colors ${
+						value === option
+							? "bg-foreground text-background"
+							: "text-muted-foreground hover:text-foreground"
+					}`}
+				>
+					{option}D
+				</button>
+			))}
 		</div>
 	);
 }
@@ -187,7 +224,13 @@ function UpgradeGate() {
 	);
 }
 
-function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
+function AnalyticsBody({
+	data,
+	days,
+}: {
+	data: AnalyticsSummary;
+	days: number;
+}) {
 	const {
 		totals,
 		changes,
@@ -207,6 +250,11 @@ function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 
 	return (
 		<div className="mt-8">
+			<div className="mb-6 flex justify-end gap-4">
+				<ExportLink type="views" days={days} label="Export views CSV" />
+				<ExportLink type="clicks" days={days} label="Export clicks CSV" />
+			</div>
+
 			{isEmpty && (
 				<div className="mb-8 border-y border-border py-4">
 					<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
@@ -676,6 +724,25 @@ function StatBlock({
 				<ChangeBadge changePct={changePct} />
 			</div>
 		</div>
+	);
+}
+
+function ExportLink({
+	type,
+	days,
+	label,
+}: {
+	type: "views" | "clicks";
+	days: number;
+	label: string;
+}) {
+	return (
+		<a
+			href={`/api/analytics/export?type=${type}&days=${days}`}
+			className="font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground underline underline-offset-4 hover:text-foreground"
+		>
+			{label}
+		</a>
 	);
 }
 

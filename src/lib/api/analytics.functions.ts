@@ -3,8 +3,8 @@ import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/index";
 import { linkClicks, pageViews, profiles } from "@/db/schema";
-import { ensureSession } from "@/lib/auth.functions";
 import { knownSourceFromHostname } from "@/lib/analytics-parse.server";
+import { ensureSession } from "@/lib/auth.functions";
 
 export type AnalyticsSummary = {
 	plan: string;
@@ -14,8 +14,8 @@ export type AnalyticsSummary = {
 		ctr: number;
 		uniqueVisitors: number;
 	};
-	// % change vs. the prior 30-day window. `null` means there was no
-	// activity in the prior window to compare against (nothing to divide by).
+	// % change vs. the prior window of the same length. `null` means there
+	// was no activity in the prior window to compare against.
 	changes: {
 		views: number | null;
 		clicks: number | null;
@@ -63,7 +63,10 @@ function pctChange(current: number, previous: number): number | null {
 // present — it's the only signal for in-app browsers that strip the
 // referrer entirely. Otherwise fall back to the referrer's hostname, mapped
 // to a known app name where the redirect domain gives it away.
-function resolveSource(source: string | null, ref: string | null): string {
+export function resolveSource(
+	source: string | null,
+	ref: string | null,
+): string {
 	if (source) return source;
 	if (!ref) return "direct";
 	try {
@@ -79,13 +82,23 @@ const dayExpr = sql<string>`to_char(${pageViews.viewedAt} AT TIME ZONE 'UTC', 'Y
 const hourExpr = sql<number>`extract(hour from ${pageViews.viewedAt})::int`;
 const topLinkExpr = sql<string>`coalesce(nullif(${linkClicks.linkTitle}, ''), ${linkClicks.linkUrl})`;
 
-export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
-	async (): Promise<AnalyticsSummary> => {
+export const ANALYTICS_RANGE_DAYS = [7, 30, 90] as const;
+export type AnalyticsRangeDays = (typeof ANALYTICS_RANGE_DAYS)[number];
+
+export const getMyAnalytics = createServerFn({ method: "GET" })
+	.validator(
+		z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90)]) })
+			.parse,
+	)
+	.handler(async ({ data }): Promise<AnalyticsSummary> => {
 		const session = await ensureSession();
 		const userId = session.user.id;
+		const days = data.days;
 
-		const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-		const previousSince = new Date(since.getTime() - 30 * 24 * 60 * 60 * 1000);
+		const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+		const previousSince = new Date(
+			since.getTime() - days * 24 * 60 * 60 * 1000,
+		);
 
 		try {
 			const [
@@ -250,9 +263,9 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 
 			const plan = profileRow[0]?.plan ?? "free";
 
-			// Serie diaria completa (30 días con ceros incluidos).
+			// Serie diaria completa (con ceros incluidos para el rango elegido).
 			const dailyMap = new Map<string, { views: number; clicks: number }>();
-			for (let i = 29; i >= 0; i--) {
+			for (let i = days - 1; i >= 0; i--) {
 				const d = new Date();
 				d.setUTCDate(d.getUTCDate() - i);
 				dailyMap.set(d.toISOString().slice(0, 10), { views: 0, clicks: 0 });
@@ -366,8 +379,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				topLinksBySource: [],
 			};
 		}
-	},
-);
+	});
 
 export const getMyAnalyticsSummary = createServerFn({ method: "GET" })
 	.validator(z.object({ days: z.number().int().positive().optional() }).parse)

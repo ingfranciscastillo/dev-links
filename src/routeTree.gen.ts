@@ -42,6 +42,7 @@ import { Route as AuthenticatedDashboardSnippetsRouteImport } from './routes/_au
 import { Route as AuthenticatedDashboardSupportRouteImport } from './routes/_authenticated/dashboard/support'
 import { Route as AuthenticatedDashboardTalksRouteImport } from './routes/_authenticated/dashboard/talks'
 import { Route as AuthenticatedDashboardThemeRouteImport } from './routes/_authenticated/dashboard/theme'
+import { Route as ApiAnalyticsExportRouteImport } from './routes/api/analytics/export'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ToolsGithubGraderIndexRouteImport } from './routes/tools/github-grader/index'
 import { Route as ToolsGithubGraderUsernameRouteImport } from './routes/tools/github-grader/$username'
@@ -231,6 +232,11 @@ const AuthenticatedDashboardThemeRoute =
     path: '/theme',
     getParentRoute: () => AuthenticatedDashboardRoute,
   } as any)
+const ApiAnalyticsExportRoute = ApiAnalyticsExportRouteImport.update({
+  id: '/api/analytics/export',
+  path: '/api/analytics/export',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -333,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
+  '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/tools/github-grader/$username': typeof ToolsGithubGraderUsernameRoute
   '/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -378,6 +385,7 @@ export interface FileRoutesByTo {
   '/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
+  '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/tools/github-grader/$username': typeof ToolsGithubGraderUsernameRoute
   '/dashboard': typeof AuthenticatedDashboardIndexRoute
@@ -426,6 +434,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard/support': typeof AuthenticatedDashboardSupportRoute
   '/_authenticated/dashboard/talks': typeof AuthenticatedDashboardTalksRoute
   '/_authenticated/dashboard/theme': typeof AuthenticatedDashboardThemeRoute
+  '/api/analytics/export': typeof ApiAnalyticsExportRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/tools/github-grader/$username': typeof ToolsGithubGraderUsernameRoute
   '/_authenticated/dashboard/': typeof AuthenticatedDashboardIndexRoute
@@ -474,6 +483,7 @@ export interface FileRouteTypes {
     | '/dashboard/support'
     | '/dashboard/talks'
     | '/dashboard/theme'
+    | '/api/analytics/export'
     | '/api/auth/$'
     | '/tools/github-grader/$username'
     | '/dashboard/'
@@ -519,6 +529,7 @@ export interface FileRouteTypes {
     | '/dashboard/support'
     | '/dashboard/talks'
     | '/dashboard/theme'
+    | '/api/analytics/export'
     | '/api/auth/$'
     | '/tools/github-grader/$username'
     | '/dashboard'
@@ -566,6 +577,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard/support'
     | '/_authenticated/dashboard/talks'
     | '/_authenticated/dashboard/theme'
+    | '/api/analytics/export'
     | '/api/auth/$'
     | '/tools/github-grader/$username'
     | '/_authenticated/dashboard/'
@@ -601,6 +613,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   CompareIndexRoute: typeof CompareIndexRoute
   IntegrationsIndexRoute: typeof IntegrationsIndexRoute
+  ApiAnalyticsExportRoute: typeof ApiAnalyticsExportRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ToolsGithubGraderUsernameRoute: typeof ToolsGithubGraderUsernameRoute
   ToolsGithubGraderIndexRoute: typeof ToolsGithubGraderIndexRoute
@@ -848,6 +861,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardThemeRouteImport
       parentRoute: typeof AuthenticatedDashboardRoute
     }
+    '/api/analytics/export': {
+      id: '/api/analytics/export'
+      path: '/api/analytics/export'
+      fullPath: '/api/analytics/export'
+      preLoaderRoute: typeof ApiAnalyticsExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -1006,6 +1026,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   CompareIndexRoute: CompareIndexRoute,
   IntegrationsIndexRoute: IntegrationsIndexRoute,
+  ApiAnalyticsExportRoute: ApiAnalyticsExportRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ToolsGithubGraderUsernameRoute: ToolsGithubGraderUsernameRoute,
   ToolsGithubGraderIndexRoute: ToolsGithubGraderIndexRoute,

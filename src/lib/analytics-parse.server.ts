@@ -1,4 +1,4 @@
-// Server-only helpers for lightweight User-Agent parsing + daily IP salting.
+// Server-only helpers for lightweight User-Agent parsing + weekly IP salting.
 import { createHash } from "crypto";
 
 export type ParsedUA = {
@@ -38,11 +38,29 @@ export function parseUA(ua: string): ParsedUA {
 	return { device, browser, os };
 }
 
+// ISO week key (e.g. "2026-W38"). A rotating salt keeps the raw IP
+// unrecoverable while still letting the same visitor be recognized across
+// the days inside one week — a daily salt (the previous scheme) made every
+// "unique visitors" count double-count anyone who came back the next day,
+// since the same IP hashed differently each day.
+function isoWeekKey(date: Date): string {
+	const d = new Date(
+		Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+	);
+	const dayNum = d.getUTCDay() || 7;
+	d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+	const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+	const weekNo = Math.ceil(
+		((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
+	);
+	return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2, "0")}`;
+}
+
 export function hashIP(ip: string): string {
 	const salt = process.env.ANALYTICS_SALT || "devlinks-analytics-salt-v1";
-	const day = new Date().toISOString().slice(0, 10);
+	const week = isoWeekKey(new Date());
 	return createHash("sha256")
-		.update(`${salt}:${day}:${ip}`)
+		.update(`${salt}:${week}:${ip}`)
 		.digest("hex")
 		.slice(0, 32);
 }

@@ -274,6 +274,15 @@ function IntegrationRow({
 		refreshAccount.isPending ||
 		deleteAccount.isPending;
 
+	// "Update" solo tiene sentido si algo cambió respecto a lo guardado —
+	// si no, el submit no hace nada útil y solo invita a un click de más.
+	const savedConfigValue = help.configField
+		? String((account?.config?.[help.configField.key] as string) ?? "")
+		: "";
+	const dirty =
+		handle.trim() !== (account?.handle ?? "") ||
+		configValue.trim() !== savedConfigValue;
+
 	useEffect(() => {
 		setHandle(account?.handle ?? "");
 
@@ -453,7 +462,7 @@ function IntegrationRow({
 						!help.oauth && (
 							<Button
 								onClick={handleSave}
-								disabled={busy}
+								disabled={busy || (Boolean(account) && !dirty)}
 								className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 							>
 								{account ? "Update" : "Connect"}

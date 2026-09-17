@@ -14,6 +14,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { useAnalyticsSummary } from "@/lib/queries/analytics";
 import { useIntegrationAccounts } from "@/lib/queries/integrations";
@@ -131,21 +132,21 @@ function DashboardHome() {
 	const stats = [
 		{
 			label: "Page views",
-			value: totals.views.toLocaleString(),
+			value: totals.views,
 			meta: "Last 7 days",
 			icon: EyeIcon,
 			loading: analytics.isLoading,
 		},
 		{
 			label: "Total clicks",
-			value: totals.clicks.toLocaleString(),
+			value: totals.clicks,
 			meta: "Last 7 days",
 			icon: CursorIcon,
 			loading: analytics.isLoading,
 		},
 		{
 			label: "Active links",
-			value: activeLinks.toString(),
+			value: activeLinks,
 			meta: `of ${data.links.length}`,
 			icon: LinkMinimalistic2Icon,
 			loading: false,
@@ -263,8 +264,8 @@ function DashboardHome() {
 								{stat.loading ? (
 									<div className="mt-4 h-9 w-16 animate-pulse bg-surface" />
 								) : (
-									<p className="mt-4 font-display text-4xl tracking-[-0.03em]">
-										{stat.value}
+									<p className="mt-4 font-display text-4xl tracking-[-0.03em] tabular-nums">
+										<AnimatedNumber value={stat.value} />
 									</p>
 								)}
 
@@ -482,7 +483,7 @@ function MiniStat({
 
 			<div className="flex items-center gap-3">
 				<span className="font-mono text-sm tabular-nums text-foreground">
-					{value}
+					<AnimatedNumber value={value} duration={0.5} />
 				</span>
 
 				<span className="font-mono text-xs text-muted-foreground transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand">

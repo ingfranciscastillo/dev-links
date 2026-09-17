@@ -1,4 +1,3 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import {
 	ArrowRightUpIcon,
 	CodeSquareIcon,
@@ -8,6 +7,7 @@ import {
 	LinkMinimalistic2Icon,
 	NotesIcon,
 	ShareIcon,
+	UnreadIcon,
 } from "@solar-icons/react/linear";
 import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -229,7 +229,7 @@ function DashboardHome() {
 							className="inline-flex items-center gap-2"
 						>
 							{justShared ? (
-								<CheckCircleIcon secondaryOpacity={0} size={15} />
+								<UnreadIcon size={15} />
 							) : (
 								<ShareIcon className="h-3.5 w-3.5" strokeWidth={1} />
 							)}
@@ -377,11 +377,7 @@ function DashboardHome() {
 						{allDone && (
 							<div className="mt-4 flex items-center justify-between gap-4">
 								<p className="flex items-center gap-2 text-sm text-muted-foreground">
-									<CheckCircleIcon
-										secondaryOpacity={0}
-										size={18}
-										className="shrink-0 text-brand"
-									/>
+									<UnreadIcon size={18} className="shrink-0 text-brand" />
 									All set — your page is live and up to date.
 								</p>
 

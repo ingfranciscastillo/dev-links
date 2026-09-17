@@ -1,4 +1,3 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import {
 	ArrowRightIcon,
 	ArrowRightUpIcon,
@@ -10,6 +9,7 @@ import {
 	MapPointIcon,
 	NotesIcon,
 	ShareIcon,
+	UnreadIcon,
 } from "@solar-icons/react/linear";
 import {
 	createFileRoute,
@@ -1181,7 +1181,7 @@ function ClaimUsernameModal({
 								transition={{ duration: 0.15, ease: sectionEase }}
 								className="shrink-0 text-brand"
 							>
-								<CheckCircleIcon size={16} secondaryOpacity={0} />
+								<UnreadIcon size={16} />
 							</motion.span>
 						)}
 					</AnimatePresence>

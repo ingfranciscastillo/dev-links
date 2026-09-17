@@ -1,4 +1,4 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
+import { UnreadIcon } from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import {
 	createFileRoute,
@@ -347,7 +347,7 @@ function SignupUsernameField({
 									transition={{ duration: 0.15, ease }}
 									className="text-brand"
 								>
-									<CheckCircleIcon size={16} secondaryOpacity={0} />
+									<UnreadIcon size={16} />
 								</motion.span>
 							</InputGroupAddon>
 						)}

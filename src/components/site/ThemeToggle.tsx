@@ -1,5 +1,4 @@
-import { MoonIcon } from "@solar-icons/react/linear/moon";
-import { SunIcon } from "@solar-icons/react/linear/sun";
+import { MoonIcon, Sun2Icon } from "@solar-icons/react/linear";
 import { useEffect, useState } from "react";
 
 import { getTheme, setTheme, type Theme } from "@/lib/theme";
@@ -25,9 +24,9 @@ export function ThemeToggle() {
 			aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
 			className="relative inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 		>
-			<SunIcon
+			<Sun2Icon
 				size={15}
-				strokeWidth={1.5}
+				strokeWidth={1}
 				className={`absolute transition-[opacity,transform] duration-150 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
 					theme === "dark" ? "scale-100 opacity-100" : "scale-50 opacity-0"
 				}`}

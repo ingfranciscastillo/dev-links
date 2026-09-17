@@ -1,4 +1,4 @@
-import { ArrowRightIcon, CheckCircleIcon } from "@solar-icons/react/linear";
+import { ArrowRightIcon, UnreadIcon } from "@solar-icons/react/linear";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { Footer } from "@/components/site/Footer";
@@ -104,10 +104,7 @@ function IntegrationPage() {
 					<ul className="mt-5 space-y-3">
 						{seo.syncs.map((item) => (
 							<li key={item} className="flex items-start gap-3 text-sm">
-								<CheckCircleIcon
-									size={16}
-									className="mt-0.5 shrink-0 text-brand"
-								/>
+								<UnreadIcon size={16} className="mt-0.5 shrink-0 text-brand" />
 								<span>{item}</span>
 							</li>
 						))}

@@ -1,11 +1,15 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
-import { LockKeyholeIcon, RestartIcon } from "@solar-icons/react/linear";
+import {
+	LockKeyholeIcon,
+	RestartIcon,
+	UnreadIcon,
+} from "@solar-icons/react/linear";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
+import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
 import { PlanComparisonTable } from "@/components/dashboard/PlanComparisonTable";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
@@ -58,6 +62,7 @@ function ThemePage() {
 	const resetTheme = useResetTheme();
 
 	const [tab, setTab] = useState<Tab>("templates");
+	const [confirmingReset, setConfirmingReset] = useState(false);
 
 	const theme = data.theme;
 	const bio = core.data?.bio ?? "";
@@ -91,15 +96,7 @@ function ThemePage() {
 
 					<Button
 						variant="ghost"
-						onClick={() => {
-							resetTheme.mutate(undefined, {
-								onSuccess: () => toast.success("Theme reset"),
-								onError: (err) =>
-									toast.error(
-										err instanceof Error ? err.message : "Couldn't reset",
-									),
-							});
-						}}
+						onClick={() => setConfirmingReset(true)}
 						className="h-9 self-start rounded-none px-2 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground hover:bg-transparent hover:text-foreground lg:self-auto"
 					>
 						<RestartIcon size={14} />
@@ -107,6 +104,28 @@ function ThemePage() {
 					</Button>
 				</div>
 			</header>
+
+			{confirmingReset && (
+				<ConfirmDialog
+					title="Reset theme"
+					description="This resets colors, type, layout, and effects back to the default theme. Your links, projects, and other content stay untouched."
+					confirmLabel="Reset theme"
+					pending={resetTheme.isPending}
+					onClose={() => setConfirmingReset(false)}
+					onConfirm={() => {
+						resetTheme.mutate(undefined, {
+							onSuccess: () => {
+								toast.success("Theme reset");
+								setConfirmingReset(false);
+							},
+							onError: (err) =>
+								toast.error(
+									err instanceof Error ? err.message : "Couldn't reset",
+								),
+						});
+					}}
+				/>
+			)}
 
 			<div className="mt-8 grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.85fr)] xl:gap-14">
 				<div className="min-w-0">
@@ -369,13 +388,7 @@ function TemplatesPane({
 									</p>
 								</div>
 
-								{active && (
-									<CheckCircleIcon
-										size={25}
-										secondaryOpacity={0}
-										className="shrink-0"
-									/>
-								)}
+								{active && <UnreadIcon size={25} className="shrink-0" />}
 							</div>
 
 							<div className="mt-5 flex gap-1.5">

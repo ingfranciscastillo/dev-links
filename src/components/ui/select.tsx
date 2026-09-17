@@ -1,5 +1,8 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
-import { AltArrowDownIcon, AltArrowUpIcon } from "@solar-icons/react/linear";
+import {
+	AltArrowDownIcon,
+	AltArrowUpIcon,
+	UnreadIcon,
+} from "@solar-icons/react/linear";
 import { Select as SelectPrimitive } from "radix-ui";
 import type * as React from "react";
 
@@ -118,7 +121,7 @@ function SelectItem({
 				className="absolute right-2 flex size-3.5 items-center justify-center"
 			>
 				<SelectPrimitive.ItemIndicator>
-					<CheckCircleIcon secondaryOpacity={0} size={20} className="size-4" />
+					<UnreadIcon size={16} className="size-4" />
 				</SelectPrimitive.ItemIndicator>
 			</span>
 			<SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>

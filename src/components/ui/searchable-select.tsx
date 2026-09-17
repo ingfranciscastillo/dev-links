@@ -1,5 +1,4 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
-import { AltArrowDownIcon } from "@solar-icons/react/linear";
+import { AltArrowDownIcon, UnreadIcon } from "@solar-icons/react/linear";
 import { useState } from "react";
 
 import {
@@ -86,11 +85,7 @@ export function SearchableSelect({
 								>
 									<span className="flex size-3.5 shrink-0 items-center justify-center">
 										{option.value === value && (
-											<CheckCircleIcon
-												secondaryOpacity={0}
-												size={20}
-												className="size-4"
-											/>
+											<UnreadIcon size={16} className="size-4" />
 										)}
 									</span>
 									{option.label}

@@ -1,7 +1,6 @@
 import {
 	ArrowRightUpIcon,
 	DangerCircleIcon,
-	DisketteIcon,
 	RefreshIcon,
 	TrashBin2Icon,
 } from "@solar-icons/react/linear";
@@ -457,7 +456,6 @@ function IntegrationRow({
 								disabled={busy}
 								className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 							>
-								<DisketteIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
 								{account ? "Update" : "Connect"}
 							</Button>
 						)

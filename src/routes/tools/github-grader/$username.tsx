@@ -1,4 +1,8 @@
-import { ArrowRightIcon, CheckCircleIcon, CloseCircleIcon } from "@solar-icons/react/linear";
+import {
+	ArrowRightIcon,
+	CloseCircleIcon,
+	UnreadIcon,
+} from "@solar-icons/react/linear";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
@@ -220,7 +224,7 @@ function GithubGraderResultPage() {
 							className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-4 border-b border-border py-5 sm:grid-cols-[1.5rem_minmax(0,1fr)_20rem]"
 						>
 							{check.passed ? (
-								<CheckCircleIcon size={18} className="text-brand" />
+								<UnreadIcon size={18} className="text-brand" />
 							) : (
 								<CloseCircleIcon size={18} className="text-muted-foreground" />
 							)}

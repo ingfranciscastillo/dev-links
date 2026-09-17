@@ -1,5 +1,4 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
-import { ArrowRightIcon } from "@solar-icons/react/linear";
+import { ArrowRightIcon, UnreadIcon } from "@solar-icons/react/linear";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { type FormEvent, useState } from "react";
@@ -122,7 +121,7 @@ export function Cta() {
 											transition={{ duration: 0.15, ease }}
 											className="shrink-0 text-brand"
 										>
-											<CheckCircleIcon size={16} secondaryOpacity={0} />
+											<UnreadIcon size={16} />
 										</motion.span>
 									)}
 								</AnimatePresence>

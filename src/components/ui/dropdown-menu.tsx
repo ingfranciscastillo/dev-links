@@ -1,5 +1,4 @@
-import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
-import { AltArrowRightIcon } from "@solar-icons/react/linear";
+import { AltArrowRightIcon, UnreadIcon } from "@solar-icons/react/linear";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 import type * as React from "react";
 
@@ -116,7 +115,7 @@ function DropdownMenuCheckboxItem({
 		>
 			<span className="absolute left-2 flex size-3.5 items-center justify-center">
 				<DropdownMenuPrimitive.ItemIndicator>
-					<CheckCircleIcon secondaryOpacity={0} size={20} className="size-4" />
+					<UnreadIcon size={16} className="size-4" />
 				</DropdownMenuPrimitive.ItemIndicator>
 			</span>
 			{children}

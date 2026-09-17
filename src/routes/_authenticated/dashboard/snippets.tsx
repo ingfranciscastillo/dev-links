@@ -7,10 +7,12 @@ import {
 } from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
+import posthog from "posthog-js";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
+import { LimitReachedModal } from "@/components/dashboard/LimitReachedModal";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { PageTitle } from "@/components/motion/PageTitle";
@@ -60,9 +62,19 @@ function SnippetsPage() {
 	const removeSnippet = useRemoveSnippet();
 	const [editing, setEditing] = useState<SnippetItem | "new" | null>(null);
 	const [removing, setRemoving] = useState<SnippetItem | null>(null);
+	const [showUpgrade, setShowUpgrade] = useState(false);
 
 	const isPro = core.data?.plan === "pro";
 	const atCap = !isPro && data.snippets.length >= PLAN_LIMITS.free.snippets;
+
+	function handleNewSnippet() {
+		if (atCap) {
+			posthog.capture("paywall_shown", { resource: "snippets" });
+			setShowUpgrade(true);
+			return;
+		}
+		setEditing("new");
+	}
 
 	return (
 		<>
@@ -86,12 +98,8 @@ function SnippetsPage() {
 					</div>
 
 					<Button
-						onClick={() => setEditing("new")}
-						disabled={atCap}
-						title={
-							atCap ? "Free plan limit reached — upgrade to Pro" : undefined
-						}
-						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground disabled:pointer-events-none disabled:opacity-50"
+						onClick={handleNewSnippet}
+						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
 						<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 						New snippet
@@ -202,6 +210,14 @@ function SnippetsPage() {
 					}}
 				/>
 			) : null}
+
+			{showUpgrade && (
+				<LimitReachedModal
+					resource="snippets"
+					limit={PLAN_LIMITS.free.snippets}
+					onClose={() => setShowUpgrade(false)}
+				/>
+			)}
 		</>
 	);
 }

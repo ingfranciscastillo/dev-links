@@ -8,10 +8,12 @@ import {
 } from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
+import posthog from "posthog-js";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { GithubIcon } from "#/components/brand-icons";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
+import { LimitReachedModal } from "@/components/dashboard/LimitReachedModal";
 import { ModalShell } from "@/components/dashboard/ModalShell";
 import { EmptyState } from "@/components/dashboard/SectionHeader";
 import { PageTitle } from "@/components/motion/PageTitle";
@@ -77,9 +79,19 @@ function ProjectsPage() {
 	const removeProject = useRemoveProject();
 	const [editing, setEditing] = useState<ProjectItem | "new" | null>(null);
 	const [removing, setRemoving] = useState<ProjectItem | null>(null);
+	const [showUpgrade, setShowUpgrade] = useState(false);
 
 	const isPro = core.data?.plan === "pro";
 	const atCap = !isPro && data.projects.length >= PLAN_LIMITS.free.projects;
+
+	function handleNewProject() {
+		if (atCap) {
+			posthog.capture("paywall_shown", { resource: "projects" });
+			setShowUpgrade(true);
+			return;
+		}
+		setEditing("new");
+	}
 
 	return (
 		<>
@@ -103,12 +115,8 @@ function ProjectsPage() {
 					</div>
 
 					<Button
-						onClick={() => setEditing("new")}
-						disabled={atCap}
-						title={
-							atCap ? "Free plan limit reached — upgrade to Pro" : undefined
-						}
-						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground disabled:pointer-events-none disabled:opacity-50"
+						onClick={handleNewProject}
+						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
 						<AddIcon className="h-3.5 w-3.5" strokeWidth={1.7} />
 						New project
@@ -229,6 +237,14 @@ function ProjectsPage() {
 					}}
 				/>
 			) : null}
+
+			{showUpgrade && (
+				<LimitReachedModal
+					resource="projects"
+					limit={PLAN_LIMITS.free.projects}
+					onClose={() => setShowUpgrade(false)}
+				/>
+			)}
 		</>
 	);
 }

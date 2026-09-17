@@ -141,6 +141,9 @@ function IntegrationReveal({ children }: { children: ReactNode }) {
 }
 
 export const Route = createFileRoute("/$username")({
+	validateSearch: (s: Record<string, unknown>): { ref?: string } => ({
+		ref: typeof s.ref === "string" ? s.ref.slice(0, 32) : undefined,
+	}),
 	loader: async ({ params }): Promise<LoaderData> => {
 		const username = params.username.toLowerCase();
 		const live = await getPublicProfile({ data: { username } });
@@ -234,6 +237,7 @@ function NotFoundBlock() {
 
 function ProfilePage() {
 	const { live, username } = Route.useLoaderData();
+	const { ref } = Route.useSearch();
 	const theme = live.data.theme;
 	const themed = Boolean(theme);
 	// "narrow" deja de ser el mismo grid de 2 columnas aplastado y pasa a ser
@@ -255,8 +259,8 @@ function ProfilePage() {
 	useEffect(() => {
 		if (isSessionPending || isOwner || trackedRef.current) return;
 		trackedRef.current = true;
-		trackView(username, `/${username}`);
-	}, [username, isOwner, isSessionPending]);
+		trackView(username, `/${username}`, ref);
+	}, [username, isOwner, isSessionPending, ref]);
 
 	const styleTag = theme ? themeToStyleTag(theme, ".tt-scope") : "";
 

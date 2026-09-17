@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "@/db/index";
 import { linkClicks, pageViews, profiles } from "@/db/schema";
 import { ensureSession } from "@/lib/auth.functions";
+import { knownSourceFromHostname } from "@/lib/analytics-parse.server";
 
 export type AnalyticsSummary = {
 	plan: string;
@@ -58,10 +59,16 @@ function pctChange(current: number, previous: number): number | null {
 	return Number((((current - previous) / previous) * 100).toFixed(1));
 }
 
-function sourceFromReferrer(ref: string | null): string {
+// `source` (set at insert time from the UA or an internal-nav tag) wins when
+// present — it's the only signal for in-app browsers that strip the
+// referrer entirely. Otherwise fall back to the referrer's hostname, mapped
+// to a known app name where the redirect domain gives it away.
+function resolveSource(source: string | null, ref: string | null): string {
+	if (source) return source;
 	if (!ref) return "direct";
 	try {
-		return new URL(ref).hostname.replace(/^www\./, "");
+		const hostname = new URL(ref).hostname.replace(/^www\./, "");
+		return knownSourceFromHostname(hostname) ?? hostname;
 	} catch {
 		return "other";
 	}
@@ -175,11 +182,12 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				db
 					.select({
 						referrer: pageViews.referrer,
+						source: pageViews.source,
 						visits: sql<number>`count(*)`.mapWith(Number),
 					})
 					.from(pageViews)
 					.where(VIEW_WHERE(userId, since))
-					.groupBy(pageViews.referrer)
+					.groupBy(pageViews.referrer, pageViews.source)
 					.orderBy(sql`count(*) desc`)
 					.limit(500),
 				db
@@ -230,11 +238,12 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 					.select({
 						title: topLinkExpr,
 						referrer: linkClicks.referrer,
+						source: linkClicks.source,
 						clicks: sql<number>`count(*)`.mapWith(Number),
 					})
 					.from(linkClicks)
 					.where(CLICK_WHERE(userId, since))
-					.groupBy(topLinkExpr, linkClicks.referrer)
+					.groupBy(topLinkExpr, linkClicks.referrer, linkClicks.source)
 					.orderBy(sql`count(*) desc`)
 					.limit(500),
 			]);
@@ -269,7 +278,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 			// Referrers: hostname desde grupos crudos.
 			const refMap = new Map<string, number>();
 			for (const r of referrerRows) {
-				const source = sourceFromReferrer(r.referrer);
+				const source = resolveSource(r.source, r.referrer);
 				refMap.set(source, (refMap.get(source) ?? 0) + r.visits);
 			}
 			const topReferrers = Array.from(refMap.entries())
@@ -280,7 +289,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 			// Combos link×fuente: misma resolución de hostname, agregados por par.
 			const linkSourceMap = new Map<string, number>();
 			for (const r of linkReferrerRows) {
-				const key = `${r.title}||${sourceFromReferrer(r.referrer)}`;
+				const key = `${r.title}||${resolveSource(r.source, r.referrer)}`;
 				linkSourceMap.set(key, (linkSourceMap.get(key) ?? 0) + r.clicks);
 			}
 			const topLinksBySource = Array.from(linkSourceMap.entries())

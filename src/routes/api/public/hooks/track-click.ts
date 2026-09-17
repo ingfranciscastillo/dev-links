@@ -5,6 +5,7 @@ import { user as userTable } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { linkClicks, profiles } from "@/db/schema";
 import {
+	detectInAppSource,
 	extractCountry,
 	extractIP,
 	hashIP,
@@ -43,6 +44,7 @@ export const Route = createFileRoute("/api/public/hooks/track-click")({
 
 				const ua = request.headers.get("user-agent") || "";
 				const parsed = parseUA(ua);
+				const source = detectInAppSource(ua);
 
 				try {
 					await db.insert(linkClicks).values({
@@ -57,6 +59,7 @@ export const Route = createFileRoute("/api/public/hooks/track-click")({
 						os: parsed.os,
 						country: extractCountry(request),
 						referrer: payload.referrer || null,
+						source: source || null,
 					});
 				} catch (err) {
 					console.warn("[track-click] insert failed:", err);

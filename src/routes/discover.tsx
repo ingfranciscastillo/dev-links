@@ -603,6 +603,7 @@ function ProfileRow({
 			<Link
 				to="/$username"
 				params={{ username: p.username }}
+				search={{ ref: "discover" }}
 				className="group grid gap-5 border-b border-border py-7 transition-colors hover:bg-surface sm:grid-cols-[4rem_minmax(0,1.4fr)_minmax(14rem,0.8fr)_auto] sm:items-center sm:px-3 sm:py-8"
 			>
 				<span className="font-mono text-[10px] tabular-nums text-muted-foreground">

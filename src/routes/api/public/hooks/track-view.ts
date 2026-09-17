@@ -5,6 +5,7 @@ import { user as userTable } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { pageViews, profiles } from "@/db/schema";
 import {
+	detectInAppSource,
 	extractCountry,
 	extractIP,
 	hashIP,
@@ -15,6 +16,9 @@ const bodySchema = z.object({
 	username: z.string().min(1).max(64),
 	path: z.string().max(512).optional().nullable(),
 	referrer: z.string().max(1024).optional().nullable(),
+	// Explicit internal-nav tag (e.g. "discover") — document.referrer doesn't
+	// update on client-side route transitions, so the origin page passes it.
+	source: z.string().max(32).optional().nullable(),
 });
 
 export const Route = createFileRoute("/api/public/hooks/track-view")({
@@ -41,6 +45,7 @@ export const Route = createFileRoute("/api/public/hooks/track-view")({
 
 				const ua = request.headers.get("user-agent") || "";
 				const parsed = parseUA(ua);
+				const source = payload.source || detectInAppSource(ua);
 
 				try {
 					await db.insert(pageViews).values({
@@ -52,6 +57,7 @@ export const Route = createFileRoute("/api/public/hooks/track-view")({
 						os: parsed.os,
 						country: extractCountry(request),
 						referrer: payload.referrer || null,
+						source: source || null,
 						path: payload.path || null,
 					});
 				} catch (err) {

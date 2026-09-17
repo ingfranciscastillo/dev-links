@@ -1,10 +1,11 @@
-export function trackView(username: string, path: string) {
+export function trackView(username: string, path: string, source?: string) {
 	if (typeof window === "undefined") return;
 	try {
 		const body = JSON.stringify({
 			username,
 			path,
 			referrer: document.referrer || null,
+			source: source || null,
 		});
 		fetch("/api/public/hooks/track-view", {
 			method: "POST",

@@ -393,6 +393,10 @@ export const pageViews = pgTable(
 		os: text("os"),
 		country: text("country"),
 		referrer: text("referrer"),
+		// In-app browser detected from the UA (instagram, whatsapp, x, tiktok,
+		// facebook, linkedin, snapchat) or an internal nav tag (e.g. "discover").
+		// Null when neither applies — falls back to referrer-hostname grouping.
+		source: text("source"),
 		path: text("path"),
 	},
 	(table) => [
@@ -433,6 +437,7 @@ export const linkClicks = pgTable(
 		os: text("os"),
 		country: text("country"),
 		referrer: text("referrer"),
+		source: text("source"),
 	},
 	(table) => [
 		index("link_clicks_profile_user_id_idx").on(table.profileUserId),

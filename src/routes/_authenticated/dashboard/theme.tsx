@@ -185,6 +185,7 @@ function ThemePage() {
 						theme={theme}
 						username={user.username ?? ""}
 						name={user.name}
+						image={user.image ?? null}
 						bio={bio}
 					/>
 				</div>
@@ -847,11 +848,13 @@ function ThemePreview({
 	theme,
 	username,
 	name,
+	image,
 	bio,
 }: {
 	theme: ThemeV2;
 	username: string;
 	name: string;
+	image: string | null;
 	bio: string;
 }) {
 	const styleTag = useMemo(
@@ -880,13 +883,21 @@ function ThemePreview({
 				>
 					<div className="flex items-center gap-3">
 						<div
-							className="grid h-14 w-14 shrink-0 place-items-center rounded-full font-semibold"
+							className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full font-semibold"
 							style={{
 								background: theme.accent,
 								color: theme.bg,
 							}}
 						>
-							{name.slice(0, 1).toUpperCase()}
+							{image ? (
+								<img
+									src={image}
+									alt=""
+									className="h-full w-full object-cover"
+								/>
+							) : (
+								name.slice(0, 1).toUpperCase()
+							)}
 						</div>
 
 						<div className="min-w-0">

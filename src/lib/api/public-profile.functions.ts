@@ -18,6 +18,7 @@ import type { Json } from "@/lib/api/integrations/account.functions";
 import { highlightSnippet } from "@/lib/highlight.server";
 import type { Provider } from "@/lib/integrations/types";
 import type { ProfileData, SnippetItem } from "@/lib/schemas";
+import type { SocialLinks } from "@/lib/social-links";
 import { parseThemeConfig } from "@/lib/theme-config";
 
 export type PublicIntegration = {
@@ -39,6 +40,7 @@ export type PublicProfile = {
 	country: string;
 	website: string;
 	calendarLink: string;
+	socialLinks: SocialLinks;
 	available: boolean;
 	data: Omit<ProfileData, "snippets"> & { snippets: PublicSnippet[] };
 	integrations: PublicIntegration[];
@@ -58,6 +60,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				country: profiles.country,
 				website: profiles.website,
 				calendarLink: profiles.calendarLink,
+				socialLinks: profiles.socialLinks,
 				available: profiles.available,
 				plan: profiles.plan,
 				username: authUserTable.username,
@@ -196,6 +199,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 			country: profile.country ?? "",
 			website: profile.website ?? "",
 			calendarLink: profile.calendarLink ?? "",
+			socialLinks: profile.socialLinks ?? {},
 			available: profile.available,
 			data: profileData,
 			// "linkedin" stays in the DB enum but isn't a valid Provider

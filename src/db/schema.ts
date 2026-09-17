@@ -78,6 +78,10 @@ export const profiles = pgTable(
 		location: text("location"),
 		website: text("website"),
 		calendarLink: text("calendar_link"),
+		socialLinks: jsonb("social_links")
+			.$type<Record<string, string>>()
+			.notNull()
+			.default({}),
 		plan: text("plan").notNull().default("free"),
 		country: text("country"),
 		available: boolean("available").notNull().default(false),

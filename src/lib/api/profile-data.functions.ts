@@ -18,6 +18,11 @@ import { ensureSession } from "@/lib/auth.functions";
 import { limitsFor } from "@/lib/plan-limits";
 import { defaultTheme, type ProfileData } from "@/lib/schemas";
 import {
+	SOCIAL_PLATFORM_KEYS,
+	type SocialLinks,
+	sanitizeSocialLinks,
+} from "@/lib/social-links";
+import {
 	parseThemeConfig,
 	type ThemeV2,
 	themeV2Schema,
@@ -203,6 +208,7 @@ export type ProfileCore = {
 	bio: string;
 	website: string;
 	calendarLink: string;
+	socialLinks: SocialLinks;
 	available: boolean;
 	discoverable: boolean;
 	country: string;
@@ -220,6 +226,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 				bio: profiles.bio,
 				website: profiles.website,
 				calendarLink: profiles.calendarLink,
+				socialLinks: profiles.socialLinks,
 				available: profiles.available,
 				discoverable: profiles.discoverable,
 				country: profiles.country,
@@ -235,6 +242,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 			bio: row?.bio ?? "",
 			website: row?.website ?? "",
 			calendarLink: row?.calendarLink ?? "",
+			socialLinks: row?.socialLinks ?? {},
 			available: row?.available ?? false,
 			discoverable: row?.discoverable ?? false,
 			country: row?.country ?? "",
@@ -252,6 +260,19 @@ const idInput = z.object({ id: z.string() });
 
 export const BIO_MAX_LENGTH = 160;
 
+// Username libre pegado por el usuario ("@handle", URL completa, con
+// espacios) — sanitizeSocialLinks se encarga de limpiarlo antes de guardar.
+const socialUsername = z.string().trim().max(80).optional().or(z.literal(""));
+
+const socialLinksInput = z
+	.object(
+		Object.fromEntries(
+			SOCIAL_PLATFORM_KEYS.map((key) => [key, socialUsername]),
+		) as Record<(typeof SOCIAL_PLATFORM_KEYS)[number], typeof socialUsername>,
+	)
+	.partial()
+	.default({});
+
 export const profileInput = z.object({
 	name: z.string().min(2).max(60),
 	username: z
@@ -262,6 +283,7 @@ export const profileInput = z.object({
 	bio: z.string().max(BIO_MAX_LENGTH).optional().or(z.literal("")),
 	website: z.string().url().optional().or(z.literal("")),
 	calendarLink: z.string().url().optional().or(z.literal("")),
+	socialLinks: socialLinksInput,
 });
 
 export const upsertMyProfile = createServerFn({ method: "POST" })
@@ -289,6 +311,7 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 						bio: data.bio || null,
 						website: data.website || null,
 						calendarLink: data.calendarLink || null,
+						socialLinks: sanitizeSocialLinks(data.socialLinks),
 					})
 					.onConflictDoUpdate({
 						target: profiles.id,
@@ -296,6 +319,7 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 							bio: data.bio || null,
 							website: data.website || null,
 							calendarLink: data.calendarLink || null,
+							socialLinks: sanitizeSocialLinks(data.socialLinks),
 							updatedAt: new Date(),
 						},
 					}),

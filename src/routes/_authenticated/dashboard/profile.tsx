@@ -5,13 +5,21 @@ import {
 	useRouteContext,
 	useRouter,
 } from "@tanstack/react-router";
-import { type ChangeEvent, type KeyboardEvent, useRef, useState } from "react";
+import { useReducedMotion } from "motion/react";
+import {
+	type ChangeEvent,
+	type KeyboardEvent,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import toast from "react-hot-toast";
 
 import {
 	UsernameField,
 	type UsernameStatus,
 } from "@/components/auth/UsernameField";
+import { SOCIAL_PLATFORM_ICONS } from "@/components/brand-icons";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,10 +51,73 @@ import {
 	useUploadAvatar,
 } from "@/lib/queries/profile-data";
 import { zodField } from "@/lib/schemas/field";
+import { SOCIAL_PLATFORMS } from "@/lib/social-links";
 import { TECHNOLOGY_SUGGESTIONS } from "@/lib/technologies";
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
+
+const BIO_PLACEHOLDER_PHRASES = [
+	"Full-stack engineer building developer tools...",
+	"Shipping side projects on nights and weekends...",
+	"Turning coffee into commits since 2018...",
+	"Open source maintainer, occasional blogger...",
+];
+
+const TYPE_MS = 35;
+const DELETE_MS = 20;
+const PAUSE_MS = 1600;
+
+// Placeholder animado tipo typewriter, cicla BIO_PLACEHOLDER_PHRASES mientras
+// el campo esté vacío. Vive encima del textarea (bg-transparent) y desaparece
+// en cuanto hay valor — el placeholder nativo no puede animarse.
+function AnimatedBioPlaceholder() {
+	const reduceMotion = useReducedMotion();
+	const [phraseIndex, setPhraseIndex] = useState(0);
+	const [text, setText] = useState("");
+	const [phase, setPhase] = useState<"typing" | "deleting">("typing");
+
+	useEffect(() => {
+		if (reduceMotion) {
+			setText(BIO_PLACEHOLDER_PHRASES[0]);
+			return;
+		}
+
+		const phrase = BIO_PLACEHOLDER_PHRASES[phraseIndex];
+
+		if (phase === "typing") {
+			if (text.length < phrase.length) {
+				const id = setTimeout(
+					() => setText(phrase.slice(0, text.length + 1)),
+					TYPE_MS,
+				);
+				return () => clearTimeout(id);
+			}
+			const id = setTimeout(() => setPhase("deleting"), PAUSE_MS);
+			return () => clearTimeout(id);
+		}
+
+		if (text.length > 0) {
+			const id = setTimeout(
+				() => setText(phrase.slice(0, text.length - 1)),
+				DELETE_MS,
+			);
+			return () => clearTimeout(id);
+		}
+		setPhraseIndex((i) => (i + 1) % BIO_PLACEHOLDER_PHRASES.length);
+		setPhase("typing");
+	}, [text, phase, phraseIndex, reduceMotion]);
+
+	return (
+		<p
+			aria-hidden="true"
+			className="pointer-events-none absolute inset-0 py-3 text-sm leading-relaxed text-muted-foreground"
+		>
+			{text}
+			<span className="animate-pulse">|</span>
+		</p>
+	);
+}
 
 const SENIORITY_UNSET = "none";
 
@@ -166,6 +237,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 			bio: core.bio,
 			website: core.website,
 			calendarLink: core.calendarLink,
+			socialLinks: core.socialLinks,
 		},
 		onSubmit: async ({ value }) => {
 			try {
@@ -376,17 +448,20 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 										</span>
 									</div>
 
-									<textarea
-										id={field.name}
-										name={field.name}
-										rows={4}
-										value={field.state.value ?? ""}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										placeholder="Full-stack engineer building developer tools..."
-										aria-invalid={invalid || undefined}
-										className="mt-2 flex w-full resize-y border-b border-border bg-transparent px-0 py-3 text-sm leading-relaxed placeholder:text-muted-foreground focus:border-brand focus:outline-none"
-									/>
+									<div className="relative mt-2">
+										{!field.state.value && <AnimatedBioPlaceholder />}
+
+										<textarea
+											id={field.name}
+											name={field.name}
+											rows={4}
+											value={field.state.value ?? ""}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+											aria-invalid={invalid || undefined}
+											className="relative flex w-full resize-y border-b border-border bg-transparent px-0 py-3 text-sm leading-relaxed focus:border-brand focus:outline-none"
+										/>
+									</div>
 
 									{invalid ? (
 										<FieldError>
@@ -486,6 +561,75 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 								);
 							}}
 						</form.Field>
+					</div>
+				</FieldGroup>
+			</section>
+
+			<section className="border-b border-border py-8">
+				<div className="mb-6">
+					<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+						Social links
+					</p>
+
+					<p className="mt-2 text-sm text-muted-foreground">
+						You only need to add your{" "}
+						<span className="text-foreground">username</span>.
+					</p>
+				</div>
+
+				<FieldGroup>
+					<div className="grid gap-6 sm:grid-cols-2">
+						{SOCIAL_PLATFORMS.map((platform) => {
+							const Icon = SOCIAL_PLATFORM_ICONS[platform.key];
+
+							return (
+								<form.Field
+									key={platform.key}
+									name={`socialLinks.${platform.key}`}
+								>
+									{(field) => (
+										<Field>
+											<FieldLabel
+												htmlFor={field.name}
+												className="font-mono text-[10px] uppercase tracking-[0.08em]"
+											>
+												{platform.label}
+											</FieldLabel>
+
+											<div className="mt-2 flex h-11 items-center gap-2 border-b border-border transition-colors focus-within:border-brand">
+												<Icon
+													size={14}
+													className="shrink-0 text-muted-foreground"
+												/>
+
+												{platform.prefix ? (
+													<span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+														{platform.prefix}
+													</span>
+												) : null}
+
+												<Input
+													id={field.name}
+													name={field.name}
+													value={field.state.value ?? ""}
+													onBlur={field.handleBlur}
+													onChange={(e) => field.handleChange(e.target.value)}
+													placeholder={platform.placeholder}
+													autoComplete="off"
+													className="h-full flex-1 rounded-none border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+												/>
+											</div>
+
+											{platform.helper ? (
+												<p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">
+													{platform.helper}
+												</p>
+											) : null}
+										</Field>
+									)}
+								</form.Field>
+							);
+						})}
 					</div>
 				</FieldGroup>
 			</section>

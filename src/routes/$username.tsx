@@ -14,6 +14,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { type ReactNode, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
+import { SOCIAL_PLATFORM_ICONS } from "@/components/brand-icons";
 import { BlueskyBlock } from "@/components/profile/BlueskyBlock";
 import { DevtoBlock } from "@/components/profile/DevtoBlock";
 import { DockerhubBlock } from "@/components/profile/DockerhubBlock";
@@ -66,6 +67,7 @@ import type {
 } from "@/lib/integrations/types";
 import type { ProfileData } from "@/lib/schemas";
 import { absoluteUrl } from "@/lib/site";
+import { SOCIAL_PLATFORMS, type SocialLinks } from "@/lib/social-links";
 import { themeToStyleTag } from "@/lib/theme-config";
 import { hueFromString } from "@/lib/user";
 
@@ -248,6 +250,7 @@ function ProfilePage() {
 					}
 					website={live.website}
 					calendarLink={live.calendarLink}
+					socialLinks={live.socialLinks}
 					available={live.available}
 					avatarHue={avatarHue}
 					themed={themed}
@@ -495,6 +498,7 @@ function ProfileSidebar({
 	location,
 	website,
 	calendarLink,
+	socialLinks,
 	available,
 	avatarHue,
 	themed,
@@ -507,6 +511,7 @@ function ProfileSidebar({
 	location: string;
 	website: string;
 	calendarLink: string;
+	socialLinks: SocialLinks;
 	available: boolean;
 	avatarHue: number;
 	themed: boolean;
@@ -628,6 +633,41 @@ function ProfileSidebar({
 						</li>
 					)}
 				</ul>
+
+				{SOCIAL_PLATFORMS.some((p) => socialLinks[p.key]) && (
+					<div
+						className={cx(
+							"mt-5 flex flex-wrap items-center gap-4",
+							stacked && "justify-center",
+						)}
+					>
+						{SOCIAL_PLATFORMS.filter((p) => socialLinks[p.key]).map(
+							(platform) => {
+								const Icon = SOCIAL_PLATFORM_ICONS[platform.key];
+								const username = socialLinks[platform.key];
+								if (!username) return null;
+
+								return (
+									<a
+										key={platform.key}
+										href={platform.buildUrl(username)}
+										aria-label={platform.label}
+										title={platform.label}
+										className={cx(
+											themed
+												? "opacity-70 hover:opacity-100"
+												: "text-muted-foreground hover:text-foreground",
+										)}
+										target="_blank"
+										rel="noreferrer"
+									>
+										<Icon size={16} />
+									</a>
+								);
+							},
+						)}
+					</div>
+				)}
 			</div>
 		</aside>
 	);

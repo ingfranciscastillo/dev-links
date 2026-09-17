@@ -42,6 +42,7 @@ import {
 	type SupportLinkItem,
 	type TalkItem,
 } from "@/lib/schemas";
+import type { SocialPlatformKey } from "@/lib/social-links";
 import type { ThemeV2 } from "@/lib/theme-config";
 
 export const profileDataKey = ["profile-data"] as const;
@@ -75,6 +76,7 @@ export function useUpdateProfile() {
 			location?: string;
 			website?: string;
 			calendarLink?: string;
+			socialLinks?: Partial<Record<SocialPlatformKey, string>>;
 		}) => {
 			const result = await upsertMyProfile({ data: input });
 

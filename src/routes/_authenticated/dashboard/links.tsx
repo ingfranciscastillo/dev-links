@@ -133,7 +133,7 @@ function LinksPage() {
 
 					<Button
 						onClick={handleNewLink}
-						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						<AddIcon className="h-3.5 w-3.5" strokeWidth={1.7} />
 						New link
@@ -150,7 +150,7 @@ function LinksPage() {
 						action={
 							<Button
 								onClick={() => setEditing("new")}
-								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 							>
 								<AddIcon className="h-3.5 w-3.5" strokeWidth={1.7} />
 								Add your first link
@@ -283,7 +283,9 @@ function LinkRow({
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
-		opacity: isDragging ? 0.55 : 1,
+		opacity: isDragging ? 0.85 : 1,
+		boxShadow: isDragging ? "0 8px 24px rgba(0,0,0,0.25)" : undefined,
+		zIndex: isDragging ? 10 : undefined,
 	};
 
 	const Icon = iconForUrl(link.url);
@@ -292,7 +294,7 @@ function LinkRow({
 		<li
 			ref={setNodeRef}
 			style={style}
-			className={`group grid grid-cols-[2.5rem_minmax(0,1fr)_3rem] items-center border-b border-border py-5 sm:grid-cols-[3rem_minmax(0,1fr)_12rem_3rem] ${
+			className={`group grid grid-cols-[2.5rem_minmax(0,1fr)_3rem] items-center border-b border-border bg-background py-5 transition-colors hover:bg-surface/60 sm:grid-cols-[3rem_minmax(0,1fr)_12rem_3rem] ${
 				link.active ? "" : "opacity-55"
 			}`}
 		>
@@ -300,7 +302,7 @@ function LinkRow({
 				type="button"
 				{...attributes}
 				{...listeners}
-				className="flex h-8 w-8 cursor-grab touch-none items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+				className="flex h-8 w-8 cursor-grab touch-none items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 active:cursor-grabbing hover:text-foreground"
 				aria-label="Drag to reorder"
 			>
 				<SortVerticalIcon className="h-4 w-4" strokeWidth={1.5} />
@@ -328,13 +330,15 @@ function LinkRow({
 
 			<div className="hidden sm:block">
 				<span
-					className={`inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.08em] ${
+					className={`inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.08em] transition-colors duration-300 ${
 						link.active ? "text-brand" : "text-muted-foreground"
 					}`}
 				>
 					<span
-						className={`h-1.5 w-1.5 rounded-full ${
-							link.active ? "bg-brand" : "border border-muted-foreground"
+						className={`h-1.5 w-1.5 rounded-full transition-[background-color,transform] duration-300 ${
+							link.active
+								? "scale-100 bg-brand"
+								: "scale-90 border border-muted-foreground"
 						}`}
 					/>
 					{link.active ? "Visible" : "Hidden"}
@@ -346,7 +350,7 @@ function LinkRow({
 					<DropdownMenuTrigger asChild>
 						<button
 							type="button"
-							className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+							className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground"
 							aria-label={`${link.title} actions`}
 						>
 							<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
@@ -427,7 +431,7 @@ function LinkDialog({
 						type="submit"
 						form="link-dialog-form"
 						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						{pending ? "Saving..." : initial ? "Save link" : "Create link"}
 					</Button>

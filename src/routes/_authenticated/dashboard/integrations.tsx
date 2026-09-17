@@ -333,7 +333,7 @@ function IntegrationRow({
 	}
 
 	return (
-		<article className="border-b border-border py-7 sm:py-8">
+		<article className="border-b border-border py-7 transition-colors hover:bg-surface/60 sm:py-8">
 			<div className="grid min-w-0 gap-7 lg:grid-cols-[minmax(11rem,15rem)_minmax(0,1fr)_auto] lg:items-start lg:gap-10">
 				{/* Provider */}
 				<div className="min-w-0">
@@ -446,7 +446,7 @@ function IntegrationRow({
 					{help.oauth && !account ? (
 						<a
 							href={`/api/integrations/${provider}/authorize`}
-							className="inline-flex h-9 items-center rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none transition-colors hover:bg-brand hover:text-brand-foreground"
+							className="inline-flex h-9 items-center rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none transition-[color,transform] active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 						>
 							Connect
 						</a>
@@ -455,7 +455,7 @@ function IntegrationRow({
 							<Button
 								onClick={handleSave}
 								disabled={busy}
-								className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+								className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 							>
 								<DisketteIcon className="h-3.5 w-3.5" strokeWidth={1.5} />
 								{account ? "Update" : "Connect"}
@@ -467,7 +467,7 @@ function IntegrationRow({
 						onClick={handleSync}
 						disabled={busy || !account}
 						variant="outline"
-						className="h-9 rounded-none border-border px-3 font-mono text-[9px] uppercase tracking-[0.08em]"
+						className="h-9 rounded-none border-border px-3 font-mono text-[9px] uppercase tracking-[0.08em] transition-transform active:scale-[0.98]"
 					>
 						<RefreshIcon
 							className={
@@ -485,7 +485,7 @@ function IntegrationRow({
 							type="button"
 							onClick={() => setConfirmingDelete(true)}
 							disabled={busy}
-							className="inline-flex h-9 w-9 items-center justify-center text-muted-foreground transition-colors hover:text-destructive disabled:opacity-50"
+							className="inline-flex h-9 w-9 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-destructive disabled:opacity-50"
 							title="Disconnect"
 							aria-label={`Disconnect ${PROVIDER_LABEL[provider]}`}
 						>

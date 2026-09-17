@@ -216,7 +216,7 @@ function Group({
 
 				<Button
 					onClick={onAdd}
-					className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+					className="h-9 rounded-none bg-foreground px-3 font-mono text-[9px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 				>
 					<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 					{addLabel}
@@ -234,7 +234,7 @@ function Group({
 					{items.map((link) => (
 						<li
 							key={link.id}
-							className="flex items-center gap-4 border-t border-border py-4"
+							className="flex items-center gap-4 border-t border-border py-4 transition-colors hover:bg-surface/60"
 						>
 							<div className="min-w-0 flex-1">
 								<p className="truncate text-sm font-medium text-foreground">
@@ -251,7 +251,7 @@ function Group({
 								<button
 									type="button"
 									onClick={() => onEdit(link)}
-									className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+									className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground"
 									title="Edit"
 									aria-label={`Edit ${link.label || link.platform}`}
 								>
@@ -261,7 +261,7 @@ function Group({
 								<button
 									type="button"
 									onClick={() => onRemove(link)}
-									className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-destructive"
+									className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-destructive"
 									title="Delete"
 									aria-label={`Delete ${link.label || link.platform}`}
 								>
@@ -334,7 +334,7 @@ function SupportDialog({
 						type="submit"
 						form="support-dialog-form"
 						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						{pending ? "Saving..." : initial ? "Save link" : "Add link"}
 					</Button>

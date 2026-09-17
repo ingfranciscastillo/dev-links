@@ -66,20 +66,38 @@ function DashboardHome() {
 	const activeLinks = data.links.filter((link) => link.active).length;
 	const totals = analytics.data ?? { views: 0, clicks: 0 };
 
-	const checklist: Array<[string, boolean, (() => void)?]> = [
-		["Create your account", true],
-		["Add a bio and avatar", Boolean(core.data?.bio) && Boolean(user.image)],
-		[
-			"Connect GitHub",
-			integrations.data?.some((a) => a.provider === "github") ?? false,
-		],
-		["Add your first link", data.links.length > 0],
-		["Share your page", hasShared, share],
+	const checklist: Array<{
+		label: string;
+		done: boolean;
+		to?: string;
+		action?: () => void;
+	}> = [
+		{ label: "Create your account", done: true },
+		{
+			label: "Add a bio and avatar",
+			done: Boolean(core.data?.bio) && Boolean(user.image),
+			to: "/dashboard/profile",
+		},
+		{
+			label: "Connect GitHub",
+			done: integrations.data?.some((a) => a.provider === "github") ?? false,
+			to: "/dashboard/integrations",
+		},
+		{
+			label: "Add your first link",
+			done: data.links.length > 0,
+			to: "/dashboard/links",
+		},
+		{ label: "Share your page", done: hasShared, action: share },
 		// Exposure loop: every place this link lives is a passive ad — the
 		// GitHub bio specifically because it's already the profile devs check
 		// each other's work through. Self-reported (like "Share your page"),
 		// no way to verify without re-scraping their GitHub profile.
-		["Add your link to your GitHub bio", hasLinkedBio, addLinkToGithubBio],
+		{
+			label: "Add your link to your GitHub bio",
+			done: hasLinkedBio,
+			action: addLinkToGithubBio,
+		},
 	];
 
 	const stats = [
@@ -300,7 +318,7 @@ function DashboardHome() {
 					</h2>
 
 					<ul className="mt-6 border-t border-border">
-						{checklist.map(([label, done, action], index) => (
+						{checklist.map(({ label, done, to, action }, index) => (
 							<li
 								key={label}
 								className="flex items-center gap-3 border-b border-border py-4"
@@ -328,6 +346,15 @@ function DashboardHome() {
 								>
 									{label}
 								</span>
+
+								{!done && to && (
+									<Link
+										to={to}
+										className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-brand transition-colors hover:text-foreground"
+									>
+										Do it →
+									</Link>
+								)}
 
 								{!done && action && (
 									<button

@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
 	Select,
 	SelectContent,
@@ -831,7 +832,8 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						Location
 					</Label>
 
-					<Select
+					<SearchableSelect
+						id="location-select"
 						value={disc.country || COUNTRY_UNSET}
 						onValueChange={(value) =>
 							setDisc({
@@ -839,23 +841,14 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 								country: value === COUNTRY_UNSET ? "" : value,
 							})
 						}
-					>
-						<SelectTrigger
-							id="location-select"
-							className="mt-2 h-11 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
-						>
-							<SelectValue />
-						</SelectTrigger>
-
-						<SelectContent>
-							<SelectItem value={COUNTRY_UNSET}>Not specified</SelectItem>
-							{COUNTRIES.map((c) => (
-								<SelectItem key={c.code} value={c.code}>
-									{c.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+						options={[
+							{ value: COUNTRY_UNSET, label: "Not specified" },
+							...COUNTRIES.map((c) => ({ value: c.code, label: c.name })),
+						]}
+						searchPlaceholder="Search countries…"
+						emptyText="No country found."
+						className="mt-2 h-11 border-b border-border focus-visible:border-brand"
+					/>
 				</div>
 
 				<div>
@@ -866,7 +859,8 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						Primary language
 					</Label>
 
-					<Select
+					<SearchableSelect
+						id="primary-language-select"
 						value={disc.primaryLanguage || LANGUAGE_UNSET}
 						onValueChange={(value) =>
 							setDisc({
@@ -874,23 +868,14 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 								primaryLanguage: value === LANGUAGE_UNSET ? "" : value,
 							})
 						}
-					>
-						<SelectTrigger
-							id="primary-language-select"
-							className="mt-2 h-11 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus:ring-0"
-						>
-							<SelectValue />
-						</SelectTrigger>
-
-						<SelectContent>
-							<SelectItem value={LANGUAGE_UNSET}>Not specified</SelectItem>
-							{languageOptions.map((lang) => (
-								<SelectItem key={lang} value={lang}>
-									{lang}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+						options={[
+							{ value: LANGUAGE_UNSET, label: "Not specified" },
+							...languageOptions.map((lang) => ({ value: lang, label: lang })),
+						]}
+						searchPlaceholder="Search languages…"
+						emptyText="No language found."
+						className="mt-2 h-11 border-b border-border focus-visible:border-brand"
+					/>
 				</div>
 
 				<div>

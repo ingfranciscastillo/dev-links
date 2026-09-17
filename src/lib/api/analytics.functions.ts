@@ -22,6 +22,7 @@ export type AnalyticsSummary = {
 		uniqueVisitors: number | null;
 	};
 	daily: Array<{ date: string; views: number; clicks: number }>;
+	visitorBreakdown: { new: number; returning: number };
 	devices: Array<{ name: string; value: number }>;
 	browsers: Array<{ name: string; value: number }>;
 	os: Array<{ name: string; value: number }>;
@@ -85,6 +86,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				previousVisitorRows,
 				[previousViewsRow],
 				[previousClicksRow],
+				visitorDayRows,
 			] = await Promise.all([
 				db
 					.select({ plan: profiles.plan })
@@ -199,6 +201,18 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 					.select({ count: sql<number>`count(*)`.mapWith(Number) })
 					.from(linkClicks)
 					.where(CLICK_WHERE_BETWEEN(userId, previousSince, since)),
+				// ipHash rotates weekly (see analytics-parse.server.ts), so "returning"
+				// here only catches visitors seen on 2+ distinct days inside the same
+				// ISO week — a real repeat visitor crossing a week boundary still
+				// looks new. Honest floor on "returning", not an exact count.
+				db
+					.select({
+						ipHash: pageViews.ipHash,
+						days: sql<number>`count(distinct ${dayExpr})`.mapWith(Number),
+					})
+					.from(pageViews)
+					.where(VIEW_WHERE(userId, since))
+					.groupBy(pageViews.ipHash),
 			]);
 
 			const plan = profileRow[0]?.plan ?? "free";
@@ -261,6 +275,12 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				? Number(((previousClicks / previousViews) * 100).toFixed(1))
 				: 0;
 
+			const returning = visitorDayRows.filter((r) => r.days > 1).length;
+			const visitorBreakdown = {
+				new: Math.max(visitorDayRows.length - returning, 0),
+				returning,
+			};
+
 			return {
 				plan,
 				totals: {
@@ -279,6 +299,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 					date,
 					...x,
 				})),
+				visitorBreakdown,
 				devices: deviceRows,
 				browsers: browserRows,
 				os: osRows,
@@ -294,6 +315,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				totals: { views: 0, clicks: 0, ctr: 0, uniqueVisitors: 0 },
 				changes: { views: null, clicks: null, ctr: null, uniqueVisitors: null },
 				daily: [],
+				visitorBreakdown: { new: 0, returning: 0 },
 				devices: [],
 				browsers: [],
 				os: [],

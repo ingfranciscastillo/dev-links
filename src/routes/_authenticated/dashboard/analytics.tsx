@@ -199,6 +199,7 @@ function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 		hourly,
 		topLinks,
 		topReferrers,
+		visitorBreakdown,
 	} = data;
 
 	const isEmpty = totals.views === 0 && totals.clicks === 0;
@@ -432,6 +433,20 @@ function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 					/>
 				</DataSection>
 			</div>
+
+			<DataSection
+				number="09"
+				title="Visitor loyalty"
+				description="New visitors vs. people coming back to your page."
+				className="mt-10"
+			>
+				<PieRow
+					data={[
+						{ name: "New", value: visitorBreakdown.new },
+						{ name: "Returning", value: visitorBreakdown.returning },
+					]}
+				/>
+			</DataSection>
 		</div>
 	);
 }

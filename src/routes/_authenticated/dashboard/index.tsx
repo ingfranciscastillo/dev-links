@@ -10,6 +10,7 @@ import {
 	ShareIcon,
 } from "@solar-icons/react/linear";
 import { createFileRoute, Link, useRouteContext } from "@tanstack/react-router";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -41,10 +42,12 @@ function DashboardHome() {
 	const core = useProfileCore();
 	const analytics = useAnalyticsSummary(7);
 	const integrations = useIntegrationAccounts();
+	const reduceMotion = useReducedMotion();
 
 	const [hasShared, setHasShared] = useState(false);
 	const [hasLinkedBio, setHasLinkedBio] = useState(false);
 	const [checklistDismissed, setChecklistDismissed] = useState(false);
+	const [justShared, setJustShared] = useState(false);
 
 	useEffect(() => {
 		try {
@@ -131,18 +134,21 @@ function DashboardHome() {
 			value: totals.views.toLocaleString(),
 			meta: "Last 7 days",
 			icon: EyeIcon,
+			loading: analytics.isLoading,
 		},
 		{
 			label: "Total clicks",
 			value: totals.clicks.toLocaleString(),
 			meta: "Last 7 days",
 			icon: CursorIcon,
+			loading: analytics.isLoading,
 		},
 		{
 			label: "Active links",
 			value: activeLinks.toString(),
 			meta: `of ${data.links.length}`,
 			icon: LinkIcon,
+			loading: false,
 		},
 	];
 
@@ -158,6 +164,8 @@ function DashboardHome() {
 				// Private browsing / storage disabled — non-critical, skip.
 			}
 			setHasShared(true);
+			setJustShared(true);
+			setTimeout(() => setJustShared(false), 2000);
 			posthog.capture("checklist_item_completed", { item: "share_page" });
 		} catch {
 			toast.error("Couldn't copy");
@@ -205,10 +213,29 @@ function DashboardHome() {
 				<button
 					type="button"
 					onClick={share}
-					className="group inline-flex w-fit items-center gap-2 border border-foreground px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground transition-colors hover:border-brand hover:text-brand"
+					className={`group inline-flex w-fit items-center gap-2 border px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.08em] transition-[color,border-color,transform] active:scale-[0.97] ${
+						justShared
+							? "border-brand text-brand"
+							: "border-foreground text-foreground hover:border-brand hover:text-brand"
+					}`}
 				>
-					<ShareIcon className="h-3.5 w-3.5" />
-					Share my page
+					<AnimatePresence mode="wait" initial={false}>
+						<motion.span
+							key={justShared ? "copied" : "share"}
+							initial={reduceMotion ? false : { opacity: 0, y: -4 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: 4 }}
+							transition={{ duration: 0.15 }}
+							className="inline-flex items-center gap-2"
+						>
+							{justShared ? (
+								<CheckCircleIcon secondaryOpacity={0} size={15} />
+							) : (
+								<ShareIcon className="h-3.5 w-3.5" />
+							)}
+							{justShared ? "Copied" : "Share my page"}
+						</motion.span>
+					</AnimatePresence>
 				</button>
 			</header>
 
@@ -233,9 +260,13 @@ function DashboardHome() {
 									</p>
 								</div>
 
-								<p className="mt-4 font-display text-4xl tracking-[-0.03em]">
-									{stat.value}
-								</p>
+								{stat.loading ? (
+									<div className="mt-4 h-9 w-16 animate-pulse bg-surface" />
+								) : (
+									<p className="mt-4 font-display text-4xl tracking-[-0.03em]">
+										{stat.value}
+									</p>
+								)}
 
 								<p className="mt-1 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
 									{stat.meta}
@@ -366,8 +397,15 @@ function DashboardHome() {
 
 						<ul className="mt-6 border-t border-border">
 							{checklist.map(({ label, done, to, action }, index) => (
-								<li
+								<motion.li
 									key={label}
+									initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{
+										duration: reduceMotion ? 0.01 : 0.3,
+										delay: reduceMotion ? 0 : index * 0.04,
+										ease: [0.16, 1, 0.3, 1],
+									}}
 									className="flex items-center gap-3 border-b border-border py-4"
 								>
 									<span
@@ -412,7 +450,7 @@ function DashboardHome() {
 											Do it →
 										</button>
 									)}
-								</li>
+								</motion.li>
 							))}
 						</ul>
 					</section>
@@ -439,7 +477,7 @@ function MiniStat({
 	return (
 		<Link
 			to={to}
-			className="group flex items-center justify-between border-b border-border py-5 transition-colors hover:text-brand sm:border-b-0 sm:px-6 first:sm:pl-0 last:sm:pr-0"
+			className="group flex items-center justify-between border-b border-border py-5 transition-colors hover:bg-surface/60 hover:text-brand sm:border-b-0 sm:px-6 first:sm:pl-0 last:sm:pr-0"
 		>
 			<div className="flex items-center gap-3 text-sm text-muted-foreground">
 				<Icon className="h-4 w-4" strokeWidth={1.7} />

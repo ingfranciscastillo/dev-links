@@ -52,7 +52,11 @@ export function SearchableSelect({
 					type="button"
 					id={id}
 					className={cn(
-						"flex w-full items-center justify-between gap-2 text-sm outline-none",
+						// border-b acá porque "border-b-*" (color) por sí solo no pone
+						// ancho — sin esto, un caller que solo pase border-b-border se
+						// queda con un borde invisible de 0px (así pasó con Location y
+						// Primary language).
+						"flex w-full items-center justify-between gap-2 border-b border-transparent text-sm outline-none",
 						!selected && "text-muted-foreground",
 						className,
 					)}

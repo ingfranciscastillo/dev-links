@@ -1,6 +1,6 @@
 import {
 	Buildings2Icon,
-	GlobeIcon,
+	GlobalIcon,
 	MapPointIcon,
 	StarIcon,
 } from "@solar-icons/react/linear";
@@ -175,7 +175,7 @@ export function ProfilePreview() {
 						</div>
 
 						<div className="flex items-center gap-2 text-xs text-muted-foreground">
-							<GlobeIcon size={14} />
+							<GlobalIcon size={14} />
 							<span>francis.dev</span>
 						</div>
 					</motion.div>

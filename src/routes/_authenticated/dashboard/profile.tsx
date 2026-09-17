@@ -847,7 +847,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						]}
 						searchPlaceholder="Search countries…"
 						emptyText="No country found."
-						className="mt-2 h-11 border-b border-border focus-visible:border-brand"
+						className="mt-2 h-11 w-full rounded-none border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 					/>
 				</div>
 
@@ -874,7 +874,7 @@ function DiscoveryForm({ core }: { core: ProfileCore }) {
 						]}
 						searchPlaceholder="Search languages…"
 						emptyText="No language found."
-						className="mt-2 h-11 border-b border-border focus-visible:border-brand"
+						className="mt-2 h-11 w-full rounded-none border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
 					/>
 				</div>
 

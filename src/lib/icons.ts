@@ -66,9 +66,9 @@ import {
 	SiYcombinator,
 	SiYoutube,
 } from "@icons-pack/react-simple-icons";
-import { GlobeIcon, LetterIcon } from "@solar-icons/react/linear";
+import { GlobalIcon, LetterIcon } from "@solar-icons/react/linear";
 
-type IconType = SimpleIconType | typeof GlobeIcon | typeof LetterIcon;
+type IconType = SimpleIconType | typeof GlobalIcon | typeof LetterIcon;
 
 const map: { pattern: RegExp; icon: IconType }[] = [
 	// Code hosting
@@ -159,7 +159,7 @@ const map: { pattern: RegExp; icon: IconType }[] = [
 
 export function iconForUrl(url: string): IconType {
 	for (const m of map) if (m.pattern.test(url)) return m.icon;
-	return GlobeIcon;
+	return GlobalIcon;
 }
 
 export function domainOf(url: string): string {

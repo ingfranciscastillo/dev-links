@@ -1,3 +1,4 @@
+import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import { useForm } from "@tanstack/react-form";
 import {
 	createFileRoute,
@@ -5,6 +6,7 @@ import {
 	redirect,
 	useNavigate,
 } from "@tanstack/react-router";
+import { AnimatePresence, motion } from "motion/react";
 
 import { AuthShell, OAuthRow } from "@/components/auth/authShell";
 import { Button } from "@/components/ui/button";
@@ -21,6 +23,7 @@ import {
 	InputGroupInput,
 } from "@/components/ui/input-group";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useUsernameAvailability } from "@/hooks/use-username-availability";
 import { getSession } from "@/lib/auth.functions";
 import { useSignUp } from "@/lib/queries/use-sign-up";
 import {
@@ -30,6 +33,12 @@ import {
 	usernameSchema,
 } from "@/lib/schemas/auth";
 import { zodField } from "@/lib/schemas/field";
+import { cn } from "@/lib/utils";
+
+// Mismo token de easing que el CTA del landing y el modal de claim del
+// watermark — mismo feedback de disponibilidad, misma sensación en todos
+// lados donde se elige un username.
+const ease = [0.16, 1, 0.3, 1] as const;
 
 export const Route = createFileRoute("/signup")({
 	validateSearch: (s: Record<string, unknown>) => ({
@@ -144,41 +153,15 @@ function SignupPage() {
 								field.state.meta.errors.length > 0;
 
 							return (
-								<Field data-invalid={invalid}>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										Username
-									</FieldLabel>
-
-									<InputGroup className="mt-2 rounded-none border-x-0 border-t-0 border-b-border bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-brand has-[[data-slot=input-group-control]:focus-visible]:ring-0">
-										<InputGroupAddon className="pl-0">
-											<span className="font-mono text-[11px] text-muted-foreground">
-												devlinks.com/
-											</span>
-										</InputGroupAddon>
-
-										<InputGroupInput
-											id={field.name}
-											name={field.name}
-											value={field.state.value}
-											onBlur={field.handleBlur}
-											onChange={(e) =>
-												field.handleChange(e.target.value.toLowerCase())
-											}
-											placeholder="ada"
-											aria-invalid={invalid || undefined}
-											className="h-11 rounded-none bg-transparent px-1 shadow-none focus-visible:ring-0"
-										/>
-									</InputGroup>
-
-									{invalid ? (
-										<FieldError>
-											{field.state.meta.errors.join(", ")}
-										</FieldError>
-									) : null}
-								</Field>
+								<SignupUsernameField
+									id={field.name}
+									name={field.name}
+									value={field.state.value}
+									invalid={invalid}
+									errors={field.state.meta.errors}
+									onChange={(value) => field.handleChange(value)}
+									onBlur={field.handleBlur}
+								/>
 							);
 						}}
 					</form.Field>
@@ -301,5 +284,96 @@ function SignupPage() {
 				</Link>
 			</p>
 		</AuthShell>
+	);
+}
+
+function SignupUsernameField({
+	id,
+	name,
+	value,
+	invalid,
+	errors,
+	onChange,
+	onBlur,
+}: {
+	id: string;
+	name: string;
+	value: string;
+	invalid: boolean;
+	errors: unknown[];
+	onChange: (value: string) => void;
+	onBlur: () => void;
+}) {
+	const status = useUsernameAvailability(value);
+
+	return (
+		<Field data-invalid={invalid}>
+			<FieldLabel
+				htmlFor={id}
+				className="font-mono text-[10px] uppercase tracking-[0.08em]"
+			>
+				Username
+			</FieldLabel>
+
+			<motion.div
+				animate={status === "taken" ? { x: [0, -3, 3, 0] } : { x: 0 }}
+				transition={{ duration: 0.2, ease }}
+			>
+				<InputGroup className="mt-2 rounded-none border-x-0 border-t-0 border-b-border bg-transparent shadow-none has-[[data-slot=input-group-control]:focus-visible]:border-brand has-[[data-slot=input-group-control]:focus-visible]:ring-0">
+					<InputGroupAddon className="pl-0">
+						<span className="font-mono text-[11px] text-muted-foreground">
+							devlinks.com/
+						</span>
+					</InputGroupAddon>
+
+					<InputGroupInput
+						id={id}
+						name={name}
+						value={value}
+						onBlur={onBlur}
+						onChange={(e) => onChange(e.target.value.toLowerCase())}
+						placeholder="ada"
+						aria-invalid={invalid || undefined}
+						className="h-11 rounded-none bg-transparent px-1 shadow-none focus-visible:ring-0"
+					/>
+
+					<AnimatePresence>
+						{status === "available" && (
+							<InputGroupAddon align="inline-end">
+								<motion.span
+									initial={{ opacity: 0, scale: 0.9 }}
+									animate={{ opacity: 1, scale: 1 }}
+									exit={{ opacity: 0, scale: 0.9 }}
+									transition={{ duration: 0.15, ease }}
+									className="text-brand"
+								>
+									<CheckCircleIcon size={16} secondaryOpacity={0} />
+								</motion.span>
+							</InputGroupAddon>
+						)}
+					</AnimatePresence>
+				</InputGroup>
+			</motion.div>
+
+			{invalid ? (
+				<FieldError>{errors.join(", ")}</FieldError>
+			) : status === "checking" || status === "taken" ? (
+				<AnimatePresence mode="wait">
+					<motion.p
+						key={status}
+						initial={{ opacity: 0, y: -4 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: 4 }}
+						transition={{ duration: 0.15, ease }}
+						className={cn(
+							"mt-2 font-mono text-[9px] uppercase tracking-[0.08em]",
+							status === "taken" ? "text-destructive" : "text-muted-foreground",
+						)}
+					>
+						{status === "taken" ? "Already taken" : "Checking…"}
+					</motion.p>
+				</AnimatePresence>
+			) : null}
+		</Field>
 	);
 }

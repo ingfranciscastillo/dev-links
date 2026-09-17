@@ -1,3 +1,4 @@
+import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import {
 	ArrowRightIcon,
 	ArrowRightUpIcon,
@@ -10,11 +11,24 @@ import {
 	NotesIcon,
 	ShareIcon,
 } from "@solar-icons/react/linear";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { motion, useReducedMotion } from "motion/react";
-import { type ReactNode, useEffect, useRef } from "react";
+import {
+	createFileRoute,
+	Link,
+	notFound,
+	useNavigate,
+} from "@tanstack/react-router";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import posthog from "posthog-js";
+import {
+	type FormEvent,
+	type ReactNode,
+	useEffect,
+	useRef,
+	useState,
+} from "react";
 import toast from "react-hot-toast";
 import { SOCIAL_PLATFORM_ICONS } from "@/components/brand-icons";
+import { ModalShell } from "@/components/dashboard/ModalShell";
 import { BlueskyBlock } from "@/components/profile/BlueskyBlock";
 import { DevtoBlock } from "@/components/profile/DevtoBlock";
 import { DockerhubBlock } from "@/components/profile/DockerhubBlock";
@@ -37,6 +51,10 @@ import { TalksBlock } from "@/components/profile/TalksBlock";
 import { WakatimeBlock } from "@/components/profile/WakatimeBlock";
 import { YoutubeBlock } from "@/components/profile/YoutubeBlock";
 import { ThemeToggle } from "@/components/site/ThemeToggle";
+import {
+	type UsernameAvailability,
+	useUsernameAvailability,
+} from "@/hooks/use-username-availability";
 import { trackClick, trackView } from "@/lib/analytics-track";
 import {
 	getPublicProfile,
@@ -306,7 +324,15 @@ function ProfilePage() {
 						</RevealSection>
 					)}
 
-					{live.plan !== "pro" && <Watermark themed={themed} />}
+					{live.plan !== "pro" && (
+						<RevealSection>
+							<Watermark
+								themed={themed}
+								username={username}
+								isOwner={isOwner}
+							/>
+						</RevealSection>
+					)}
 				</div>
 			</main>
 		</div>
@@ -949,25 +975,175 @@ function ArticlesSection({
 	);
 }
 
-function Watermark({ themed }: { themed?: boolean }) {
+const CLAIM_STATUS_COPY: Record<UsernameAvailability, string | null> = {
+	idle: null,
+	invalid: "At least 3 characters, a-z 0-9 _ -",
+	checking: "Checking…",
+	available: "Available",
+	taken: "Already taken",
+};
+
+function Watermark({
+	themed,
+	username,
+	isOwner,
+}: {
+	themed?: boolean;
+	username: string;
+	isOwner: boolean;
+}) {
+	const reduceMotion = useReducedMotion();
+	const [open, setOpen] = useState(false);
+
 	return (
-		<p
-			className={cx(
-				"pt-4 text-center text-xs",
-				themed ? "tt-muted" : "text-muted-foreground",
-			)}
-		>
-			Made with{" "}
-			<Link
-				to="/"
+		<>
+			<p
 				className={cx(
-					"font-medium hover:underline",
-					themed ? undefined : "text-foreground",
+					"pt-4 text-center text-xs",
+					themed ? "tt-muted" : "text-muted-foreground",
 				)}
-				style={themed ? { color: "var(--tt-fg)" } : undefined}
 			>
-				DevLinks
-			</Link>
-		</p>
+				<motion.button
+					type="button"
+					whileHover={reduceMotion ? undefined : { scale: 1.03 }}
+					whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+					transition={{ duration: 0.15, ease: sectionEase }}
+					onClick={() => {
+						if (!isOwner) {
+							posthog.capture("watermark_click", { source_username: username });
+						}
+						setOpen(true);
+					}}
+					className={cx(
+						"inline-block font-medium hover:underline",
+						themed ? undefined : "text-foreground",
+					)}
+					style={themed ? { color: "var(--tt-fg)" } : undefined}
+				>
+					Made with DevLinks — make yours free
+				</motion.button>
+			</p>
+
+			{open && (
+				<ClaimUsernameModal
+					sourceUsername={username}
+					onClose={() => setOpen(false)}
+				/>
+			)}
+		</>
+	);
+}
+
+// Mismo flujo de claim que el CTA del landing (src/components/landing/cta.tsx)
+// — check de disponibilidad debounced contra el mismo endpoint — pero
+// disparado desde el watermark en vez de requerir navegar a "/" primero.
+function ClaimUsernameModal({
+	sourceUsername,
+	onClose,
+}: {
+	sourceUsername: string;
+	onClose: () => void;
+}) {
+	const navigate = useNavigate();
+	const [value, setValue] = useState("");
+	const status = useUsernameAvailability(value);
+
+	function handleSubmit(event: FormEvent) {
+		event.preventDefault();
+		const trimmed = value.trim().toLowerCase();
+		posthog.capture("watermark_claim_submitted", {
+			source_username: sourceUsername,
+			claimed_username: trimmed,
+			status,
+		});
+		navigate({ to: "/signup", search: { username: trimmed || undefined } });
+	}
+
+	return (
+		<ModalShell title="Your address is waiting." onClose={onClose}>
+			<p className="text-sm leading-relaxed text-muted-foreground">
+				Sign up in 30 seconds. Connect your services. Share one profile
+				everywhere.
+			</p>
+
+			<form onSubmit={handleSubmit} className="mt-6">
+				<label htmlFor="claim-username" className="sr-only">
+					Your username
+				</label>
+
+				<motion.div
+					animate={status === "taken" ? { x: [0, -3, 3, 0] } : { x: 0 }}
+					transition={{ duration: 0.2, ease: sectionEase }}
+					className={cx(
+						"flex items-center border-b pb-2 transition-colors focus-within:border-brand",
+						status === "taken" ? "border-destructive" : "border-foreground",
+					)}
+				>
+					<span className="shrink-0 font-mono text-[12px] text-muted-foreground">
+						devlinks.com/
+					</span>
+
+					<input
+						id="claim-username"
+						// biome-ignore lint/a11y/noAutofocus: modal opens from an explicit click, autofocus is expected here
+						autoFocus
+						placeholder="your-handle"
+						value={value}
+						onChange={(e) => setValue(e.target.value)}
+						autoComplete="off"
+						spellCheck={false}
+						className="min-w-0 flex-1 bg-transparent px-1 font-mono text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none"
+					/>
+
+					<AnimatePresence>
+						{status === "available" && (
+							<motion.span
+								initial={{ opacity: 0, scale: 0.9 }}
+								animate={{ opacity: 1, scale: 1 }}
+								exit={{ opacity: 0, scale: 0.9 }}
+								transition={{ duration: 0.15, ease: sectionEase }}
+								className="shrink-0 text-brand"
+							>
+								<CheckCircleIcon size={16} secondaryOpacity={0} />
+							</motion.span>
+						)}
+					</AnimatePresence>
+				</motion.div>
+
+				<div className="mt-3 min-h-4">
+					<AnimatePresence mode="wait">
+						<motion.p
+							key={status}
+							initial={{ opacity: 0, y: -4 }}
+							animate={{ opacity: 1, y: 0 }}
+							exit={{ opacity: 0, y: 4 }}
+							transition={{ duration: 0.15, ease: sectionEase }}
+							className={cx(
+								"font-mono text-[9px] uppercase tracking-[0.08em]",
+								status === "taken"
+									? "text-destructive"
+									: status === "available"
+										? "text-brand"
+										: "text-muted-foreground",
+							)}
+						>
+							{CLAIM_STATUS_COPY[status] ?? "No credit card · Free forever"}
+						</motion.p>
+					</AnimatePresence>
+				</div>
+
+				<button
+					type="submit"
+					className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 bg-foreground font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-colors hover:bg-brand hover:text-brand-foreground"
+				>
+					Claim my page
+					<ArrowRightIcon className="h-3.5 w-3.5" />
+				</button>
+
+				<p className="mt-5 border-t border-border pt-4 text-center font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground">
+					GitHub-synced · Free forever · No credit card
+				</p>
+			</form>
+		</ModalShell>
 	);
 }

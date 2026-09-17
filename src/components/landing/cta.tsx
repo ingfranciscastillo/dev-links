@@ -1,15 +1,16 @@
+import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import { ArrowRightIcon } from "@solar-icons/react/linear";
 import { useNavigate } from "@tanstack/react-router";
-import { motion, useReducedMotion } from "motion/react";
-import { type FormEvent, useEffect, useRef, useState } from "react";
-import { authClient } from "@/lib/auth-client";
-import { usernameSchema } from "@/lib/schemas/auth";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { type FormEvent, useState } from "react";
+import {
+	type UsernameAvailability,
+	useUsernameAvailability,
+} from "@/hooks/use-username-availability";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
-type Status = "idle" | "invalid" | "checking" | "available" | "taken";
-
-const STATUS_COPY: Record<Status, string | null> = {
+const STATUS_COPY: Record<UsernameAvailability, string | null> = {
 	idle: null,
 	invalid: "At least 3 characters, a-z 0-9 _ -",
 	checking: "Checking…",
@@ -22,40 +23,7 @@ export function Cta() {
 	const navigate = useNavigate();
 
 	const [username, setUsername] = useState("");
-	const [status, setStatus] = useState<Status>("idle");
-	const requestId = useRef(0);
-
-	useEffect(() => {
-		const value = username.trim().toLowerCase();
-
-		if (!value) {
-			setStatus("idle");
-			return;
-		}
-
-		if (!usernameSchema.safeParse(value).success) {
-			setStatus("invalid");
-			return;
-		}
-
-		setStatus("checking");
-		const id = ++requestId.current;
-
-		const timer = setTimeout(async () => {
-			try {
-				const { data } = await authClient.isUsernameAvailable({
-					username: value,
-				});
-				if (requestId.current !== id) return;
-				setStatus(data?.available ? "available" : "taken");
-			} catch {
-				if (requestId.current !== id) return;
-				setStatus("idle");
-			}
-		}, 400);
-
-		return () => clearTimeout(timer);
-	}, [username]);
+	const status = useUsernameAvailability(username);
 
 	function handleSubmit(e: FormEvent) {
 		e.preventDefault();
@@ -116,11 +84,16 @@ export function Cta() {
 												x: 2,
 											}
 								}
+								animate={
+									reduceMotion || status !== "taken"
+										? { x: 0 }
+										: { x: [0, -3, 3, 0] }
+								}
 								transition={{
 									duration: 0.2,
 									ease,
 								}}
-								className={`flex border-b pb-2 transition-colors focus-within:border-brand ${
+								className={`flex items-center border-b pb-2 transition-colors focus-within:border-brand ${
 									status === "taken"
 										? "border-destructive"
 										: "border-foreground"
@@ -140,6 +113,20 @@ export function Cta() {
 									className="min-w-0 flex-1 bg-transparent px-1 font-mono text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none"
 								/>
 
+								<AnimatePresence>
+									{status === "available" && (
+										<motion.span
+											initial={{ opacity: 0, scale: 0.9 }}
+											animate={{ opacity: 1, scale: 1 }}
+											exit={{ opacity: 0, scale: 0.9 }}
+											transition={{ duration: 0.15, ease }}
+											className="shrink-0 text-brand"
+										>
+											<CheckCircleIcon size={16} secondaryOpacity={0} />
+										</motion.span>
+									)}
+								</AnimatePresence>
+
 								<button
 									type="submit"
 									aria-label="Claim username"
@@ -153,17 +140,26 @@ export function Cta() {
 								</button>
 							</motion.div>
 
-							<p
-								className={`mt-3 font-mono text-[9px] uppercase tracking-[0.08em] ${
-									status === "taken"
-										? "text-destructive"
-										: status === "available"
-											? "text-brand"
-											: "text-muted-foreground"
-								}`}
-							>
-								{STATUS_COPY[status] ?? "No credit card · Free forever"}
-							</p>
+							<div className="mt-3 min-h-4">
+								<AnimatePresence mode="wait">
+									<motion.p
+										key={status}
+										initial={reduceMotion ? false : { opacity: 0, y: -4 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: 4 }}
+										transition={{ duration: 0.15, ease }}
+										className={`font-mono text-[9px] uppercase tracking-[0.08em] ${
+											status === "taken"
+												? "text-destructive"
+												: status === "available"
+													? "text-brand"
+													: "text-muted-foreground"
+										}`}
+									>
+										{STATUS_COPY[status] ?? "No credit card · Free forever"}
+									</motion.p>
+								</AnimatePresence>
+							</div>
 						</form>
 					</motion.div>
 				</div>

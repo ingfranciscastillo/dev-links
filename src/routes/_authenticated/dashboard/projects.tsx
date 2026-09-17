@@ -116,7 +116,7 @@ function ProjectsPage() {
 
 					<Button
 						onClick={handleNewProject}
-						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						<AddIcon className="h-3.5 w-3.5" strokeWidth={1.7} />
 						New project
@@ -133,7 +133,7 @@ function ProjectsPage() {
 						action={
 							<Button
 								onClick={() => setEditing("new")}
-								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 							>
 								<AddIcon className="h-3.5 w-3.5" strokeWidth={1.7} />
 								Add your first project
@@ -261,7 +261,7 @@ function ProjectRow({
 	onRemove: () => void;
 }) {
 	return (
-		<article className="group grid gap-5 border-b border-border py-6 sm:grid-cols-[4rem_minmax(0,1.4fr)_12rem_8rem_3rem] sm:items-center sm:px-3 sm:py-7">
+		<article className="group grid gap-5 border-b border-border py-6 transition-colors hover:bg-surface/60 sm:grid-cols-[4rem_minmax(0,1.4fr)_12rem_8rem_3rem] sm:items-center sm:px-3 sm:py-7">
 			<span className="font-mono text-[10px] tabular-nums text-muted-foreground">
 				{String(index + 1).padStart(2, "0")}
 			</span>
@@ -313,7 +313,7 @@ function ProjectRow({
 					<DropdownMenuTrigger asChild>
 						<button
 							type="button"
-							className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+							className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground"
 							aria-label={`${project.name} actions`}
 						>
 							<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
@@ -432,7 +432,7 @@ function ProjectDialog({
 						type="submit"
 						form="project-dialog-form"
 						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						{pending
 							? "Saving..."

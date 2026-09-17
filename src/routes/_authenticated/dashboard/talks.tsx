@@ -86,7 +86,7 @@ function TalksPage() {
 
 					<Button
 						onClick={() => setEditing("new")}
-						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 						New talk
@@ -103,7 +103,7 @@ function TalksPage() {
 						action={
 							<Button
 								onClick={() => setEditing("new")}
-								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 							>
 								<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 								Add your first talk
@@ -206,7 +206,7 @@ function TalkRow({
 	const date = talk.date ? new Date(talk.date) : null;
 
 	return (
-		<article className="group border-b border-border py-6 sm:py-7">
+		<article className="group border-b border-border py-6 transition-colors hover:bg-surface/60 sm:py-7">
 			<div className="grid gap-4 sm:grid-cols-[5rem_minmax(0,1fr)_3rem] sm:items-center">
 				<div>
 					{date ? (
@@ -277,7 +277,7 @@ function TalkRow({
 						<DropdownMenuTrigger asChild>
 							<button
 								type="button"
-								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground"
 								aria-label={`${talk.title} actions`}
 							>
 								<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
@@ -354,7 +354,7 @@ function TalkDialog({
 						type="submit"
 						form="talk-dialog-form"
 						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						{pending ? "Saving..." : initial ? "Save talk" : "Add talk"}
 					</Button>

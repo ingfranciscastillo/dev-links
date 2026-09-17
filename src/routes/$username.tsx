@@ -120,6 +120,26 @@ function RevealSection({ children }: { children: ReactNode }) {
 	);
 }
 
+// `amount` mide contra la altura del propio target, no del viewport — un
+// wrapper único alrededor de todo el stack de integraciones (potencialmente
+// muy alto, un bloque por proveedor) empujaba el punto de disparo lejos y
+// obligaba a scrollear de más antes de ver el primero. Cada bloque revela
+// por separado con margin negativo para adelantar el trigger.
+function IntegrationReveal({ children }: { children: ReactNode }) {
+	const reduceMotion = useReducedMotion();
+
+	return (
+		<motion.div
+			initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+			whileInView={{ opacity: 1, y: 0 }}
+			viewport={{ once: true, amount: 0.2, margin: "0px 0px -10% 0px" }}
+			transition={{ duration: reduceMotion ? 0.01 : 0.5, ease: sectionEase }}
+		>
+			{children}
+		</motion.div>
+	);
+}
+
 export const Route = createFileRoute("/$username")({
 	loader: async ({ params }): Promise<LoaderData> => {
 		const username = params.username.toLowerCase();
@@ -298,12 +318,10 @@ function ProfilePage() {
 					</RevealSection>
 
 					{live.integrations.length > 0 && (
-						<RevealSection>
-							<IntegrationBlocks
-								integrations={live.integrations}
-								themed={themed}
-							/>
-						</RevealSection>
+						<IntegrationBlocks
+							integrations={live.integrations}
+							themed={themed}
+						/>
 					)}
 
 					{live.data.supportLinks.some((l) => l.category !== "community") && (
@@ -374,27 +392,86 @@ function IntegrationBlocks({
 
 	return (
 		<div className="space-y-10">
-			{gh && <GithubBlock payload={gh} themed={themed} />}
-			{gitlab && <GitlabBlock payload={gitlab} themed={themed} />}
-			{dev && <DevtoBlock payload={dev} themed={themed} />}
-			{md && <MediumBlock payload={md} themed={themed} />}
-			{so && <StackOverflowBlock payload={so} themed={themed} />}
-
-			{bluesky && <BlueskyBlock payload={bluesky} themed={themed} />}
-			{dockerhub && <DockerhubBlock payload={dockerhub} themed={themed} />}
-			{leetcode && <LeetcodeBlock payload={leetcode} themed={themed} />}
-			{mastodon && <MastodonBlock payload={mastodon} themed={themed} />}
-			{npm && <NpmBlock payload={npm} themed={themed} />}
-			{wakatime && <WakatimeBlock payload={wakatime} themed={themed} />}
-			{youtube && <YoutubeBlock payload={youtube} themed={themed} />}
+			{gh && (
+				<IntegrationReveal>
+					<GithubBlock payload={gh} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{gitlab && (
+				<IntegrationReveal>
+					<GitlabBlock payload={gitlab} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{dev && (
+				<IntegrationReveal>
+					<DevtoBlock payload={dev} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{md && (
+				<IntegrationReveal>
+					<MediumBlock payload={md} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{so && (
+				<IntegrationReveal>
+					<StackOverflowBlock payload={so} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{bluesky && (
+				<IntegrationReveal>
+					<BlueskyBlock payload={bluesky} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{dockerhub && (
+				<IntegrationReveal>
+					<DockerhubBlock payload={dockerhub} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{leetcode && (
+				<IntegrationReveal>
+					<LeetcodeBlock payload={leetcode} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{mastodon && (
+				<IntegrationReveal>
+					<MastodonBlock payload={mastodon} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{npm && (
+				<IntegrationReveal>
+					<NpmBlock payload={npm} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{wakatime && (
+				<IntegrationReveal>
+					<WakatimeBlock payload={wakatime} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{youtube && (
+				<IntegrationReveal>
+					<YoutubeBlock payload={youtube} themed={themed} />
+				</IntegrationReveal>
+			)}
 			{huggingface && (
-				<HuggingfaceBlock payload={huggingface} themed={themed} />
+				<IntegrationReveal>
+					<HuggingfaceBlock payload={huggingface} themed={themed} />
+				</IntegrationReveal>
 			)}
 			{producthunt && (
-				<ProducthuntBlock payload={producthunt} themed={themed} />
+				<IntegrationReveal>
+					<ProducthuntBlock payload={producthunt} themed={themed} />
+				</IntegrationReveal>
 			)}
-			{dribbble && <DribbbleBlock payload={dribbble} themed={themed} />}
-			{pinterest && <PinterestBlock payload={pinterest} themed={themed} />}
+			{dribbble && (
+				<IntegrationReveal>
+					<DribbbleBlock payload={dribbble} themed={themed} />
+				</IntegrationReveal>
+			)}
+			{pinterest && (
+				<IntegrationReveal>
+					<PinterestBlock payload={pinterest} themed={themed} />
+				</IntegrationReveal>
+			)}
 		</div>
 	);
 }

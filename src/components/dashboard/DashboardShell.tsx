@@ -21,6 +21,7 @@ import {
 	useRouteContext,
 	useRouter,
 } from "@tanstack/react-router";
+import { motion, useReducedMotion } from "motion/react";
 import {
 	type ComponentType,
 	type CSSProperties,
@@ -98,6 +99,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 	const core = useProfileCore();
 	const isPro = core.data?.plan === "pro";
 	const [mobileNavOpen, setMobileNavOpen] = useState(false);
+	const [upgradePending, setUpgradePending] = useState(false);
 
 	async function handleSignOut() {
 		await authClient.signOut();
@@ -106,12 +108,14 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 	}
 
 	async function handleUpgrade() {
+		setUpgradePending(true);
 		try {
 			await startProCheckout();
 		} catch (err) {
 			toast.error(
 				err instanceof Error ? err.message : "Couldn't start checkout",
 			);
+			setUpgradePending(false);
 		}
 	}
 
@@ -142,6 +146,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 							pathname={pathname}
 							isPro={isPro}
 							onUpgrade={handleUpgrade}
+							upgradePending={upgradePending}
 						/>
 					</div>
 				</aside>
@@ -169,7 +174,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 										type="button"
 										onClick={requestClose}
 										aria-label="Close menu"
-										className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+										className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground"
 									>
 										<CloseIcon className="h-4 w-4" strokeWidth={1.5} />
 									</button>
@@ -183,6 +188,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 											requestClose();
 											handleUpgrade();
 										}}
+										upgradePending={upgradePending}
 										onNavigate={requestClose}
 									/>
 								</div>
@@ -201,7 +207,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 								type="button"
 								onClick={() => setMobileNavOpen(true)}
 								aria-label="Open menu"
-								className="inline-flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground transition-colors hover:text-foreground md:hidden"
+								className="inline-flex h-8 w-8 shrink-0 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground md:hidden"
 							>
 								<HamburgerMenuIcon className="h-5 w-5" strokeWidth={1.7} />
 							</button>
@@ -237,7 +243,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 								onClick={handleSignOut}
 								title="Sign out"
 								aria-label="Sign out"
-								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
 							>
 								<Logout2Icon className="h-4 w-4" strokeWidth={1.7} />
 							</button>
@@ -269,13 +275,17 @@ function WorkspaceNav({
 	pathname,
 	isPro,
 	onUpgrade,
+	upgradePending,
 	onNavigate,
 }: {
 	pathname: string;
 	isPro: boolean;
 	onUpgrade: () => void;
+	upgradePending: boolean;
 	onNavigate?: () => void;
 }) {
+	const reduceMotion = useReducedMotion();
+
 	return (
 		<>
 			<p className="px-2 font-mono text-[9px] uppercase tracking-[0.14em] text-brand">
@@ -298,14 +308,19 @@ function WorkspaceNav({
 							className={`group relative flex items-center gap-3 px-2 py-2.5 text-sm transition-colors ${
 								active
 									? "text-foreground"
-									: "text-muted-foreground hover:text-foreground"
+									: "text-muted-foreground hover:bg-surface/60 hover:text-foreground"
 							}`}
 						>
-							<span
-								className={`absolute -left-4 top-0 h-full w-px transition-colors ${
-									active ? "bg-brand" : "bg-transparent"
-								}`}
-							/>
+							{active && (
+								<motion.span
+									layoutId="active-nav-indicator"
+									className="absolute -left-4 top-0 h-full w-px bg-brand"
+									transition={{
+										duration: reduceMotion ? 0 : 0.25,
+										ease: [0.16, 1, 0.3, 1],
+									}}
+								/>
+							)}
 
 							<Icon
 								className={`size-5 transition-colors ${
@@ -344,9 +359,10 @@ function WorkspaceNav({
 						<button
 							type="button"
 							onClick={onUpgrade}
-							className="font-mono text-[9px] uppercase tracking-[0.08em] text-brand transition-colors hover:text-foreground"
+							disabled={upgradePending}
+							className="font-mono text-[9px] uppercase tracking-[0.08em] text-brand transition-colors hover:text-foreground disabled:opacity-50"
 						>
-							Upgrade
+							{upgradePending ? "Redirecting…" : "Upgrade"}
 						</button>
 					)}
 				</div>

@@ -357,7 +357,7 @@ function SignupUsernameField({
 
 			{invalid ? (
 				<FieldError>{errors.join(", ")}</FieldError>
-			) : status === "checking" || status === "taken" ? (
+			) : status !== "idle" ? (
 				<AnimatePresence mode="wait">
 					<motion.p
 						key={status}
@@ -367,10 +367,20 @@ function SignupUsernameField({
 						transition={{ duration: 0.15, ease }}
 						className={cn(
 							"mt-2 font-mono text-[9px] uppercase tracking-[0.08em]",
-							status === "taken" ? "text-destructive" : "text-muted-foreground",
+							status === "taken"
+								? "text-destructive"
+								: status === "available"
+									? "text-brand"
+									: "text-muted-foreground",
 						)}
 					>
-						{status === "taken" ? "Already taken" : "Checking…"}
+						{status === "checking"
+							? "Checking…"
+							: status === "available"
+								? "Available"
+								: status === "taken"
+									? "Already taken"
+									: null}
 					</motion.p>
 				</AnimatePresence>
 			) : null}

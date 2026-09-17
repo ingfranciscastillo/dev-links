@@ -787,7 +787,7 @@ function CssPane({
 							onClick={handleUpgrade}
 							className="mt-5 h-9 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 						>
-							Upgrade to Pro
+							Upgrade to Pro — $5/mo
 						</Button>
 					</div>
 				</div>

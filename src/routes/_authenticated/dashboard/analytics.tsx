@@ -6,6 +6,7 @@ import {
 	UsersGroupRoundedIcon,
 } from "@solar-icons/react/linear";
 import { createFileRoute } from "@tanstack/react-router";
+import toast from "react-hot-toast";
 import {
 	Bar,
 	BarChart,
@@ -18,7 +19,6 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import toast from "react-hot-toast";
 
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
@@ -168,7 +168,7 @@ function UpgradeGate() {
 						onClick={handleUpgrade}
 						className="mt-6 h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
 					>
-						Upgrade to Pro
+						Upgrade to Pro — $5/mo
 					</Button>
 				</div>
 			</div>

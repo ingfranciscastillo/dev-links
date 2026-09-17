@@ -8,9 +8,11 @@ const ease = [0.16, 1, 0.3, 1] as const;
 export function AnimatedNumber({
 	value,
 	duration = 0.6,
+	decimals = 0,
 }: {
 	value: number;
 	duration?: number;
+	decimals?: number;
 }) {
 	const reduceMotion = useReducedMotion();
 	const [display, setDisplay] = useState(reduceMotion ? value : 0);
@@ -26,7 +28,7 @@ export function AnimatedNumber({
 		const controls = animate(fromRef.current, value, {
 			duration,
 			ease,
-			onUpdate: (latest) => setDisplay(Math.round(latest)),
+			onUpdate: setDisplay,
 		});
 
 		fromRef.current = value;
@@ -34,5 +36,12 @@ export function AnimatedNumber({
 		// biome-ignore lint/correctness/useExhaustiveDependencies: fromRef intentionally reads the previous value, not a dependency
 	}, [value, duration, reduceMotion]);
 
-	return <>{display.toLocaleString()}</>;
+	return (
+		<>
+			{display.toLocaleString(undefined, {
+				minimumFractionDigits: decimals,
+				maximumFractionDigits: decimals,
+			})}
+		</>
+	);
 }

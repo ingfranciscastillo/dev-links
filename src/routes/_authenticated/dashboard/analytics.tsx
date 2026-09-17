@@ -24,6 +24,7 @@ import {
 } from "recharts";
 
 import { PlanComparisonTable } from "@/components/dashboard/PlanComparisonTable";
+import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import type { AnalyticsSummary } from "@/lib/api/analytics.functions";
@@ -219,25 +220,27 @@ function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 
 			<section className="border-y border-border" aria-label="Summary">
 				<div className="grid sm:grid-cols-2 lg:grid-cols-4">
-					<StatBlock
-						icon={EyeIcon}
-						label="Page views"
-						value={totals.views.toLocaleString()}
-					/>
+					<StatBlock icon={EyeIcon} label="Page views" value={totals.views} />
 
 					<StatBlock
 						icon={UsersGroupRoundedIcon}
 						label="Unique visitors"
-						value={totals.uniqueVisitors.toLocaleString()}
+						value={totals.uniqueVisitors}
 					/>
 
 					<StatBlock
 						icon={CursorIcon}
 						label="Total clicks"
-						value={totals.clicks.toLocaleString()}
+						value={totals.clicks}
 					/>
 
-					<StatBlock icon={GraphUpIcon} label="CTR" value={`${totals.ctr}%`} />
+					<StatBlock
+						icon={GraphUpIcon}
+						label="CTR"
+						value={totals.ctr}
+						decimals={1}
+						suffix="%"
+					/>
 				</div>
 			</section>
 
@@ -519,7 +522,7 @@ function PieRow({ data }: { data: Array<{ name: string; value: number }> }) {
 						</span>
 
 						<span className="shrink-0 font-mono text-[10px] tabular-nums">
-							{item.value}
+							<AnimatedNumber value={item.value} duration={0.5} />
 						</span>
 					</li>
 				))}
@@ -545,7 +548,7 @@ function BarList({ data }: { data: Array<{ name: string; value: number }> }) {
 						</span>
 
 						<span className="shrink-0 font-mono text-[10px] tabular-nums">
-							{item.value}
+							<AnimatedNumber value={item.value} duration={0.5} />
 						</span>
 					</div>
 
@@ -599,7 +602,7 @@ function RankedList({
 					</span>
 
 					<span className="shrink-0 font-mono text-[10px] tabular-nums text-foreground">
-						{item.value.toLocaleString()}
+						<AnimatedNumber value={item.value} duration={0.5} />
 					</span>
 				</motion.li>
 			))}
@@ -611,10 +614,14 @@ function StatBlock({
 	icon: Icon,
 	label,
 	value,
+	decimals = 0,
+	suffix = "",
 }: {
 	icon: React.ComponentType<{ className?: string }>;
 	label: string;
-	value: string;
+	value: number;
+	decimals?: number;
+	suffix?: string;
 }) {
 	return (
 		<div className="border-b border-border py-6 sm:px-6 sm:py-7 sm:first:pl-0 sm:last:pr-0 sm:border-b-0 sm:first:border-l-0 sm:not-first:border-l">
@@ -626,8 +633,9 @@ function StatBlock({
 				</p>
 			</div>
 
-			<p className="mt-4 font-display text-4xl tracking-[-0.03em] sm:text-5xl">
-				{value}
+			<p className="mt-4 font-display text-4xl tracking-[-0.03em] tabular-nums sm:text-5xl">
+				<AnimatedNumber value={value} decimals={decimals} />
+				{suffix}
 			</p>
 		</div>
 	);

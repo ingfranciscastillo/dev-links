@@ -15,13 +15,6 @@ import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
 	type DiscoverResult,
 	searchProfiles,
 } from "@/lib/api/discover.functions";
@@ -416,7 +409,8 @@ function Discover() {
 											Country
 										</p>
 
-										<Select
+										<SearchableSelect
+											id="discover-country"
 											value={search.country ?? "ALL"}
 											onValueChange={(value) =>
 												navigate({
@@ -427,23 +421,17 @@ function Discover() {
 													replace: true,
 												})
 											}
-										>
-											<SelectTrigger
-												aria-label="Country"
-												className="mt-3 h-9 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground shadow-none focus:ring-0"
-											>
-												<SelectValue />
-											</SelectTrigger>
-
-											<SelectContent>
-												<SelectItem value="ALL">All</SelectItem>
-												{COUNTRIES.map((c) => (
-													<SelectItem key={c.code} value={c.code}>
-														{c.name}
-													</SelectItem>
-												))}
-											</SelectContent>
-										</Select>
+											options={[
+												{ value: "ALL", label: "All" },
+												...COUNTRIES.map((c) => ({
+													value: c.code,
+													label: c.name,
+												})),
+											]}
+											searchPlaceholder="Search countries…"
+											emptyText="No country found."
+											className="mt-3 h-9 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground shadow-none"
+										/>
 									</div>
 
 									<div>

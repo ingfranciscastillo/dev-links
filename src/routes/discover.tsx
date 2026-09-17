@@ -1,4 +1,4 @@
-import { ArrowRightUpIcon } from "@solar-icons/react/linear";
+import { AltArrowDownIcon, ArrowRightUpIcon } from "@solar-icons/react/linear";
 import { useQuery } from "@tanstack/react-query";
 import {
 	createFileRoute,
@@ -7,12 +7,13 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { Footer } from "@/components/site/Footer";
 import { Header } from "@/components/site/Header";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
 	Select,
 	SelectContent,
@@ -158,6 +159,7 @@ function Discover() {
 	// escribir a la URL (y por tanto re-disparar el loader) en cada tecla
 	// sería tanto una navegación de más como un re-fetch de más.
 	const [qInput, setQInput] = useState(search.q);
+	const [filtersOpen, setFiltersOpen] = useState(true);
 
 	useEffect(() => {
 		setQInput(search.q);
@@ -286,157 +288,199 @@ function Discover() {
 						</motion.span>
 					</div>
 
-					<div className="mt-5 grid gap-6 border-b border-border pb-6 sm:grid-cols-2 sm:items-start lg:grid-cols-4">
-						<div>
-							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-								Language
-							</p>
+					<button
+						type="button"
+						onClick={() => setFiltersOpen((v) => !v)}
+						aria-expanded={filtersOpen}
+						className="group mt-5 flex w-full items-center justify-between gap-4 py-2 text-left"
+					>
+						<span className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-widest text-brand transition-colors group-hover:text-foreground">
+							Filters
+							{hasActiveFilters(search) && (
+								<span className="h-1.5 w-1.5 rounded-full bg-brand" />
+							)}
+						</span>
 
-							<Select
-								value={search.language ?? "ALL"}
-								onValueChange={(value) =>
-									navigate({
-										search: (prev) => ({
-											...prev,
-											language: value === "ALL" ? null : value,
-										}),
-										replace: true,
-									})
-								}
-							>
-								<SelectTrigger
-									aria-label="Language"
-									className="mt-3 h-9 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground shadow-none focus:ring-0"
-								>
-									<SelectValue />
-								</SelectTrigger>
+						<span className="flex min-w-0 items-center gap-3">
+							{!filtersOpen && filterLabel(search) && (
+								<span className="truncate font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
+									{filterLabel(search)}
+								</span>
+							)}
 
-								<SelectContent>
-									<SelectItem value="ALL">All</SelectItem>
-									{LANGUAGES.map((item) => (
-										<SelectItem key={item} value={item}>
-											{item}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
+							<AltArrowDownIcon
+								size={12}
+								className={`shrink-0 text-muted-foreground transition-transform duration-200 ${
+									filtersOpen ? "rotate-180" : ""
+								}`}
+							/>
+						</span>
+					</button>
 
-						<div>
-							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-								Seniority
-							</p>
-
+					<AnimatePresence initial={false}>
+						{filtersOpen && (
 							<motion.div
-								className="mt-3 flex flex-wrap gap-x-4 gap-y-2"
-								initial="hidden"
-								animate="visible"
-								variants={{
-									hidden: {},
-									visible: {
-										transition: {
-											staggerChildren: reduceMotion ? 0 : 0.03,
-										},
-									},
-								}}
+								key="filters"
+								initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+								animate={{ height: "auto", opacity: 1 }}
+								exit={reduceMotion ? {} : { height: 0, opacity: 0 }}
+								transition={{ duration: reduceMotion ? 0.01 : 0.35, ease }}
+								className="overflow-hidden"
 							>
-								{SENIORITIES.map((item) => (
-									<motion.div
-										key={item}
-										variants={{
-											hidden: reduceMotion ? {} : { opacity: 0, y: 6 },
-											visible: {
-												opacity: 1,
-												y: 0,
-												transition: {
-													duration: reduceMotion ? 0.01 : 0.3,
-													ease,
-												},
-											},
-										}}
-									>
-										<FilterButton
-											active={search.seniority === item}
-											onClick={() =>
+								<div className="grid gap-6 pt-4 pb-6 sm:grid-cols-2 sm:items-start lg:grid-cols-4">
+									<div>
+										<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+											Language
+										</p>
+
+										<SearchableSelect
+											id="discover-language"
+											value={search.language ?? "ALL"}
+											onValueChange={(value) =>
 												navigate({
 													search: (prev) => ({
 														...prev,
-														seniority: prev.seniority === item ? null : item,
+														language: value === "ALL" ? null : value,
+													}),
+													replace: true,
+												})
+											}
+											options={[
+												{ value: "ALL", label: "All" },
+												...LANGUAGES.map((item) => ({
+													value: item,
+													label: item,
+												})),
+											]}
+											searchPlaceholder="Search languages…"
+											emptyText="No language found."
+											className="mt-3 h-9 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground shadow-none"
+										/>
+									</div>
+
+									<div>
+										<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+											Seniority
+										</p>
+
+										<motion.div
+											className="mt-3 flex flex-wrap gap-x-4 gap-y-2"
+											initial="hidden"
+											animate="visible"
+											variants={{
+												hidden: {},
+												visible: {
+													transition: {
+														staggerChildren: reduceMotion ? 0 : 0.03,
+													},
+												},
+											}}
+										>
+											{SENIORITIES.map((item) => (
+												<motion.div
+													key={item}
+													variants={{
+														hidden: reduceMotion ? {} : { opacity: 0, y: 6 },
+														visible: {
+															opacity: 1,
+															y: 0,
+															transition: {
+																duration: reduceMotion ? 0.01 : 0.3,
+																ease,
+															},
+														},
+													}}
+												>
+													<FilterButton
+														active={search.seniority === item}
+														onClick={() =>
+															navigate({
+																search: (prev) => ({
+																	...prev,
+																	seniority:
+																		prev.seniority === item ? null : item,
+																}),
+																replace: true,
+															})
+														}
+													>
+														{item}
+													</FilterButton>
+												</motion.div>
+											))}
+										</motion.div>
+									</div>
+
+									<div>
+										<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+											Country
+										</p>
+
+										<Select
+											value={search.country ?? "ALL"}
+											onValueChange={(value) =>
+												navigate({
+													search: (prev) => ({
+														...prev,
+														country: value === "ALL" ? null : value,
 													}),
 													replace: true,
 												})
 											}
 										>
-											{item}
-										</FilterButton>
-									</motion.div>
-								))}
+											<SelectTrigger
+												aria-label="Country"
+												className="mt-3 h-9 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground shadow-none focus:ring-0"
+											>
+												<SelectValue />
+											</SelectTrigger>
+
+											<SelectContent>
+												<SelectItem value="ALL">All</SelectItem>
+												{COUNTRIES.map((c) => (
+													<SelectItem key={c.code} value={c.code}>
+														{c.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
+
+									<div>
+										<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
+											Availability
+										</p>
+
+										<div className="mt-3">
+											<FilterButton
+												active={search.available}
+												onClick={() =>
+													navigate({
+														search: (prev) => ({
+															...prev,
+															available: !prev.available,
+														}),
+														replace: true,
+													})
+												}
+											>
+												<span
+													className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
+														search.available
+															? "bg-brand"
+															: "bg-muted-foreground/40"
+													}`}
+												/>
+												Available for hire
+											</FilterButton>
+										</div>
+									</div>
+								</div>
 							</motion.div>
-						</div>
+						)}
+					</AnimatePresence>
 
-						<div>
-							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-								Country
-							</p>
-
-							<Select
-								value={search.country ?? "ALL"}
-								onValueChange={(value) =>
-									navigate({
-										search: (prev) => ({
-											...prev,
-											country: value === "ALL" ? null : value,
-										}),
-										replace: true,
-									})
-								}
-							>
-								<SelectTrigger
-									aria-label="Country"
-									className="mt-3 h-9 w-full rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-[11px] uppercase tracking-[0.08em] text-foreground shadow-none focus:ring-0"
-								>
-									<SelectValue />
-								</SelectTrigger>
-
-								<SelectContent>
-									<SelectItem value="ALL">All</SelectItem>
-									{COUNTRIES.map((c) => (
-										<SelectItem key={c.code} value={c.code}>
-											{c.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-
-						<div>
-							<p className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-								Availability
-							</p>
-
-							<div className="mt-3">
-								<FilterButton
-									active={search.available}
-									onClick={() =>
-										navigate({
-											search: (prev) => ({
-												...prev,
-												available: !prev.available,
-											}),
-											replace: true,
-										})
-									}
-								>
-									<span
-										className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${
-											search.available ? "bg-brand" : "bg-muted-foreground/40"
-										}`}
-									/>
-									Available for hire
-								</FilterButton>
-							</div>
-						</div>
-					</div>
+					<div className="border-b border-border" />
 				</motion.div>
 
 				<motion.div

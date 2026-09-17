@@ -99,7 +99,7 @@ function SnippetsPage() {
 
 					<Button
 						onClick={handleNewSnippet}
-						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 shrink-0 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 						New snippet
@@ -116,7 +116,7 @@ function SnippetsPage() {
 						action={
 							<Button
 								onClick={() => setEditing("new")}
-								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+								className="h-10 rounded-none bg-foreground px-4 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 							>
 								<AddIcon className="h-3.5 w-3.5" strokeWidth={1} />
 								Add your first snippet
@@ -235,7 +235,7 @@ function SnippetEntry({
 }) {
 	return (
 		<article className="border-b border-border pb-8">
-			<header className="flex flex-col gap-4 border-t border-border py-4 sm:flex-row sm:items-center sm:justify-between">
+			<header className="flex flex-col gap-4 border-t border-border py-4 transition-colors hover:bg-surface/60 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex min-w-0 items-baseline gap-3">
 					<span className="shrink-0 font-mono text-[10px] tabular-nums text-muted-foreground">
 						{String(index + 1).padStart(2, "0")}
@@ -255,7 +255,7 @@ function SnippetEntry({
 						<DropdownMenuTrigger asChild>
 							<button
 								type="button"
-								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+								className="inline-flex h-8 w-8 items-center justify-center text-muted-foreground transition-[color,transform] active:scale-90 hover:text-foreground"
 								aria-label={`${snippet.title} actions`}
 							>
 								<MenuDotsIcon className="h-4 w-4" strokeWidth={1.5} />
@@ -328,7 +328,7 @@ function SnippetDialog({
 						type="submit"
 						form="snippet-dialog-form"
 						disabled={pending || !form.state.canSubmit}
-						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none hover:bg-brand hover:text-brand-foreground"
+						className="h-10 rounded-none bg-foreground px-5 font-mono text-[10px] uppercase tracking-[0.08em] text-background shadow-none transition-transform active:scale-[0.98] hover:bg-brand hover:text-brand-foreground"
 					>
 						{pending
 							? "Saving..."

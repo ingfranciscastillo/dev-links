@@ -1,6 +1,7 @@
 import {
 	AddIcon,
 	ArrowRightUpIcon,
+	CloseIcon,
 	FolderIcon,
 	MenuDotsIcon,
 	PenIcon,
@@ -8,8 +9,9 @@ import {
 } from "@solar-icons/react/linear";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import posthog from "posthog-js";
-import { useState } from "react";
+import { type KeyboardEvent, useState } from "react";
 import toast from "react-hot-toast";
 import { GithubIcon } from "#/components/brand-icons";
 import { ConfirmDialog } from "@/components/dashboard/ConfirmDialog";
@@ -50,6 +52,7 @@ import {
 } from "@/lib/queries/profile-data";
 import { type ProjectItem, projectSchema } from "@/lib/schemas";
 import { zodField } from "@/lib/schemas/field";
+import { TECHNOLOGY_SUGGESTIONS } from "@/lib/technologies";
 
 export const Route = createFileRoute("/_authenticated/dashboard/projects")({
 	head: () => ({ meta: [{ title: "Projects — DevLinks" }] }),
@@ -59,7 +62,7 @@ export const Route = createFileRoute("/_authenticated/dashboard/projects")({
 type ProjectFormValues = {
 	name: string;
 	description: string;
-	tech: string;
+	tech: string[];
 	github: string;
 	demo: string;
 	status: "shipped" | "wip" | "archived";
@@ -173,10 +176,7 @@ function ProjectsPage() {
 						const projectValues = {
 							name: values.name,
 							description: values.description,
-							tech: values.tech
-								.split(",")
-								.map((value) => value.trim())
-								.filter(Boolean),
+							tech: values.tech,
 							github: values.github || "",
 							demo: values.demo || "",
 							status: values.status,
@@ -400,11 +400,15 @@ function ProjectDialog({
 	onSubmit: (value: ProjectFormValues) => void;
 	pending?: boolean;
 }) {
+	const reduceMotion = useReducedMotion();
+	const [techInput, setTechInput] = useState("");
+	const [techFocused, setTechFocused] = useState(false);
+
 	const form = useForm({
 		defaultValues: {
 			name: initial?.name ?? "",
 			description: initial?.description ?? "",
-			tech: initial?.tech.join(", ") ?? "",
+			tech: initial?.tech ?? [],
 			github: initial?.github ?? "",
 			demo: initial?.demo ?? "",
 			status: initial?.status ?? "shipped",
@@ -413,6 +417,56 @@ function ProjectDialog({
 			onSubmit(value);
 		},
 	});
+
+	function techSuggestionsFor(current: string[]) {
+		const query = techInput.trim().toLowerCase();
+		if (!query) return [];
+		const chosen = new Set(current.map((t) => t.toLowerCase()));
+		return TECHNOLOGY_SUGGESTIONS.filter(
+			(t) => t.toLowerCase().includes(query) && !chosen.has(t.toLowerCase()),
+		).slice(0, 8);
+	}
+
+	function commitTech(
+		raw: string,
+		current: string[],
+		onChange: (next: string[]) => void,
+	) {
+		const value = raw.trim();
+		if (!value) return;
+		if (
+			current.length >= 20 ||
+			current.some((t) => t.toLowerCase() === value.toLowerCase())
+		) {
+			setTechInput("");
+			return;
+		}
+		onChange([...current, value]);
+		setTechInput("");
+	}
+
+	function removeTech(
+		value: string,
+		current: string[],
+		onChange: (next: string[]) => void,
+	) {
+		onChange(current.filter((t) => t !== value));
+	}
+
+	function handleTechKeyDown(
+		event: KeyboardEvent<HTMLInputElement>,
+		current: string[],
+		onChange: (next: string[]) => void,
+	) {
+		if (event.key === "," || event.key === "Enter") {
+			event.preventDefault();
+			commitTech(techInput, current, onChange);
+			return;
+		}
+		if (event.key === "Backspace" && !techInput && current.length > 0) {
+			onChange(current.slice(0, -1));
+		}
+	}
 
 	return (
 		<ModalShell
@@ -537,29 +591,125 @@ function ProjectDialog({
 						</form.Field>
 
 						<form.Field name="tech">
-							{(field) => (
-								<Field>
-									<FieldLabel
-										htmlFor={field.name}
-										className="font-mono text-[10px] uppercase tracking-[0.08em]"
-									>
-										Tech
-										<span className="ml-1 text-muted-foreground">
-											(comma separated)
-										</span>
-									</FieldLabel>
+							{(field) => {
+								const suggestions = techSuggestionsFor(field.state.value);
 
-									<Input
-										id={field.name}
-										name={field.name}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										placeholder="TypeScript, React, Postgres"
-										className="mt-2 h-11 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 shadow-none focus-visible:border-brand focus-visible:ring-0"
-									/>
-								</Field>
-							)}
+								return (
+									<Field>
+										<FieldLabel
+											htmlFor={field.name}
+											className="font-mono text-[10px] uppercase tracking-[0.08em]"
+										>
+											Tech
+										</FieldLabel>
+
+										<div className="relative">
+											<div className="mt-2 flex flex-wrap items-center gap-2 border-b border-border py-2">
+												<AnimatePresence initial={false}>
+													{field.state.value.map((tech) => (
+														<motion.span
+															key={tech}
+															layout={!reduceMotion}
+															initial={
+																reduceMotion
+																	? false
+																	: { opacity: 0, scale: 0.85 }
+															}
+															animate={{ opacity: 1, scale: 1 }}
+															exit={
+																reduceMotion
+																	? undefined
+																	: { opacity: 0, scale: 0.85 }
+															}
+															transition={{ duration: 0.15 }}
+															className="inline-flex items-center gap-1.5 border border-border bg-surface px-2 py-1 font-mono text-[10px] uppercase tracking-[0.04em]"
+														>
+															{tech}
+															<button
+																type="button"
+																onClick={() =>
+																	removeTech(
+																		tech,
+																		field.state.value,
+																		field.handleChange,
+																	)
+																}
+																aria-label={`Remove ${tech}`}
+																className="text-muted-foreground transition-colors hover:text-foreground"
+															>
+																<CloseIcon className="h-3 w-3" />
+															</button>
+														</motion.span>
+													))}
+												</AnimatePresence>
+
+												<input
+													id={field.name}
+													name={field.name}
+													value={techInput}
+													onChange={(e) => setTechInput(e.target.value)}
+													onKeyDown={(e) =>
+														handleTechKeyDown(
+															e,
+															field.state.value,
+															field.handleChange,
+														)
+													}
+													onFocus={() => setTechFocused(true)}
+													onBlur={() => {
+														commitTech(
+															techInput,
+															field.state.value,
+															field.handleChange,
+														);
+														field.handleBlur();
+														setTechFocused(false);
+													}}
+													placeholder={
+														field.state.value.length === 0
+															? "TypeScript, React, Postgres…"
+															: undefined
+													}
+													disabled={field.state.value.length >= 20}
+													autoComplete="off"
+													className="h-7 min-w-24 flex-1 bg-transparent text-sm placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
+												/>
+											</div>
+
+											{techFocused && suggestions.length > 0 ? (
+												<ul className="absolute inset-x-0 top-full z-10 mt-1 border border-border bg-surface shadow-sm">
+													{suggestions.map((suggestion) => (
+														<li key={suggestion}>
+															<button
+																type="button"
+																// onMouseDown (not onClick) fires before the
+																// input's onBlur, and preventDefault keeps
+																// focus in the input instead of letting blur
+																// commit the raw partial text first.
+																onMouseDown={(e) => {
+																	e.preventDefault();
+																	commitTech(
+																		suggestion,
+																		field.state.value,
+																		field.handleChange,
+																	);
+																}}
+																className="block w-full px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-background"
+															>
+																{suggestion}
+															</button>
+														</li>
+													))}
+												</ul>
+											) : null}
+										</div>
+
+										<p className="mt-2 font-mono text-[9px] uppercase tracking-[0.06em] text-muted-foreground">
+											Press comma or enter to add · up to 20
+										</p>
+									</Field>
+								);
+							}}
 						</form.Field>
 
 						<div className="grid gap-5 sm:grid-cols-2">

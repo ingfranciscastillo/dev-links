@@ -1,7 +1,8 @@
 import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import { LockKeyholeIcon, RestartIcon } from "@solar-icons/react/linear";
 import { createFileRoute, useRouteContext } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import posthog from "posthog-js";
+import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
 import { PageTitle } from "@/components/motion/PageTitle";
@@ -751,7 +752,12 @@ function CssPane({
 }) {
 	const [draft, setDraft] = useState(theme.customCss);
 
+	useEffect(() => {
+		if (!isPro) posthog.capture("paywall_shown", { resource: "custom_css" });
+	}, [isPro]);
+
 	async function handleUpgrade() {
+		posthog.capture("paywall_upgrade_clicked", { resource: "custom_css" });
 		try {
 			await startProCheckout();
 		} catch (err) {

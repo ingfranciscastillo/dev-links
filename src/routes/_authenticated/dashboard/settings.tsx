@@ -4,6 +4,7 @@ import {
 	useNavigate,
 	useRouteContext,
 } from "@tanstack/react-router";
+import posthog from "posthog-js";
 import { type ReactNode, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -39,6 +40,7 @@ function SettingsPage() {
 			if (isPro) {
 				await openBillingPortal();
 			} else {
+				posthog.capture("paywall_upgrade_clicked", { resource: "settings" });
 				await startProCheckout();
 			}
 		} catch (err) {

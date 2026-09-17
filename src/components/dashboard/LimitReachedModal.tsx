@@ -1,5 +1,6 @@
 import { LockKeyholeIcon } from "@solar-icons/react/linear";
 import { motion, useReducedMotion } from "motion/react";
+import posthog from "posthog-js";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export function LimitReachedModal({
 	const [pending, setPending] = useState(false);
 
 	async function handleUpgrade() {
+		posthog.capture("paywall_upgrade_clicked", { resource });
 		setPending(true);
 		try {
 			await startProCheckout();
@@ -77,7 +79,10 @@ export function LimitReachedModal({
 					<div className="mt-7 flex items-center justify-end gap-5 border-t border-border pt-5">
 						<button
 							type="button"
-							onClick={requestClose}
+							onClick={() => {
+								posthog.capture("paywall_dismissed", { resource });
+								requestClose();
+							}}
 							disabled={pending}
 							className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
 						>

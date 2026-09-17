@@ -6,6 +6,8 @@ import {
 	UsersGroupRoundedIcon,
 } from "@solar-icons/react/linear";
 import { createFileRoute } from "@tanstack/react-router";
+import posthog from "posthog-js";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import {
 	Bar,
@@ -133,7 +135,12 @@ function ErrorState({ onRetry }: { onRetry: () => void }) {
 }
 
 function UpgradeGate() {
+	useEffect(() => {
+		posthog.capture("paywall_shown", { resource: "analytics" });
+	}, []);
+
 	async function handleUpgrade() {
+		posthog.capture("paywall_upgrade_clicked", { resource: "analytics" });
 		try {
 			await startProCheckout();
 		} catch (err) {

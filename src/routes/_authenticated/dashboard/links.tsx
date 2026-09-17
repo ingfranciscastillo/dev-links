@@ -128,8 +128,6 @@ function LinksPage() {
 
 						<p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
 							The destinations you want visitors to find. Drag to reorder.
-							{!isPro &&
-								` ${data.links.length}/${PLAN_LIMITS.free.links} used on the Free plan.`}
 						</p>
 					</div>
 

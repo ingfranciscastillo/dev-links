@@ -5,6 +5,7 @@ import posthog from "posthog-js";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 
+import { PlanComparisonTable } from "@/components/dashboard/PlanComparisonTable";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import {
@@ -788,6 +789,10 @@ function CssPane({
 							Write your own CSS, scoped to your public page, for full control
 							over how it looks.
 						</p>
+
+						<div className="max-w-md">
+							<PlanComparisonTable highlight="custom_css" />
+						</div>
 
 						<Button
 							onClick={handleUpgrade}

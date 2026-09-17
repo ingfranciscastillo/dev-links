@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { startProCheckout } from "@/lib/billing";
 import { ModalShell } from "./ModalShell";
+import { PlanComparisonTable } from "./PlanComparisonTable";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -56,8 +57,7 @@ export function LimitReachedModal({
 						</div>
 
 						<p className="text-sm leading-relaxed text-muted-foreground">
-							You're using all {limit} {label} on the Free plan. Pro removes the
-							limit — plus custom CSS, analytics, and no DevLinks branding.
+							You're using all {limit} {label} on the Free plan.
 						</p>
 					</div>
 
@@ -75,6 +75,8 @@ export function LimitReachedModal({
 							{limit}/{limit} {label} used
 						</p>
 					</div>
+
+					<PlanComparisonTable highlight="usage" />
 
 					<div className="mt-7 flex items-center justify-end gap-5 border-t border-border pt-5">
 						<button

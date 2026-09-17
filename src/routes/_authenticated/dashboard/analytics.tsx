@@ -22,6 +22,7 @@ import {
 	YAxis,
 } from "recharts";
 
+import { PlanComparisonTable } from "@/components/dashboard/PlanComparisonTable";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import type { AnalyticsSummary } from "@/lib/api/analytics.functions";
@@ -170,6 +171,8 @@ function UpgradeGate() {
 						Unlock views, clicks, CTR, unique visitors, device, browser,
 						country, referrer, and hourly activity data for your public page.
 					</p>
+
+					<PlanComparisonTable highlight="analytics" />
 
 					<Button
 						onClick={handleUpgrade}

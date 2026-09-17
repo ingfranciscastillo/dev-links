@@ -199,6 +199,7 @@ function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 		hourly,
 		topLinks,
 		topReferrers,
+		topLinksBySource,
 		visitorBreakdown,
 	} = data;
 
@@ -445,6 +446,21 @@ function AnalyticsBody({ data }: { data: AnalyticsSummary }) {
 						{ name: "New", value: visitorBreakdown.new },
 						{ name: "Returning", value: visitorBreakdown.returning },
 					]}
+				/>
+			</DataSection>
+
+			<DataSection
+				number="10"
+				title="What source clicks what"
+				description="Which link each traffic source clicks the most."
+				className="mt-10"
+			>
+				<RankedList
+					empty="No clicks yet."
+					items={topLinksBySource.map((item) => ({
+						label: `${item.link} — via ${item.source}`,
+						value: item.clicks,
+					}))}
 				/>
 			</DataSection>
 		</div>

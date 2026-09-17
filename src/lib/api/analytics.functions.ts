@@ -30,6 +30,7 @@ export type AnalyticsSummary = {
 	hourly: Array<{ hour: number; views: number }>;
 	topLinks: Array<{ title: string; clicks: number }>;
 	topReferrers: Array<{ source: string; visits: number }>;
+	topLinksBySource: Array<{ link: string; source: string; clicks: number }>;
 };
 
 export type AnalyticsSummaryLite = { views: number; clicks: number };
@@ -55,6 +56,15 @@ const CLICK_WHERE_BETWEEN = (userId: string, since: Date, until: Date) =>
 function pctChange(current: number, previous: number): number | null {
 	if (previous === 0) return current === 0 ? 0 : null;
 	return Number((((current - previous) / previous) * 100).toFixed(1));
+}
+
+function sourceFromReferrer(ref: string | null): string {
+	if (!ref) return "direct";
+	try {
+		return new URL(ref).hostname.replace(/^www\./, "");
+	} catch {
+		return "other";
+	}
 }
 
 // Fecha UTC (YYYY-MM-DD) de un timestamptz, igual que toISOString().slice(0,10).
@@ -87,6 +97,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				[previousViewsRow],
 				[previousClicksRow],
 				visitorDayRows,
+				linkReferrerRows,
 			] = await Promise.all([
 				db
 					.select({ plan: profiles.plan })
@@ -213,6 +224,19 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 					.from(pageViews)
 					.where(VIEW_WHERE(userId, since))
 					.groupBy(pageViews.ipHash),
+				// Which source drives clicks on which link — cheap because
+				// linkClicks already carries its own referrer per row.
+				db
+					.select({
+						title: topLinkExpr,
+						referrer: linkClicks.referrer,
+						clicks: sql<number>`count(*)`.mapWith(Number),
+					})
+					.from(linkClicks)
+					.where(CLICK_WHERE(userId, since))
+					.groupBy(topLinkExpr, linkClicks.referrer)
+					.orderBy(sql`count(*) desc`)
+					.limit(500),
 			]);
 
 			const plan = profileRow[0]?.plan ?? "free";
@@ -245,20 +269,26 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 			// Referrers: hostname desde grupos crudos.
 			const refMap = new Map<string, number>();
 			for (const r of referrerRows) {
-				const ref = r.referrer;
-				let source = "direct";
-				if (ref) {
-					try {
-						source = new URL(ref).hostname.replace(/^www\./, "");
-					} catch {
-						source = "other";
-					}
-				}
+				const source = sourceFromReferrer(r.referrer);
 				refMap.set(source, (refMap.get(source) ?? 0) + r.visits);
 			}
 			const topReferrers = Array.from(refMap.entries())
 				.map(([source, visits]) => ({ source, visits }))
 				.sort((a, b) => b.visits - a.visits)
+				.slice(0, 8);
+
+			// Combos link×fuente: misma resolución de hostname, agregados por par.
+			const linkSourceMap = new Map<string, number>();
+			for (const r of linkReferrerRows) {
+				const key = `${r.title}||${sourceFromReferrer(r.referrer)}`;
+				linkSourceMap.set(key, (linkSourceMap.get(key) ?? 0) + r.clicks);
+			}
+			const topLinksBySource = Array.from(linkSourceMap.entries())
+				.map(([key, clicks]) => {
+					const [link, source] = key.split("||");
+					return { link, source, clicks };
+				})
+				.sort((a, b) => b.clicks - a.clicks)
 				.slice(0, 8);
 
 			const totalViews = dailyViewRows.reduce((acc, r) => acc + r.views, 0);
@@ -307,6 +337,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				hourly,
 				topLinks: topLinkRows,
 				topReferrers,
+				topLinksBySource,
 			};
 		} catch (err) {
 			console.warn("[analytics] getMyAnalytics failed:", err);
@@ -323,6 +354,7 @@ export const getMyAnalytics = createServerFn({ method: "GET" }).handler(
 				hourly: [],
 				topLinks: [],
 				topReferrers: [],
+				topLinksBySource: [],
 			};
 		}
 	},

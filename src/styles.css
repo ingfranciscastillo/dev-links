@@ -506,6 +506,30 @@
 }
 
 /* =========================================================
+   FORM FEEDBACK (forms-inputs skill: error states deserve
+   noticeable, non-linear motion — not just a color change)
+   ========================================================= */
+
+@keyframes field-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@utility animate-field-shake {
+  animation: field-shake 300ms ease-in-out;
+}
+
+/* =========================================================
    PAGE TRANSITIONS (native View Transition API, router-driven)
    ========================================================= */
 

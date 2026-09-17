@@ -460,7 +460,7 @@ function ProfileForm({ core }: { core: ProfileCore }) {
 											onBlur={field.handleBlur}
 											onChange={(e) => field.handleChange(e.target.value)}
 											aria-invalid={invalid || undefined}
-											className="relative flex w-full resize-y border-b border-border bg-transparent px-0 py-3 text-sm leading-relaxed focus:border-brand focus:outline-none"
+											className="relative flex w-full resize-y border-b border-border bg-transparent px-0 py-3 text-sm leading-relaxed transition-colors duration-150 focus:border-brand focus:outline-none"
 										/>
 									</div>
 

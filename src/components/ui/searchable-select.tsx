@@ -56,7 +56,7 @@ export function SearchableSelect({
 						// ancho — sin esto, un caller que solo pase border-b-border se
 						// queda con un borde invisible de 0px (así pasó con Location y
 						// Primary language).
-						"flex w-full items-center justify-between gap-2 border-b border-transparent text-sm outline-none",
+						"flex w-full items-center justify-between gap-2 border-b border-transparent text-sm outline-none transition-colors duration-150",
 						!selected && "text-muted-foreground",
 						className,
 					)}

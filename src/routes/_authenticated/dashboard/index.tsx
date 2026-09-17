@@ -1,3 +1,4 @@
+import { CheckCircleIcon } from "@solar-icons/react/line-duotone";
 import {
 	ArrowRightUpIcon,
 	CodeSquareIcon,
@@ -25,6 +26,10 @@ function bioLinkedStorageKey(userId: string) {
 	return `devlinks:bio-linked:${userId}`;
 }
 
+function checklistDismissedStorageKey(userId: string) {
+	return `devlinks:checklist-dismissed:${userId}`;
+}
+
 export const Route = createFileRoute("/_authenticated/dashboard/")({
 	head: () => ({ meta: [{ title: "Dashboard — DevLinks" }] }),
 	component: DashboardHome,
@@ -39,12 +44,16 @@ function DashboardHome() {
 
 	const [hasShared, setHasShared] = useState(false);
 	const [hasLinkedBio, setHasLinkedBio] = useState(false);
+	const [checklistDismissed, setChecklistDismissed] = useState(false);
 
 	useEffect(() => {
 		try {
 			setHasShared(localStorage.getItem(sharedStorageKey(user.id)) === "1");
 			setHasLinkedBio(
 				localStorage.getItem(bioLinkedStorageKey(user.id)) === "1",
+			);
+			setChecklistDismissed(
+				localStorage.getItem(checklistDismissedStorageKey(user.id)) === "1",
 			);
 		} catch {
 			// Private browsing / storage disabled — checklist item just stays open.
@@ -74,14 +83,18 @@ function DashboardHome() {
 	}> = [
 		{ label: "Create your account", done: true },
 		{
-			label: "Add a bio and avatar",
-			done: Boolean(core.data?.bio) && Boolean(user.image),
-			to: "/dashboard/profile",
-		},
-		{
+			// Primero — es el diferenciador real del producto (sync automático),
+			// no bio/avatar. Antes iba tercero y hacía que alguien pudiera
+			// "completar" el setup sin haber tocado la parte que de verdad
+			// importa.
 			label: "Connect GitHub",
 			done: integrations.data?.some((a) => a.provider === "github") ?? false,
 			to: "/dashboard/integrations",
+		},
+		{
+			label: "Add a bio and avatar",
+			done: Boolean(core.data?.bio) && Boolean(user.image),
+			to: "/dashboard/profile",
 		},
 		{
 			label: "Add your first link",
@@ -99,6 +112,18 @@ function DashboardHome() {
 			action: addLinkToGithubBio,
 		},
 	];
+
+	const allDone = checklist.every((item) => item.done);
+
+	function dismissChecklist() {
+		setChecklistDismissed(true);
+		try {
+			localStorage.setItem(checklistDismissedStorageKey(user.id), "1");
+		} catch {
+			// Private browsing / storage disabled — non-critical, skip.
+		}
+		posthog.capture("checklist_dismissed");
+	}
 
 	const stats = [
 		{
@@ -308,67 +333,90 @@ function DashboardHome() {
 					</div>
 				</section>
 
-				<section className="py-8 lg:pl-10">
-					<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
-						03 / Setup
-					</p>
+				{!checklistDismissed && (
+					<section className="py-8 lg:pl-10">
+						<p className="font-mono text-[9px] uppercase tracking-[0.12em] text-brand">
+							03 / Setup
+						</p>
 
-					<h2 className="mt-4 font-display text-3xl tracking-[-0.03em]">
-						Setup checklist
-					</h2>
+						<h2 className="mt-4 font-display text-3xl tracking-[-0.03em]">
+							Setup checklist
+						</h2>
 
-					<ul className="mt-6 border-t border-border">
-						{checklist.map(({ label, done, to, action }, index) => (
-							<li
-								key={label}
-								className="flex items-center gap-3 border-b border-border py-4"
-							>
-								<span
-									className={`font-mono text-[9px] transition-colors duration-300 ${
-										done ? "text-brand" : "text-muted-foreground"
-									}`}
+						{allDone && (
+							<div className="mt-4 flex items-center justify-between gap-4">
+								<p className="flex items-center gap-2 text-sm text-muted-foreground">
+									<CheckCircleIcon
+										secondaryOpacity={0}
+										size={18}
+										className="shrink-0 text-brand"
+									/>
+									All set — your page is live and up to date.
+								</p>
+
+								<button
+									type="button"
+									onClick={dismissChecklist}
+									className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-muted-foreground transition-colors hover:text-foreground"
 								>
-									{String(index + 1).padStart(2, "0")}
-								</span>
+									Hide
+								</button>
+							</div>
+						)}
 
-								<span
-									className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${
-										done ? "bg-brand" : "border border-border"
-									}`}
-								/>
-
-								<span
-									className={`flex-1 text-sm transition-colors duration-300 ${
-										done
-											? "text-muted-foreground line-through"
-											: "text-foreground"
-									}`}
+						<ul className="mt-6 border-t border-border">
+							{checklist.map(({ label, done, to, action }, index) => (
+								<li
+									key={label}
+									className="flex items-center gap-3 border-b border-border py-4"
 								>
-									{label}
-								</span>
-
-								{!done && to && (
-									<Link
-										to={to}
-										className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-brand transition-colors hover:text-foreground"
+									<span
+										className={`font-mono text-[9px] transition-colors duration-300 ${
+											done ? "text-brand" : "text-muted-foreground"
+										}`}
 									>
-										Do it →
-									</Link>
-								)}
+										{String(index + 1).padStart(2, "0")}
+									</span>
 
-								{!done && action && (
-									<button
-										type="button"
-										onClick={action}
-										className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-brand transition-colors hover:text-foreground"
+									<span
+										className={`h-1.5 w-1.5 rounded-full transition-colors duration-300 ${
+											done ? "bg-brand" : "border border-border"
+										}`}
+									/>
+
+									<span
+										className={`flex-1 text-sm transition-colors duration-300 ${
+											done
+												? "text-muted-foreground line-through"
+												: "text-foreground"
+										}`}
 									>
-										Do it →
-									</button>
-								)}
-							</li>
-						))}
-					</ul>
-				</section>
+										{label}
+									</span>
+
+									{!done && to && (
+										<Link
+											to={to}
+											className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-brand transition-colors hover:text-foreground"
+										>
+											Do it →
+										</Link>
+									)}
+
+									{!done && action && (
+										<button
+											type="button"
+											onClick={action}
+											className="shrink-0 font-mono text-[9px] uppercase tracking-widest text-brand transition-colors hover:text-foreground"
+										>
+											Do it →
+										</button>
+									)}
+								</li>
+							))}
+						</ul>
+					</section>
+				)}
 			</div>
 		</div>
 	);

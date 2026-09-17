@@ -21,6 +21,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { autoConnectGithub } from "@/lib/api/integrations/account.functions";
 import { profileInput } from "@/lib/api/profile-data.functions";
 import { useUpdateProfile } from "@/lib/queries/profile-data";
 import { zodField } from "@/lib/schemas/field";
@@ -58,6 +59,22 @@ function OnboardingPage() {
 				// Only reached by first-time OAuth signups (see beforeLoad) —
 				// email signups fire this in use-sign-up.ts instead.
 				posthog.capture("signup_completed", { method: "oauth" });
+
+				// Si el signup fue con GitHub, conecta la integración de una vez
+				// con el access token que better-auth ya guardó — sin esto el
+				// usuario tendría que volver a escribir su propio username en
+				// /dashboard/integrations. No-op silencioso si no fue GitHub o
+				// si la llamada a la API de GitHub falla.
+				try {
+					const result = await autoConnectGithub();
+					if (result.connected) {
+						posthog.capture("github_auto_connected");
+						toast.success("GitHub connected");
+					}
+				} catch {
+					// Ignorado a propósito — nunca debe bloquear el onboarding.
+				}
+
 				await router.invalidate();
 				await router.navigate({ to: "/dashboard" });
 			} catch (err) {

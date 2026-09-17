@@ -33,16 +33,14 @@ export function EmptyState({
 	description,
 	action,
 }: {
-	icon: React.ComponentType<{ className?: string }>;
+	icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
 	title: string;
 	description: string;
 	action?: ReactNode;
 }) {
 	return (
 		<div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-hairline bg-surface/40 py-16 text-center">
-			<div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-surface-elevated text-muted-foreground">
-				<Icon className="h-5 w-5" />
-			</div>
+			<Icon className="mb-3 h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
 			<h3 className="text-base font-semibold">{title}</h3>
 			<p className="mt-1 max-w-sm text-sm text-muted-foreground">
 				{description}

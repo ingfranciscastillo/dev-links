@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { and, asc, eq } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { z } from "zod";
+import { account as authAccount } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { integrationAccounts, integrationCache, profiles } from "@/db/schema";
 import { ensureSession } from "@/lib/auth.functions";
@@ -249,3 +250,59 @@ export const refreshIntegration = createServerFn({ method: "POST" })
 			throw new Error(message);
 		}
 	});
+
+// Solo se llama una vez, desde /_authenticated/onboarding, justo después de un
+// signup nuevo por OAuth — si ese signup fue con GitHub, usa el access token
+// que better-auth ya guardó en `account` para leer el username real (GitHub
+// no lo expone como accountId, ese es el numeric id) y conectar la
+// integración sin que el usuario tenga que repetir su username a mano.
+export const autoConnectGithub = createServerFn({ method: "POST" }).handler(
+	async (): Promise<{ connected: boolean; handle?: string }> => {
+		const userId = await requireUserId();
+
+		const [githubAccount] = await db
+			.select({ accessToken: authAccount.accessToken })
+			.from(authAccount)
+			.where(
+				and(
+					eq(authAccount.userId, userId),
+					eq(authAccount.providerId, "github"),
+				),
+			)
+			.limit(1);
+
+		if (!githubAccount?.accessToken) return { connected: false };
+
+		try {
+			const res = await fetch("https://api.github.com/user", {
+				headers: {
+					Authorization: `Bearer ${githubAccount.accessToken}`,
+					"User-Agent": "DevLinks",
+					Accept: "application/vnd.github+json",
+				},
+			});
+			if (!res.ok) return { connected: false };
+
+			const profile = (await res.json()) as { login?: string };
+			if (!profile.login) return { connected: false };
+
+			await db
+				.insert(integrationAccounts)
+				.values({
+					userId,
+					provider: "github",
+					handle: profile.login,
+					config: {},
+				})
+				.onConflictDoNothing({
+					target: [integrationAccounts.userId, integrationAccounts.provider],
+				});
+
+			return { connected: true, handle: profile.login };
+		} catch {
+			// GitHub caído/rate-limited: no debe bloquear el onboarding, el
+			// usuario siempre puede conectar GitHub a mano después.
+			return { connected: false };
+		}
+	},
+);

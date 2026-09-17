@@ -561,6 +561,12 @@ function TypePane({
 	);
 }
 
+// Con cada fuente nueva la grilla crece — colapsada por defecto para que
+// picker no empuje el resto del panel fuera de vista. Si el valor activo
+// cae fuera de las primeras N, se muestra igual expandido para no esconder
+// la selección actual.
+const FONT_PICKER_COLLAPSED_COUNT = 6;
+
 function FontPicker({
 	label,
 	value,
@@ -572,14 +578,25 @@ function FontPicker({
 	onChange: (value: string) => void;
 	categories: readonly FontCategory[];
 }) {
+	const [expanded, setExpanded] = useState(false);
 	const options = fontOptions.filter((font) =>
 		categories.includes(font.category),
 	);
+	const hiddenCount = options.length - FONT_PICKER_COLLAPSED_COUNT;
+	const selectedIsHidden =
+		hiddenCount > 0 &&
+		options
+			.slice(FONT_PICKER_COLLAPSED_COUNT)
+			.some((font) => font.value === value);
+	const visible =
+		expanded || selectedIsHidden || hiddenCount <= 0
+			? options
+			: options.slice(0, FONT_PICKER_COLLAPSED_COUNT);
 
 	return (
 		<Row label={label}>
 			<div className="grid gap-px border border-border bg-border sm:grid-cols-2">
-				{options.map((font) => (
+				{visible.map((font) => (
 					<button
 						type="button"
 						key={font.value}
@@ -600,6 +617,16 @@ function FontPicker({
 					</button>
 				))}
 			</div>
+
+			{hiddenCount > 0 && !expanded && !selectedIsHidden && (
+				<button
+					type="button"
+					onClick={() => setExpanded(true)}
+					className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+				>
+					Show {hiddenCount} more
+				</button>
+			)}
 		</Row>
 	);
 }
@@ -874,7 +901,9 @@ function CssPane({
 			<p className="text-[10px] leading-relaxed text-muted-foreground">
 				Scoped selectors: <code>.tt-card</code>, <code>.tt-btn</code>,{" "}
 				<code>.tt-muted</code>. Vars: <code>--tt-bg</code>, <code>--tt-fg</code>
-				, <code>--tt-accent</code>, <code>--tt-radius</code>…
+				, <code>--tt-accent</code>, <code>--tt-radius</code>,{" "}
+				<code>--tt-heading-font</code>, <code>--tt-body-font</code>,{" "}
+				<code>--tt-mono-font</code>…
 			</p>
 		</Pane>
 	);

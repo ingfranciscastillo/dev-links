@@ -40,6 +40,24 @@ export const fontOptions = [
 		stack: "system-ui, -apple-system, sans-serif",
 	},
 	{
+		value: "bricolage-grotesque",
+		label: "Bricolage Grotesque",
+		category: "sans",
+		stack: "'Bricolage Grotesque Variable', sans-serif",
+	},
+	{
+		value: "plus-jakarta-sans",
+		label: "Plus Jakarta Sans",
+		category: "sans",
+		stack: "'Plus Jakarta Sans Variable', sans-serif",
+	},
+	{
+		value: "archivo",
+		label: "Archivo",
+		category: "sans",
+		stack: "'Archivo Variable', sans-serif",
+	},
+	{
 		value: "fraunces",
 		label: "Fraunces",
 		category: "serif",
@@ -50,6 +68,18 @@ export const fontOptions = [
 		label: "Newsreader",
 		category: "serif",
 		stack: "'Newsreader Variable', Georgia, serif",
+	},
+	{
+		value: "spectral",
+		label: "Spectral",
+		category: "serif",
+		stack: "'Spectral', Georgia, serif",
+	},
+	{
+		value: "petrona",
+		label: "Petrona",
+		category: "serif",
+		stack: "'Petrona Variable', Georgia, serif",
 	},
 	{
 		value: "jetbrains",
@@ -74,6 +104,18 @@ export const fontOptions = [
 		label: "Space Mono",
 		category: "mono",
 		stack: "'Space Mono', ui-monospace, monospace",
+	},
+	{
+		value: "fira-code",
+		label: "Fira Code",
+		category: "mono",
+		stack: "'Fira Code Variable', ui-monospace, monospace",
+	},
+	{
+		value: "victor-mono",
+		label: "Victor Mono",
+		category: "mono",
+		stack: "'Victor Mono Variable', ui-monospace, monospace",
 	},
 ] as const;
 

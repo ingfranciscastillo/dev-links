@@ -43,6 +43,21 @@ function isDisallowedHost(host: string): boolean {
 	return false;
 }
 
+const FETCH_TIMEOUT_MS = 8000;
+
+// No AbortController meant a hanging/slow instance host held the connection
+// open indefinitely, and since refreshIntegration's 60s cooldown is
+// check-then-act (not atomic), a burst of concurrent requests could each
+// slip past the cooldown while the first was still hanging — fanning out
+// unboundedly against one internal target reachable via the SSRF above.
+function fetchWithTimeout(input: string, init: RequestInit): Promise<Response> {
+	const controller = new AbortController();
+	const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+	return fetch(input, { ...init, signal: controller.signal }).finally(() =>
+		clearTimeout(timer),
+	);
+}
+
 function parseHandle(raw: string): { user: string; host: string } {
 	const handle = raw.trim().replace(/^@/, "");
 	const parts = handle.split("@");
@@ -60,7 +75,7 @@ export async function fetchMastodon(input: {
 }): Promise<FetchResult[]> {
 	const { user, host } = parseHandle(input.handle);
 	const base = `https://${host}`;
-	const accRes = await fetch(
+	const accRes = await fetchWithTimeout(
 		`${base}/api/v1/accounts/lookup?acct=${encodeURIComponent(user)}`,
 		{
 			headers: {
@@ -73,7 +88,7 @@ export async function fetchMastodon(input: {
 	const acc = (await accRes.json()) as Record<string, unknown>;
 	const id = acc.id as string;
 
-	const stRes = await fetch(
+	const stRes = await fetchWithTimeout(
 		`${base}/api/v1/accounts/${encodeURIComponent(id)}/statuses?limit=10&exclude_replies=true&exclude_reblogs=true`,
 		{
 			headers: {

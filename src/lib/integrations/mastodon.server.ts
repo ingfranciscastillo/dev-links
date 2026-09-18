@@ -7,11 +7,50 @@ function stripTags(s: string): string {
 		.trim();
 }
 
+// Blocks SSRF into the server's internal network via an attacker-supplied
+// instance host: literal loopback/private/link-local/reserved IPs (IPv4 and
+// IPv6), plus "localhost". Does not resolve DNS, so a rebinding attack via a
+// public hostname that later resolves to an internal IP is out of scope here.
+function isDisallowedHost(host: string): boolean {
+	const h = host.toLowerCase();
+	if (h === "localhost" || h.endsWith(".localhost")) return true;
+
+	const bracketless = h.startsWith("[") && h.endsWith("]") ? h.slice(1, -1) : h;
+
+	const ipv4Match = bracketless.match(
+		/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/,
+	);
+	if (ipv4Match) {
+		const [a, b] = [Number(ipv4Match[1]), Number(ipv4Match[2])];
+		if (a === 127) return true; // loopback
+		if (a === 10) return true; // private
+		if (a === 172 && b >= 16 && b <= 31) return true; // private
+		if (a === 192 && b === 168) return true; // private
+		if (a === 169 && b === 254) return true; // link-local / cloud metadata
+		if (a === 0) return true; // "this network"
+		return false;
+	}
+
+	if (bracketless.includes(":")) {
+		// IPv6: treat anything other than a clearly-global address as unsafe.
+		if (bracketless === "::1") return true; // loopback
+		if (/^fe[89ab][0-9a-f]:/i.test(bracketless)) return true; // link-local
+		if (/^f[cd][0-9a-f]{2}:/i.test(bracketless)) return true; // unique local
+		if (bracketless === "::" || /^::ffff:/i.test(bracketless)) return true;
+		return false;
+	}
+
+	return false;
+}
+
 function parseHandle(raw: string): { user: string; host: string } {
 	const handle = raw.trim().replace(/^@/, "");
 	const parts = handle.split("@");
 	if (parts.length !== 2 || !parts[0] || !parts[1]) {
 		throw new Error("Use the full handle: user@instance.social");
+	}
+	if (isDisallowedHost(parts[1])) {
+		throw new Error("This Mastodon instance host is not allowed");
 	}
 	return { user: parts[0], host: parts[1] };
 }

@@ -51,6 +51,23 @@
 @import '@fontsource/spectral/600.css';
 @import '@fontsource/spectral/700.css';
 
+@import '@fontsource/instrument-serif/400.css';
+
+@import "@fontsource-variable/playfair-display/wght.css";
+@import "@fontsource-variable/cormorant-garamond/wght.css";
+@import "@fontsource-variable/libre-baskerville/wght.css";
+@import "@fontsource-variable/dm-sans/wght.css";
+@import "@fontsource-variable/sora/wght.css";
+@import "@fontsource-variable/syne/wght.css";
+@import "@fontsource-variable/outfit/wght.css";
+@import "@fontsource-variable/figtree/wght.css";
+@import "@fontsource-variable/source-sans-3/wght.css";
+@import "@fontsource-variable/public-sans/wght.css";
+@import "@fontsource-variable/work-sans/wght.css";
+@import "@fontsource-variable/noto-sans/wght.css";
+@import "@fontsource-variable/ibm-plex-sans/wght.css";
+@import "@fontsource-variable/rubik/wght.css";
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";

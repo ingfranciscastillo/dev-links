@@ -578,18 +578,23 @@ function FontPicker({
 	onChange: (value: string) => void;
 	categories: readonly FontCategory[];
 }) {
-	const [expanded, setExpanded] = useState(false);
 	const options = fontOptions.filter((font) =>
 		categories.includes(font.category),
 	);
 	const hiddenCount = options.length - FONT_PICKER_COLLAPSED_COUNT;
-	const selectedIsHidden =
-		hiddenCount > 0 &&
-		options
-			.slice(FONT_PICKER_COLLAPSED_COUNT)
-			.some((font) => font.value === value);
+	// Solo determina el estado INICIAL — si el valor guardado cae fuera de las
+	// primeras N, arranca expandido para no esconder la selección activa al
+	// cargar. Después el toggle manda: colapsar sigue posible aunque eso
+	// oculte el botón resaltado (es una elección explícita del usuario).
+	const [expanded, setExpanded] = useState(
+		() =>
+			hiddenCount > 0 &&
+			options
+				.slice(FONT_PICKER_COLLAPSED_COUNT)
+				.some((font) => font.value === value),
+	);
 	const visible =
-		expanded || selectedIsHidden || hiddenCount <= 0
+		expanded || hiddenCount <= 0
 			? options
 			: options.slice(0, FONT_PICKER_COLLAPSED_COUNT);
 
@@ -618,13 +623,13 @@ function FontPicker({
 				))}
 			</div>
 
-			{hiddenCount > 0 && !expanded && !selectedIsHidden && (
+			{hiddenCount > 0 && (
 				<button
 					type="button"
-					onClick={() => setExpanded(true)}
+					onClick={() => setExpanded((current) => !current)}
 					className="mt-2 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
 				>
-					Show {hiddenCount} more
+					{expanded ? "Show less" : `Show ${hiddenCount} more`}
 				</button>
 			)}
 		</Row>

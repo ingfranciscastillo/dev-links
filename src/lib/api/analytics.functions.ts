@@ -262,6 +262,11 @@ export const getMyAnalytics = createServerFn({ method: "GET" })
 			]);
 
 			const plan = profileRow[0]?.plan ?? "free";
+			if (plan !== "pro") {
+				throw new Error(
+					"Analytics is a Pro feature. Upgrade to Pro to view it.",
+				);
+			}
 
 			// Serie diaria completa (con ceros incluidos para el rango elegido).
 			const dailyMap = new Map<string, { views: number; clicks: number }>();

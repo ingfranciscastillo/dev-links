@@ -1,9 +1,23 @@
 import { z } from "zod";
 
+// Mirrors the server-side allow-list in profile-data.functions.ts — client
+// validation is UX only, but z.url()/.url() alone accepts "javascript:..."
+// since it checks syntax, not scheme, so keep this in sync with the server.
+const SAFE_URL_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:"]);
+function isSafeUrl(value: string): boolean {
+	try {
+		return SAFE_URL_SCHEMES.has(new URL(value).protocol);
+	} catch {
+		return false;
+	}
+}
+const safeUrl = (message = "Must be a valid http(s)/mailto/tel URL") =>
+	z.string().refine(isSafeUrl, message);
+
 export const linkSchema = z.object({
 	id: z.string(),
 	title: z.string().min(1, "Title is required").max(60),
-	url: z.url("Must be a valid URL"),
+	url: safeUrl(),
 	description: z.string().max(120).optional().or(z.literal("")),
 	active: z.boolean(),
 });
@@ -14,8 +28,8 @@ export const projectSchema = z.object({
 	name: z.string().min(1).max(60),
 	description: z.string().max(200),
 	tech: z.array(z.string()).max(12),
-	github: z.url().optional().or(z.literal("")),
-	demo: z.url().optional().or(z.literal("")),
+	github: safeUrl().optional().or(z.literal("")),
+	demo: safeUrl().optional().or(z.literal("")),
 	status: z.enum(["shipped", "wip", "archived"]),
 });
 export type ProjectItem = z.infer<typeof projectSchema>;
@@ -32,7 +46,7 @@ export const articleSchema = z.object({
 	id: z.string(),
 	title: z.string().min(1).max(160),
 	summary: z.string().max(240).optional().or(z.literal("")),
-	url: z.url(),
+	url: safeUrl(),
 	source: z.string().max(40).optional().or(z.literal("")),
 	date: z.string(), // ISO
 });
@@ -59,8 +73,8 @@ export const talkSchema = z.object({
 	event: z.string().max(120).optional().or(z.literal("")),
 	description: z.string().max(400).optional().or(z.literal("")),
 	date: z.string().optional().or(z.literal("")).nullable(),
-	slidesUrl: z.url().optional().or(z.literal("")).nullable(),
-	videoUrl: z.url().optional().or(z.literal("")).nullable(),
+	slidesUrl: safeUrl().optional().or(z.literal("")).nullable(),
+	videoUrl: safeUrl().optional().or(z.literal("")).nullable(),
 });
 
 export type SupportLinkItem = {
@@ -77,7 +91,7 @@ export const supportLinkSchema = z.object({
 	category: z.enum(["support", "community"]),
 	platform: z.string().min(1, "Choose a platform"),
 	label: z.string().max(60).optional().or(z.literal("")),
-	url: z.url("Must be a valid URL"),
+	url: safeUrl(),
 	serverId: z.string().max(40).optional().or(z.literal("")).nullable(),
 });
 

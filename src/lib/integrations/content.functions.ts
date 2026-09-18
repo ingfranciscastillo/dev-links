@@ -6,27 +6,34 @@ import { db } from "@/db/index";
 import { supportLinks, talks } from "@/db/schema";
 import { ensureSession } from "@/lib/auth.functions";
 
+// Same authoritative scheme allow-list as profile-data.functions.ts — zod's
+// .url() only checks syntax, not scheme, so it would still accept
+// "javascript:...". This is a separate write path into the same
+// talks/supportLinks tables that render as href on the public profile.
+const SAFE_URL_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:"]);
+function isSafeUrl(value: string): boolean {
+	try {
+		return SAFE_URL_SCHEMES.has(new URL(value).protocol);
+	} catch {
+		return false;
+	}
+}
+const urlOrEmpty = z
+	.string()
+	.trim()
+	.max(500)
+	.refine(
+		(v) => v === "" || isSafeUrl(v),
+		"Must be a valid http(s)/mailto/tel URL",
+	);
+
 const talkInput = z.object({
 	title: z.string().trim().min(1).max(160),
 	event: z.string().trim().max(120).default(""),
 	description: z.string().trim().max(400).default(""),
 	date: z.string().trim().max(20).nullable().default(null),
-	slides_url: z
-		.string()
-		.trim()
-		.url()
-		.max(500)
-		.nullable()
-		.or(z.literal(""))
-		.default(null),
-	video_url: z
-		.string()
-		.trim()
-		.url()
-		.max(500)
-		.nullable()
-		.or(z.literal(""))
-		.default(null),
+	slides_url: urlOrEmpty.nullable().default(null),
+	video_url: urlOrEmpty.nullable().default(null),
 });
 
 const supportInput = z.object({
@@ -40,7 +47,12 @@ const supportInput = z.object({
 		"slack",
 	]),
 	label: z.string().trim().max(80).default(""),
-	url: z.string().trim().url().max(500),
+	url: z
+		.string()
+		.trim()
+		.min(1)
+		.max(500)
+		.refine(isSafeUrl, "Must be a valid http(s)/mailto/tel URL"),
 	server_id: z
 		.string()
 		.trim()

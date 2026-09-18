@@ -83,6 +83,7 @@ import type {
 	WakatimePayload,
 	YoutubePayload,
 } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 import type { ProfileData } from "@/lib/schemas";
 import { absoluteUrl } from "@/lib/site";
 import { SOCIAL_PLATFORMS, type SocialLinks } from "@/lib/social-links";
@@ -711,7 +712,7 @@ function ProfileSidebar({
 							<GlobalIcon className="h-3.5 w-3.5" />
 
 							<a
-								href={website}
+								href={sanitizeHref(website)}
 								className={
 									themed ? "hover:opacity-80" : "hover:text-foreground"
 								}
@@ -728,7 +729,7 @@ function ProfileSidebar({
 							<CalendarIcon className="h-3.5 w-3.5" />
 
 							<a
-								href={calendarLink}
+								href={sanitizeHref(calendarLink)}
 								className={
 									themed ? "hover:opacity-80" : "hover:text-foreground"
 								}
@@ -841,7 +842,7 @@ function LinksSection({
 					return (
 						<a
 							key={l.id}
-							href={l.url}
+							href={sanitizeHref(l.url)}
 							target="_blank"
 							rel="noreferrer"
 							onClick={() => {
@@ -942,7 +943,7 @@ function ProjectsSection({
 						>
 							{p.github && (
 								<a
-									href={p.github}
+									href={sanitizeHref(p.github)}
 									className={cx(
 										"inline-flex items-center gap-1",
 										themed ? "hover:opacity-80" : "hover:text-foreground",
@@ -955,7 +956,7 @@ function ProjectsSection({
 							)}
 							{p.demo && (
 								<a
-									href={p.demo}
+									href={sanitizeHref(p.demo)}
 									className={cx(
 										"inline-flex items-center gap-1",
 										themed ? "hover:opacity-80" : "hover:text-foreground",
@@ -1023,7 +1024,7 @@ function ArticlesSection({
 				{articles.map((a) => (
 					<a
 						key={a.id}
-						href={a.url}
+						href={sanitizeHref(a.url)}
 						className={cx(
 							"flex items-center justify-between gap-4 p-4 transition-colors",
 							themed ? "hover:opacity-90" : "hover:bg-surface-elevated",

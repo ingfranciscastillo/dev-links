@@ -53,6 +53,31 @@ function assertUnderLimit(count: number, limit: number, label: string) {
 	}
 }
 
+// Authoritative server-side scheme allow-list for every URL a visitor can
+// click on a public profile — the sole gate, since this file's validators
+// (not the client-only ones in schemas.ts) are the actual trust boundary.
+// zod's own .url()/z.url() only checks syntax, not scheme, so it would still
+// accept "javascript:..." — this refine is what actually blocks it.
+const SAFE_URL_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:"]);
+function isSafeUrl(value: string): boolean {
+	try {
+		return SAFE_URL_SCHEMES.has(new URL(value).protocol);
+	} catch {
+		return false;
+	}
+}
+const URL_SCHEME_MESSAGE = "Must be a valid http(s)/mailto/tel URL";
+const requiredUrl = z.string().min(1).refine(isSafeUrl, URL_SCHEME_MESSAGE);
+const optionalUrl = z
+	.string()
+	.refine((v) => v === "" || isSafeUrl(v), URL_SCHEME_MESSAGE)
+	.optional();
+const nullableOptionalUrl = z
+	.string()
+	.refine((v) => v === "" || isSafeUrl(v), URL_SCHEME_MESSAGE)
+	.nullable()
+	.optional();
+
 // db.transaction no existe en el driver neon-http; los writes multi-statement
 // van por db.batch (endpoint batch de Neon: un roundtrip, atómico).
 type Batch = [BatchItem<"pg">, ...Array<BatchItem<"pg">>];
@@ -281,8 +306,8 @@ export const profileInput = z.object({
 		.max(24)
 		.regex(/^[a-z0-9_-]+$/, "Only a-z, 0-9, _ and -"),
 	bio: z.string().max(BIO_MAX_LENGTH).optional().or(z.literal("")),
-	website: z.string().url().optional().or(z.literal("")),
-	calendarLink: z.string().url().optional().or(z.literal("")),
+	website: optionalUrl,
+	calendarLink: optionalUrl,
 	socialLinks: socialLinksInput,
 });
 
@@ -376,7 +401,7 @@ export const updateDiscovery = createServerFn({ method: "POST" })
 
 const linkInput = z.object({
 	title: z.string().min(1),
-	url: z.string().min(1),
+	url: requiredUrl,
 	description: z.string().optional(),
 });
 
@@ -415,7 +440,7 @@ export const addLink = createServerFn({ method: "POST" })
 const updateLinkInput = z.object({
 	id: z.string(),
 	title: z.string().optional(),
-	url: z.string().optional(),
+	url: optionalUrl,
 	description: z.string().nullable().optional(),
 	active: z.boolean().optional(),
 });
@@ -476,8 +501,8 @@ const projectInput = z.object({
 	name: z.string().min(1),
 	description: z.string().default(""),
 	tech: z.array(z.string()).default([]),
-	github: z.string().optional(),
-	demo: z.string().optional(),
+	github: optionalUrl,
+	demo: optionalUrl,
 	status: z.enum(["shipped", "wip", "archived"]).default("shipped"),
 });
 
@@ -595,7 +620,7 @@ export const removeSnippet = createServerFn({ method: "POST" })
 const articleInput = z.object({
 	title: z.string().min(1),
 	summary: z.string().optional(),
-	url: z.string().min(1),
+	url: requiredUrl,
 	source: z.string().optional(),
 	date: z.string(), // ISO
 });
@@ -629,7 +654,7 @@ const updateArticleInput = z.object({
 	id: z.string(),
 	title: z.string().optional(),
 	summary: z.string().nullable().optional(),
-	url: z.string().optional(),
+	url: optionalUrl,
 	source: z.string().nullable().optional(),
 	date: z.string().optional(),
 });
@@ -661,8 +686,8 @@ const talkInput = z.object({
 	event: z.string().optional(),
 	description: z.string().optional(),
 	date: z.string().nullable().optional(),
-	slidesUrl: z.string().nullable().optional(),
-	videoUrl: z.string().nullable().optional(),
+	slidesUrl: nullableOptionalUrl,
+	videoUrl: nullableOptionalUrl,
 });
 
 export const addTalk = createServerFn({ method: "POST" })
@@ -698,8 +723,8 @@ const updateTalkInput = z.object({
 	event: z.string().optional(),
 	description: z.string().optional(),
 	date: z.string().nullable().optional(),
-	slidesUrl: z.string().nullable().optional(),
-	videoUrl: z.string().nullable().optional(),
+	slidesUrl: nullableOptionalUrl,
+	videoUrl: nullableOptionalUrl,
 });
 
 export const updateTalk = createServerFn({ method: "POST" })
@@ -728,7 +753,7 @@ const supportLinkInput = z.object({
 	category: z.enum(["support", "community"]),
 	platform: z.string().min(1),
 	label: z.string().optional(),
-	url: z.string().min(1),
+	url: requiredUrl,
 	serverId: z.string().nullable().optional(),
 });
 
@@ -764,7 +789,7 @@ const updateSupportLinkInput = z.object({
 	category: z.enum(["support", "community"]).optional(),
 	platform: z.string().optional(),
 	label: z.string().optional(),
-	url: z.string().optional(),
+	url: optionalUrl,
 	serverId: z.string().nullable().optional(),
 });
 

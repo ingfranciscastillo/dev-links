@@ -5,6 +5,7 @@ import {
 	SiKofi,
 } from "@icons-pack/react-simple-icons";
 import { HeartIcon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -63,7 +64,7 @@ export function SupportBlock({
 					return (
 						<a
 							key={l.id}
-							href={l.url}
+							href={sanitizeHref(l.url)}
 							target="_blank"
 							rel="noreferrer"
 							className={
@@ -110,7 +111,7 @@ export function CommunityBlock({
 					return (
 						<a
 							key={l.id}
-							href={l.url}
+							href={sanitizeHref(l.url)}
 							target="_blank"
 							rel="noreferrer"
 							className={cx(

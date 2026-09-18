@@ -3,6 +3,7 @@ import {
 	MicrophoneLargeIcon,
 	PlayIcon,
 } from "@solar-icons/react/linear";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -87,7 +88,7 @@ export function TalksBlock({
 						<div className="mt-3 flex flex-wrap gap-3 text-xs">
 							{t.slidesUrl && (
 								<a
-									href={t.slidesUrl}
+									href={sanitizeHref(t.slidesUrl)}
 									target="_blank"
 									rel="noreferrer"
 									className={cx(
@@ -102,7 +103,7 @@ export function TalksBlock({
 							)}
 							{t.videoUrl && (
 								<a
-									href={t.videoUrl}
+									href={sanitizeHref(t.videoUrl)}
 									target="_blank"
 									rel="noreferrer"
 									className={cx(

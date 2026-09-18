@@ -57,7 +57,10 @@ function isoWeekKey(date: Date): string {
 }
 
 export function hashIP(ip: string): string {
-	const salt = process.env.ANALYTICS_SALT || "devlinks-analytics-salt-v1";
+	const salt = process.env.ANALYTICS_SALT;
+	if (!salt) {
+		throw new Error("ANALYTICS_SALT environment variable is not set");
+	}
 	const week = isoWeekKey(new Date());
 	return createHash("sha256")
 		.update(`${salt}:${week}:${ip}`)

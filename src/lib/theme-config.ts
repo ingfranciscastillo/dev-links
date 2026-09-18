@@ -556,11 +556,15 @@ export function contrastOn(hex: string): string {
 	return lum > 0.6 ? "#0a0a0a" : "#ffffff";
 }
 
-// Strip anything that could break out of the scoped style block.
+// Strip anything that could break out of the scoped style block. The
+// `</style>` blacklist alone was bypassable with whitespace/attribute
+// variants like `</style foo>` — valid CSS never needs a literal `<`/`>`,
+// so stripping both outright closes that whole class of bypass instead of
+// enumerating more tag-name variants.
 function sanitizeCss(css: string): string {
 	if (!css) return "";
 	return css
-		.replace(/<\/style>/gi, "")
+		.replace(/[<>]/g, "")
 		.replace(/@import[^;]*;/gi, "")
 		.replace(/expression\s*\(/gi, "")
 		.replace(/javascript:/gi, "")

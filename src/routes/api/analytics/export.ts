@@ -7,8 +7,15 @@ import { auth } from "@/lib/auth";
 
 const ALLOWED_DAYS = new Set([7, 30, 90]);
 
+// Several of these columns (path, link_title, source, referrer-derived
+// source) originate from unauthenticated visitors via the public tracking
+// endpoints, not from the exporting user. A leading =/+/-/@ makes Excel/
+// Sheets interpret the cell as a formula when the Pro user opens their own
+// export, so any such value is neutralized with a leading apostrophe before
+// the normal CSV-quoting rules apply.
 function csvCell(value: string | number | null): string {
-	const s = value === null ? "" : String(value);
+	let s = value === null ? "" : String(value);
+	if (/^[=+\-@]/.test(s)) s = `'${s}`;
 	if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
 	return s;
 }

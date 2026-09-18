@@ -80,11 +80,22 @@ export async function fetchGithub(input: {
 		),
 	]);
 
-	const pinnedSlugs = (input.config.pinned ?? []).slice(0, 6);
+	// Each slug is interpolated straight into the request path below, so an
+	// unvalidated value like "../rate_limit" or one containing a query
+	// string could redirect the (scopeless, but still real) shared token's
+	// request to a different api.github.com endpoint. Only accept the
+	// "owner/repo" shape GitHub itself uses.
+	const REPO_SLUG_RE = /^[\w.-]+\/[\w.-]+$/;
+	const pinnedSlugs = (input.config.pinned ?? [])
+		.filter((slug) => REPO_SLUG_RE.test(slug))
+		.slice(0, 6);
 	const pinned = await Promise.all(
 		pinnedSlugs.map(async (slug) => {
 			try {
-				return await ghFetch(`https://api.github.com/repos/${slug}`, token);
+				return await ghFetch(
+					`https://api.github.com/repos/${encodeURIComponent(slug).replace("%2F", "/")}`,
+					token,
+				);
 			} catch {
 				return null;
 			}

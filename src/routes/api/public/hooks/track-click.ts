@@ -11,6 +11,10 @@ import {
 	parseUA,
 } from "@/lib/analytics-parse.server";
 import { detectInAppSource } from "@/lib/analytics-sources";
+import { rateLimit } from "@/lib/rate-limit.server";
+
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 30;
 
 const bodySchema = z.object({
 	username: z.string().min(1).max(64),
@@ -42,6 +46,17 @@ export const Route = createFileRoute("/api/public/hooks/track-click")({
 
 				if (!profile) return new Response("ok");
 
+				const ip = extractIP(request);
+				if (
+					!rateLimit(
+						`click:${ip}:${profile.id}`,
+						RATE_LIMIT_WINDOW_MS,
+						RATE_LIMIT_MAX,
+					)
+				) {
+					return new Response("ok"); // no signal to the caller, just drop
+				}
+
 				const ua = request.headers.get("user-agent") || "";
 				const parsed = parseUA(ua);
 				const source = detectInAppSource(ua);
@@ -52,7 +67,7 @@ export const Route = createFileRoute("/api/public/hooks/track-click")({
 						linkId: payload.linkId || null,
 						linkUrl: payload.url,
 						linkTitle: payload.title || null,
-						ipHash: hashIP(extractIP(request)),
+						ipHash: hashIP(ip),
 						ua: ua.slice(0, 512),
 						device: parsed.device,
 						browser: parsed.browser,

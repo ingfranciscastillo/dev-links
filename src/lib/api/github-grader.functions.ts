@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestIP } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { type GraderReport, gradeGithubProfile } from "@/lib/github-grader";
 import { fetchGithub } from "@/lib/integrations/github.server";
 import type { GithubPayload } from "@/lib/integrations/types";
-import { gradeGithubProfile, type GraderReport } from "@/lib/github-grader";
 
 const UA = "DevLinks-GithubGrader/1.0";
 
@@ -74,7 +74,11 @@ export const gradeGithubUsername = createServerFn({ method: "GET" })
 			return { ok: true, data: cached.data };
 		}
 
-		const ip = getRequestIP({ xForwardedFor: true }) ?? "0.0.0.0";
+		// xForwardedFor is intentionally omitted: that header's first entry is
+		// client-supplied and trivially spoofable per request, which let a
+		// single visitor bypass this limiter and exhaust the shared
+		// GITHUB_TOKEN. The raw socket address below can't be spoofed.
+		const ip = getRequestIP() ?? "0.0.0.0";
 		if (!allowRequest(ip)) {
 			return { ok: false, reason: "rate_limited" };
 		}

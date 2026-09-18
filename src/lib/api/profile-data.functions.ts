@@ -45,14 +45,6 @@ async function getPlanLimits(userId: string) {
 	return limitsFor(row?.plan);
 }
 
-function assertUnderLimit(count: number, limit: number, label: string) {
-	if (Number.isFinite(limit) && count >= limit) {
-		throw new Error(
-			`Free plan is limited to ${limit} ${label}. Upgrade to Pro for unlimited.`,
-		);
-	}
-}
-
 // Authoritative server-side scheme allow-list for every URL a visitor can
 // click on a public profile — the sole gate, since this file's validators
 // (not the client-only ones in schemas.ts) are the actual trust boundary.
@@ -410,24 +402,35 @@ export const addLink = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
 		const limits = await getPlanLimits(userId);
-		const [{ count }] = await db
-			.select({ count: sql<number>`count(*)::int` })
-			.from(links)
-			.where(eq(links.userId, userId));
-		assertUnderLimit(count, limits.links, "links");
 
+		// Single guarded INSERT...SELECT...WHERE instead of a separate
+		// count-then-insert: collapses the two round trips (and the window a
+		// concurrent request could land in between them) into one statement,
+		// same idea as the atomic position subquery below.
+		const limitGuard = Number.isFinite(limits.links)
+			? sql`(select count(*)::int from ${links} where ${links.userId} = ${userId}) < ${limits.links}`
+			: sql`true`;
 		const [row] = await db
 			.insert(links)
-			.values({
-				userId,
-				title: data.title,
-				url: data.url,
-				description: data.description || null,
-				active: true,
-				// Subquery atómico: evita la carrera count-then-insert.
-				position: sql<number>`(SELECT COUNT(*)::int FROM ${links} WHERE ${links.userId} = ${userId})`,
-			})
+			.select(sql`
+				select
+					gen_random_uuid(),
+					${userId}::text,
+					${data.title}::text,
+					${data.url}::text,
+					${data.description || null}::text,
+					true,
+					(select count(*)::int from ${links} where ${links.userId} = ${userId}),
+					now()
+				where ${limitGuard}
+			`)
 			.returning();
+
+		if (!row) {
+			throw new Error(
+				`Free plan is limited to ${limits.links} links. Upgrade to Pro for unlimited.`,
+			);
+		}
 		return {
 			id: row.id,
 			title: row.title,
@@ -511,24 +514,45 @@ export const addProject = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
 		const limits = await getPlanLimits(userId);
-		const [{ count }] = await db
-			.select({ count: sql<number>`count(*)::int` })
-			.from(projects)
-			.where(eq(projects.userId, userId));
-		assertUnderLimit(count, limits.projects, "projects");
 
+		// See addLink: single guarded INSERT...SELECT...WHERE instead of
+		// count-then-insert, closing the concurrent-request race window.
+		const limitGuard = Number.isFinite(limits.projects)
+			? sql`(select count(*)::int from ${projects} where ${projects.userId} = ${userId}) < ${limits.projects}`
+			: sql`true`;
+		// Built as array[$1, $2, ...] with each element its own bound
+		// parameter, not a single ::text[]-cast param — the raw driver isn't
+		// guaranteed to serialize a JS array value into Postgres array
+		// wire format on its own.
+		const techArray =
+			data.tech.length > 0
+				? sql`array[${sql.join(
+						data.tech.map((t) => sql`${t}::text`),
+						sql`, `,
+					)}]`
+				: sql`array[]::text[]`;
 		const [row] = await db
 			.insert(projects)
-			.values({
-				userId,
-				name: data.name,
-				description: data.description,
-				tech: data.tech,
-				github: data.github || null,
-				demo: data.demo || null,
-				status: data.status,
-			})
+			.select(sql`
+				select
+					gen_random_uuid(),
+					${userId}::text,
+					${data.name}::text,
+					${data.description}::text,
+					${techArray},
+					${data.github || null}::text,
+					${data.demo || null}::text,
+					${data.status}::project_status,
+					now()
+				where ${limitGuard}
+			`)
 			.returning();
+
+		if (!row) {
+			throw new Error(
+				`Free plan is limited to ${limits.projects} projects. Upgrade to Pro for unlimited.`,
+			);
+		}
 		return {
 			id: row.id,
 			name: row.name,
@@ -575,16 +599,31 @@ export const addSnippet = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		const userId = await requireUserId();
 		const limits = await getPlanLimits(userId);
-		const [{ count }] = await db
-			.select({ count: sql<number>`count(*)::int` })
-			.from(snippets)
-			.where(eq(snippets.userId, userId));
-		assertUnderLimit(count, limits.snippets, "snippets");
 
+		// See addLink: single guarded INSERT...SELECT...WHERE instead of
+		// count-then-insert, closing the concurrent-request race window.
+		const limitGuard = Number.isFinite(limits.snippets)
+			? sql`(select count(*)::int from ${snippets} where ${snippets.userId} = ${userId}) < ${limits.snippets}`
+			: sql`true`;
 		const [row] = await db
 			.insert(snippets)
-			.values({ userId, ...data })
+			.select(sql`
+				select
+					gen_random_uuid(),
+					${userId}::text,
+					${data.title}::text,
+					${data.language}::text,
+					${data.code}::text,
+					now()
+				where ${limitGuard}
+			`)
 			.returning();
+
+		if (!row) {
+			throw new Error(
+				`Free plan is limited to ${limits.snippets} snippets. Upgrade to Pro for unlimited.`,
+			);
+		}
 		return {
 			id: row.id,
 			title: row.title,

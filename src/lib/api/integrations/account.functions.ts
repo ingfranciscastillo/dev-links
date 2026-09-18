@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { z } from "zod";
 import { account as authAccount } from "@/db/auth-schema";
@@ -92,30 +92,38 @@ export const upsertIntegrationAccount = createServerFn({ method: "POST" })
 			.limit(1);
 		const limits = limitsFor(planRow?.plan);
 
-		if (Number.isFinite(limits.integrations)) {
-			const existing = await db
-				.select({ provider: integrationAccounts.provider })
-				.from(integrationAccounts)
-				.where(eq(integrationAccounts.userId, userId));
-			const alreadyConnected = existing.some(
-				(r) => r.provider === data.provider,
-			);
-			if (!alreadyConnected && existing.length >= limits.integrations) {
-				throw new Error(
-					`Free plan is limited to ${limits.integrations} connected integrations. Upgrade to Pro for unlimited.`,
-				);
-			}
-		}
+		// Guarded INSERT...SELECT...WHERE instead of count-then-insert:
+		// reconnecting an already-linked provider is always allowed (it's not
+		// a new slot), a brand new provider only inserts while still under
+		// the free-plan cap. Collapses the check and the write into one
+		// statement, closing the window two concurrent requests could both
+		// pass the count check in.
+		const limitGuard = Number.isFinite(limits.integrations)
+			? sql`(
+					exists (
+						select 1 from ${integrationAccounts}
+						where ${integrationAccounts.userId} = ${userId}
+							and ${integrationAccounts.provider} = ${data.provider}
+					)
+					or (select count(*)::int from ${integrationAccounts} where ${integrationAccounts.userId} = ${userId}) < ${limits.integrations}
+				)`
+			: sql`true`;
 
-		await db
+		const [row] = await db
 			.insert(integrationAccounts)
-			.values({
-				userId,
-				provider: data.provider,
-				handle: data.handle,
-				config: data.config,
-				lastError: null,
-			})
+			.select(sql`
+				select
+					gen_random_uuid(),
+					${userId}::text,
+					${data.provider}::integration_provider,
+					${data.handle}::text,
+					${JSON.stringify(data.config)}::jsonb,
+					null::timestamptz,
+					null::text,
+					now(),
+					now()
+				where ${limitGuard}
+			`)
 			.onConflictDoUpdate({
 				target: [integrationAccounts.userId, integrationAccounts.provider],
 				set: {
@@ -124,7 +132,14 @@ export const upsertIntegrationAccount = createServerFn({ method: "POST" })
 					lastError: null,
 					updatedAt: new Date(),
 				},
-			});
+			})
+			.returning({ id: integrationAccounts.id });
+
+		if (!row) {
+			throw new Error(
+				`Free plan is limited to ${limits.integrations} connected integrations. Upgrade to Pro for unlimited.`,
+			);
+		}
 		return { ok: true as const };
 	});
 

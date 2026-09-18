@@ -734,7 +734,7 @@ export function useResetTheme() {
 export function useWipeProfileData() {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: () => wipeProfileData(),
+		mutationFn: (username: string) => wipeProfileData({ data: { username } }),
 		onSuccess: () => {
 			queryClient.setQueryData<ProfileData>(profileDataKey, (d) => ({
 				...emptyProfileData,

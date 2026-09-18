@@ -889,14 +889,31 @@ export const resetTheme = createServerFn({ method: "POST" }).handler(
 
 // ---------- wipe ----------
 
-export const wipeProfileData = createServerFn({ method: "POST" }).handler(
-	async () => {
+const wipeInput = z.object({ username: z.string() });
+
+export const wipeProfileData = createServerFn({ method: "POST" })
+	.validator((input) => wipeInput.parse(input))
+	.handler(async ({ data }) => {
 		const userId = await requireUserId();
+
+		// The dashboard UI only disables the wipe button until the typed
+		// confirmation matches the username — that's client-side only and
+		// never reached the server, so this irreversible bulk delete could
+		// be triggered directly (e.g. via devtools) with no confirmation at
+		// all. Re-validate the same check server-side.
+		const [row] = await db
+			.select({ username: authUser.username })
+			.from(authUser)
+			.where(eq(authUser.id, userId))
+			.limit(1);
+		if (!row || data.username !== row.username) {
+			throw new Error("Confirmation username does not match.");
+		}
+
 		await db.batch([
 			db.delete(links).where(eq(links.userId, userId)),
 			db.delete(projects).where(eq(projects.userId, userId)),
 			db.delete(snippets).where(eq(snippets.userId, userId)),
 			db.delete(articles).where(eq(articles.userId, userId)),
 		]);
-	},
-);
+	});

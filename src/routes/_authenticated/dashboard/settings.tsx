@@ -97,7 +97,7 @@ function SettingsPage() {
 
 	async function handleWipe() {
 		try {
-			await wipeProfileData.mutateAsync();
+			await wipeProfileData.mutateAsync(confirm);
 			toast.success("All content wiped");
 			setConfirm("");
 		} catch (error) {

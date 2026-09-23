@@ -312,6 +312,21 @@ export const auth = betterAuth({
 				},
 			},
 		},
+		// Account linking is on for GitHub/Google, so a new provider can get
+		// attached to an existing user; log every account row created (signup
+		// or link) so that's traceable. Only ids — the row also carries the
+		// OAuth tokens.
+		account: {
+			create: {
+				after: async (account) => {
+					const a = account as { userId?: string; providerId?: string };
+					console.info("[auth] account.created", {
+						userId: a?.userId,
+						providerId: a?.providerId,
+					});
+				},
+			},
+		},
 		session: {
 			create: {
 				after: async (session) => {

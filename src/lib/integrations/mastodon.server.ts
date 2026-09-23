@@ -1,3 +1,4 @@
+import { safeGet } from "@/lib/safe-fetch.server";
 import type { FetchResult, MastodonPayload } from "./types";
 
 function stripTags(s: string): string {
@@ -7,56 +8,12 @@ function stripTags(s: string): string {
 		.trim();
 }
 
-// Blocks SSRF into the server's internal network via an attacker-supplied
-// instance host: literal loopback/private/link-local/reserved IPs (IPv4 and
-// IPv6), plus "localhost". Does not resolve DNS, so a rebinding attack via a
-// public hostname that later resolves to an internal IP is out of scope here.
-function isDisallowedHost(host: string): boolean {
-	const h = host.toLowerCase();
-	if (h === "localhost" || h.endsWith(".localhost")) return true;
-
-	const bracketless = h.startsWith("[") && h.endsWith("]") ? h.slice(1, -1) : h;
-
-	const ipv4Match = bracketless.match(
-		/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/,
-	);
-	if (ipv4Match) {
-		const [a, b] = [Number(ipv4Match[1]), Number(ipv4Match[2])];
-		if (a === 127) return true; // loopback
-		if (a === 10) return true; // private
-		if (a === 172 && b >= 16 && b <= 31) return true; // private
-		if (a === 192 && b === 168) return true; // private
-		if (a === 169 && b === 254) return true; // link-local / cloud metadata
-		if (a === 0) return true; // "this network"
-		return false;
-	}
-
-	if (bracketless.includes(":")) {
-		// IPv6: treat anything other than a clearly-global address as unsafe.
-		if (bracketless === "::1") return true; // loopback
-		if (/^fe[89ab][0-9a-f]:/i.test(bracketless)) return true; // link-local
-		if (/^f[cd][0-9a-f]{2}:/i.test(bracketless)) return true; // unique local
-		if (bracketless === "::" || /^::ffff:/i.test(bracketless)) return true;
-		return false;
-	}
-
-	return false;
-}
-
-const FETCH_TIMEOUT_MS = 8000;
-
-// No AbortController meant a hanging/slow instance host held the connection
-// open indefinitely, and since refreshIntegration's 60s cooldown is
-// check-then-act (not atomic), a burst of concurrent requests could each
-// slip past the cooldown while the first was still hanging — fanning out
-// unboundedly against one internal target reachable via the SSRF above.
-function fetchWithTimeout(input: string, init: RequestInit): Promise<Response> {
-	const controller = new AbortController();
-	const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-	return fetch(input, { ...init, signal: controller.signal }).finally(() =>
-		clearTimeout(timer),
-	);
-}
+// The instance host comes from the user's handle, so every request to it goes
+// through safeGet (SSRF protection: public addresses only, checked at connect
+// time; no redirects; timeout and size cap). Up front we additionally require
+// a plain DNS name — Mastodon instances are never bare IPs or ports.
+const INSTANCE_HOST_RE =
+	/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
 
 function parseHandle(raw: string): { user: string; host: string } {
 	const handle = raw.trim().replace(/^@/, "");
@@ -64,56 +21,62 @@ function parseHandle(raw: string): { user: string; host: string } {
 	if (parts.length !== 2 || !parts[0] || !parts[1]) {
 		throw new Error("Use the full handle: user@instance.social");
 	}
-	if (isDisallowedHost(parts[1])) {
+	if (!INSTANCE_HOST_RE.test(parts[1])) {
 		throw new Error("This Mastodon instance host is not allowed");
 	}
-	return { user: parts[0], host: parts[1] };
+	return { user: parts[0], host: parts[1].toLowerCase() };
 }
+
+// Everything in the payload comes from the (user-chosen) instance and is
+// rendered as href/src on the public profile — keep only https URLs.
+function httpsUrl(value: unknown): string | null {
+	if (typeof value !== "string") return null;
+	try {
+		return new URL(value).protocol === "https:" ? value : null;
+	} catch {
+		return null;
+	}
+}
+
+const HEADERS = {
+	Accept: "application/json",
+	"User-Agent": "DevLinks-Integrations/1.0",
+};
 
 export async function fetchMastodon(input: {
 	handle: string;
 }): Promise<FetchResult[]> {
 	const { user, host } = parseHandle(input.handle);
 	const base = `https://${host}`;
-	const accRes = await fetchWithTimeout(
+	const accRes = await safeGet(
 		`${base}/api/v1/accounts/lookup?acct=${encodeURIComponent(user)}`,
-		{
-			headers: {
-				Accept: "application/json",
-				"User-Agent": "DevLinks-Integrations/1.0",
-			},
-		},
+		{ headers: HEADERS },
 	);
 	if (!accRes.ok) throw new Error(`Mastodon ${accRes.status}`);
-	const acc = (await accRes.json()) as Record<string, unknown>;
+	const acc = JSON.parse(accRes.text) as Record<string, unknown>;
 	const id = acc.id as string;
 
-	const stRes = await fetchWithTimeout(
+	const stRes = await safeGet(
 		`${base}/api/v1/accounts/${encodeURIComponent(id)}/statuses?limit=10&exclude_replies=true&exclude_reblogs=true`,
-		{
-			headers: {
-				Accept: "application/json",
-				"User-Agent": "DevLinks-Integrations/1.0",
-			},
-		},
+		{ headers: HEADERS },
 	);
 	const statuses = stRes.ok
-		? ((await stRes.json()) as Array<Record<string, unknown>>)
+		? (JSON.parse(stRes.text) as Array<Record<string, unknown>>)
 		: [];
 
 	const payload: MastodonPayload = {
 		profile: {
 			acct: `@${user}@${host}`,
 			display_name: (acc.display_name as string) || user,
-			avatar: (acc.avatar as string | undefined) ?? null,
+			avatar: httpsUrl(acc.avatar),
 			followers: (acc.followers_count as number) ?? 0,
 			following: (acc.following_count as number) ?? 0,
 			statuses: (acc.statuses_count as number) ?? 0,
-			url: (acc.url as string) ?? `${base}/@${user}`,
+			url: httpsUrl(acc.url) ?? `${base}/@${user}`,
 		},
 		posts: statuses.slice(0, 10).map((s) => ({
 			text: stripTags((s.content as string) ?? "").slice(0, 280),
-			url: (s.url as string) ?? "",
+			url: httpsUrl(s.url) ?? "",
 			created_at: (s.created_at as string) ?? "",
 			favourites: (s.favourites_count as number) ?? 0,
 			reblogs: (s.reblogs_count as number) ?? 0,

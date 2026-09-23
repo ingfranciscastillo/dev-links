@@ -17,9 +17,19 @@ import {
 import type { Json } from "@/lib/api/integrations/account.functions";
 import { highlightSnippet } from "@/lib/highlight.server";
 import type { Provider } from "@/lib/integrations/types";
+import { limitsFor } from "@/lib/plan-limits";
 import type { ProfileData, SnippetItem } from "@/lib/schemas";
 import type { SocialLinks } from "@/lib/social-links";
 import { parseThemeConfig } from "@/lib/theme-config";
+
+// updateTheme only checks the plan when CSS is saved, so after a downgrade
+// (cancelled/expired subscription) the stored custom CSS would stay live.
+// The entitlement is re-checked on every render instead; the CSS itself is
+// kept, so it comes back if the user resubscribes.
+function publicTheme(config: unknown, plan: string) {
+	const theme = parseThemeConfig(config);
+	return limitsFor(plan).customCss ? theme : { ...theme, customCss: "" };
+}
 
 export type PublicIntegration = {
 	provider: Provider;
@@ -185,7 +195,7 @@ export const getPublicProfile = createServerFn({ method: "GET" })
 				url: r.url,
 				serverId: r.serverId,
 			})),
-			theme: parseThemeConfig(themeRow[0]?.config),
+			theme: publicTheme(themeRow[0]?.config, profile.plan),
 			templateId: themeRow[0]?.template ?? null,
 		};
 

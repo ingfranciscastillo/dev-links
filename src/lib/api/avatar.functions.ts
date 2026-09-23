@@ -1,20 +1,20 @@
 import { createServerFn } from "@tanstack/react-start";
-import { ensureSession } from "@/lib/auth.functions";
+import { authMiddleware } from "@/lib/auth-middleware";
 import { uploadAvatar } from "@/lib/r2.server";
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/png", "image/jpeg", "image/webp"]);
 
 export const uploadMyAvatar = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((data: unknown) => {
 		if (!(data instanceof FormData)) {
 			throw new Error("Expected multipart form data");
 		}
 		return data;
 	})
-	.handler(async ({ data }) => {
-		const session = await ensureSession();
-		const userId = session.user.id;
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 
 		const file = data.get("file");
 		if (!(file instanceof File)) {

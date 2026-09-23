@@ -4,7 +4,7 @@ import { z } from "zod";
 import { db } from "@/db/index";
 import { linkClicks, pageViews, profiles } from "@/db/schema";
 import { knownSourceFromHostname } from "@/lib/analytics-sources";
-import { ensureSession } from "@/lib/auth.functions";
+import { authMiddleware } from "@/lib/auth-middleware";
 
 export type AnalyticsSummary = {
 	plan: string;
@@ -86,13 +86,13 @@ export const ANALYTICS_RANGE_DAYS = [7, 30, 90] as const;
 export type AnalyticsRangeDays = (typeof ANALYTICS_RANGE_DAYS)[number];
 
 export const getMyAnalytics = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
 	.validator(
 		z.object({ days: z.union([z.literal(7), z.literal(30), z.literal(90)]) })
 			.parse,
 	)
-	.handler(async ({ data }): Promise<AnalyticsSummary> => {
-		const session = await ensureSession();
-		const userId = session.user.id;
+	.handler(async ({ data, context }): Promise<AnalyticsSummary> => {
+		const { userId } = context;
 		const days = data.days;
 
 		const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
@@ -387,10 +387,10 @@ export const getMyAnalytics = createServerFn({ method: "GET" })
 	});
 
 export const getMyAnalyticsSummary = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
 	.validator(z.object({ days: z.number().int().positive().optional() }).parse)
-	.handler(async ({ data }): Promise<AnalyticsSummaryLite> => {
-		const session = await ensureSession();
-		const userId = session.user.id;
+	.handler(async ({ data, context }): Promise<AnalyticsSummaryLite> => {
+		const { userId } = context;
 		const days = data?.days ?? 7;
 		const cutoff = new Date();
 		cutoff.setDate(cutoff.getDate() - days);

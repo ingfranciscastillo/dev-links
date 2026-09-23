@@ -14,7 +14,7 @@ import {
 	talks,
 	themes,
 } from "@/db/schema";
-import { ensureSession } from "@/lib/auth.functions";
+import { authMiddleware } from "@/lib/auth-middleware";
 import { limitsFor } from "@/lib/plan-limits";
 import { defaultTheme, type ProfileData } from "@/lib/schemas";
 import {
@@ -28,13 +28,6 @@ import {
 	themeV2Schema,
 } from "@/lib/theme-config";
 import { templateById } from "@/lib/theme-templates";
-
-// Todas las funciones de este archivo derivan el userId de la sesión,
-// NUNCA del input del cliente — sustituye a lo que hacía RLS en Supabase.
-async function requireUserId() {
-	const session = await ensureSession();
-	return session.user.id;
-}
 
 async function getPlanLimits(userId: string) {
 	const [row] = await db
@@ -119,9 +112,10 @@ async function upsertTheme(
 
 // ---------- read (bundle completo, como el fetchAll viejo) ----------
 
-export const getMyProfileData = createServerFn({ method: "GET" }).handler(
-	async (): Promise<ProfileData> => {
-		const userId = await requireUserId();
+export const getMyProfileData = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async ({ context }): Promise<ProfileData> => {
+		const { userId } = context;
 
 		const [
 			linkRows,
@@ -216,8 +210,7 @@ export const getMyProfileData = createServerFn({ method: "GET" }).handler(
 			theme: parseThemeConfig(themeRow[0]?.config),
 			templateId: themeRow[0]?.template ?? null,
 		};
-	},
-);
+	});
 
 // Datos "core" del perfil que no viven en la sesión (bio/location/website)
 // más los campos de discovery que consume el dashboard.
@@ -235,9 +228,10 @@ export type ProfileCore = {
 	plan: string;
 };
 
-export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
-	async (): Promise<ProfileCore> => {
-		const userId = await requireUserId();
+export const getMyProfileCore = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async ({ context }): Promise<ProfileCore> => {
+		const { userId } = context;
 		const [row] = await db
 			.select({
 				bio: profiles.bio,
@@ -268,8 +262,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" }).handler(
 			technologies: row?.technologies ?? [],
 			plan: row?.plan ?? "free",
 		};
-	},
-);
+	});
 
 const idInput = z.object({ id: z.string() });
 
@@ -304,9 +297,10 @@ export const profileInput = z.object({
 });
 
 export const upsertMyProfile = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => profileInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const cleanUsername = data.username.toLowerCase();
 
 		try {
@@ -366,9 +360,10 @@ const discoveryInput = z.object({
 });
 
 export const updateDiscovery = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => discoveryInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const values = {
 			country: data.country || null,
 			primaryLanguage: data.primaryLanguage || null,
@@ -398,9 +393,10 @@ const linkInput = z.object({
 });
 
 export const addLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => linkInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const limits = await getPlanLimits(userId);
 
 		// Single guarded INSERT...SELECT...WHERE instead of a separate
@@ -449,9 +445,10 @@ const updateLinkInput = z.object({
 });
 
 export const updateLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => updateLinkInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const { id, ...patch } = data;
 		await db
 			.update(links)
@@ -460,9 +457,10 @@ export const updateLink = createServerFn({ method: "POST" })
 	});
 
 export const removeLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		await db
 			.delete(links)
 			.where(and(eq(links.id, data.id), eq(links.userId, userId)));
@@ -471,9 +469,10 @@ export const removeLink = createServerFn({ method: "POST" })
 const reorderInput = z.object({ ids: z.array(z.string()) });
 
 export const reorderLinks = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => reorderInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		if (data.ids.length === 0) return;
 		// Batch atómico: un roundtrip, todo-o-nada en Neon.
 		const statements: Array<BatchItem<"pg">> = [];
@@ -489,9 +488,10 @@ export const reorderLinks = createServerFn({ method: "POST" })
 	});
 
 export const toggleLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		await db
 			.update(links)
 			.set({ active: sql`NOT ${links.active}` })
@@ -510,9 +510,10 @@ const projectInput = z.object({
 });
 
 export const addProject = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => projectInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const limits = await getPlanLimits(userId);
 
 		// See addLink: single guarded INSERT...SELECT...WHERE instead of
@@ -567,9 +568,10 @@ export const addProject = createServerFn({ method: "POST" })
 const updateProjectInput = projectInput.partial().extend({ id: z.string() });
 
 export const updateProject = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => updateProjectInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const { id, ...patch } = data;
 		await db
 			.update(projects)
@@ -578,9 +580,10 @@ export const updateProject = createServerFn({ method: "POST" })
 	});
 
 export const removeProject = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		await db
 			.delete(projects)
 			.where(and(eq(projects.id, data.id), eq(projects.userId, userId)));
@@ -595,9 +598,10 @@ const snippetInput = z.object({
 });
 
 export const addSnippet = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => snippetInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const limits = await getPlanLimits(userId);
 
 		// See addLink: single guarded INSERT...SELECT...WHERE instead of
@@ -635,9 +639,10 @@ export const addSnippet = createServerFn({ method: "POST" })
 const updateSnippetInput = snippetInput.partial().extend({ id: z.string() });
 
 export const updateSnippet = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => updateSnippetInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const { id, ...patch } = data;
 		await db
 			.update(snippets)
@@ -646,9 +651,10 @@ export const updateSnippet = createServerFn({ method: "POST" })
 	});
 
 export const removeSnippet = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		await db
 			.delete(snippets)
 			.where(and(eq(snippets.id, data.id), eq(snippets.userId, userId)));
@@ -665,9 +671,10 @@ const articleInput = z.object({
 });
 
 export const addArticle = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => articleInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const [row] = await db
 			.insert(articles)
 			.values({
@@ -699,9 +706,10 @@ const updateArticleInput = z.object({
 });
 
 export const updateArticle = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => updateArticleInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const { id, date, ...rest } = data;
 		await db
 			.update(articles)
@@ -710,9 +718,10 @@ export const updateArticle = createServerFn({ method: "POST" })
 	});
 
 export const removeArticle = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		await db
 			.delete(articles)
 			.where(and(eq(articles.id, data.id), eq(articles.userId, userId)));
@@ -730,9 +739,10 @@ const talkInput = z.object({
 });
 
 export const addTalk = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => talkInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const [row] = await db
 			.insert(talks)
 			.values({
@@ -767,9 +777,10 @@ const updateTalkInput = z.object({
 });
 
 export const updateTalk = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => updateTalkInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const { id, ...patch } = data;
 		await db
 			.update(talks)
@@ -778,9 +789,10 @@ export const updateTalk = createServerFn({ method: "POST" })
 	});
 
 export const removeTalk = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		await db
 			.delete(talks)
 			.where(and(eq(talks.id, data.id), eq(talks.userId, userId)));
@@ -797,9 +809,10 @@ const supportLinkInput = z.object({
 });
 
 export const addSupportLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => supportLinkInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const [row] = await db
 			.insert(supportLinks)
 			.values({
@@ -833,9 +846,10 @@ const updateSupportLinkInput = z.object({
 });
 
 export const updateSupportLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => updateSupportLinkInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const { id, ...patch } = data;
 		await db
 			.update(supportLinks)
@@ -844,9 +858,10 @@ export const updateSupportLink = createServerFn({ method: "POST" })
 	});
 
 export const removeSupportLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		await db
 			.delete(supportLinks)
 			.where(
@@ -857,9 +872,10 @@ export const removeSupportLink = createServerFn({ method: "POST" })
 // ---------- theme ----------
 
 export const updateTheme = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => themeV2Schema.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const limits = await getPlanLimits(userId);
 		if (!limits.customCss && data.customCss.trim()) {
 			throw new Error(
@@ -872,29 +888,31 @@ export const updateTheme = createServerFn({ method: "POST" })
 const templateInput = z.object({ templateId: z.string() });
 
 export const applyThemeTemplate = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => templateInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		const tpl = templateById(data.templateId);
 		if (!tpl) return;
 		await upsertTheme(userId, tpl.config, data.templateId);
 	});
 
-export const resetTheme = createServerFn({ method: "POST" }).handler(
-	async () => {
-		const userId = await requireUserId();
+export const resetTheme = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.handler(async ({ context }) => {
+		const { userId } = context;
 		await upsertTheme(userId, defaultTheme, null);
-	},
-);
+	});
 
 // ---------- wipe ----------
 
 const wipeInput = z.object({ username: z.string() });
 
 export const wipeProfileData = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => wipeInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 
 		// The dashboard UI only disables the wipe button until the typed
 		// confirmation matches the username — that's client-side only and

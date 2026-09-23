@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { db } from "@/db/index";
 import { supportLinks, talks } from "@/db/schema";
-import { ensureSession } from "@/lib/auth.functions";
+import { authMiddleware } from "@/lib/auth-middleware";
 
 // Same authoritative scheme allow-list as profile-data.functions.ts — zod's
 // .url() only checks syntax, not scheme, so it would still accept
@@ -66,35 +66,29 @@ const idInput = z.object({
 	id: z.string().uuid(),
 });
 
-async function requireUserId(): Promise<string> {
-	const session = await ensureSession();
-	return session.user.id;
-}
+export const listMyTalks = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async ({ context }) => {
+		const { userId } = context;
 
-export const listMyTalks = createServerFn({
-	method: "GET",
-}).handler(async () => {
-	const userId = await requireUserId();
+		return db
+			.select({
+				id: talks.id,
+				title: talks.title,
+				event: talks.event,
+				description: talks.description,
+				date: talks.date,
+				slidesUrl: talks.slidesUrl,
+				videoUrl: talks.videoUrl,
+				position: talks.position,
+			})
+			.from(talks)
+			.where(eq(talks.userId, userId))
+			.orderBy(desc(talks.date));
+	});
 
-	return db
-		.select({
-			id: talks.id,
-			title: talks.title,
-			event: talks.event,
-			description: talks.description,
-			date: talks.date,
-			slidesUrl: talks.slidesUrl,
-			videoUrl: talks.videoUrl,
-			position: talks.position,
-		})
-		.from(talks)
-		.where(eq(talks.userId, userId))
-		.orderBy(desc(talks.date));
-});
-
-export const upsertTalk = createServerFn({
-	method: "POST",
-})
+export const upsertTalk = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) =>
 		talkInput
 			.extend({
@@ -102,8 +96,8 @@ export const upsertTalk = createServerFn({
 			})
 			.parse(input),
 	)
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 
 		const values = {
 			userId,
@@ -135,12 +129,11 @@ export const upsertTalk = createServerFn({
 		return { ok: true as const };
 	});
 
-export const deleteTalk = createServerFn({
-	method: "POST",
-})
+export const deleteTalk = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 
 		await db
 			.delete(talks)
@@ -149,29 +142,28 @@ export const deleteTalk = createServerFn({
 		return { ok: true as const };
 	});
 
-export const listMySupportLinks = createServerFn({
-	method: "GET",
-}).handler(async () => {
-	const userId = await requireUserId();
+export const listMySupportLinks = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async ({ context }) => {
+		const { userId } = context;
 
-	return db
-		.select({
-			id: supportLinks.id,
-			category: supportLinks.category,
-			platform: supportLinks.platform,
-			label: supportLinks.label,
-			url: supportLinks.url,
-			serverId: supportLinks.serverId,
-			position: supportLinks.position,
-		})
-		.from(supportLinks)
-		.where(eq(supportLinks.userId, userId))
-		.orderBy(asc(supportLinks.position));
-});
+		return db
+			.select({
+				id: supportLinks.id,
+				category: supportLinks.category,
+				platform: supportLinks.platform,
+				label: supportLinks.label,
+				url: supportLinks.url,
+				serverId: supportLinks.serverId,
+				position: supportLinks.position,
+			})
+			.from(supportLinks)
+			.where(eq(supportLinks.userId, userId))
+			.orderBy(asc(supportLinks.position));
+	});
 
-export const upsertSupportLink = createServerFn({
-	method: "POST",
-})
+export const upsertSupportLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) =>
 		supportInput
 			.extend({
@@ -179,8 +171,8 @@ export const upsertSupportLink = createServerFn({
 			})
 			.parse(input),
 	)
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 
 		const values = {
 			userId,
@@ -212,12 +204,11 @@ export const upsertSupportLink = createServerFn({
 		return { ok: true as const };
 	});
 
-export const deleteSupportLink = createServerFn({
-	method: "POST",
-})
+export const deleteSupportLink = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => idInput.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 
 		await db
 			.delete(supportLinks)

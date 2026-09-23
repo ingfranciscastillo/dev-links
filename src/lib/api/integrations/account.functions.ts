@@ -7,7 +7,7 @@ import { account as authAccount } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { integrationAccounts, integrationCache, profiles } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { ensureSession } from "@/lib/auth.functions";
+import { authMiddleware } from "@/lib/auth-middleware";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
 import { SECRET_CONFIG_KEYS } from "@/lib/integrations/secrets.server";
 import { PROVIDERS, type Provider } from "@/lib/integrations/types";
@@ -55,50 +55,47 @@ function toClientConfig(config: unknown): Record<string, Json> {
 	);
 }
 
-async function requireUserId(): Promise<string> {
-	const session = await ensureSession();
-	return session.user.id;
-}
-
-export const listMyIntegrationAccounts = createServerFn({
-	method: "GET",
-}).handler(async (): Promise<IntegrationAccount[]> => {
-	const userId = await requireUserId();
-	const rows = await db
-		.select({
-			id: integrationAccounts.id,
-			provider: integrationAccounts.provider,
-			handle: integrationAccounts.handle,
-			config: integrationAccounts.config,
-			lastSyncedAt: integrationAccounts.lastSyncedAt,
-			lastError: integrationAccounts.lastError,
-			updatedAt: integrationAccounts.updatedAt,
-		})
-		.from(integrationAccounts)
-		.where(eq(integrationAccounts.userId, userId))
-		.orderBy(asc(integrationAccounts.provider));
-	// "linkedin" stays in the DB enum (Postgres can't drop enum values) but
-	// isn't a valid Provider anymore — drop any leftover row instead of
-	// showing an integration the UI no longer has a form for.
-	return rows
-		.filter(
-			(r): r is typeof r & { provider: Provider } => r.provider !== "linkedin",
-		)
-		.map((r) => ({
-			id: r.id,
-			provider: r.provider,
-			handle: r.handle,
-			config: toClientConfig(r.config),
-			lastSyncedAt: r.lastSyncedAt ? r.lastSyncedAt.toISOString() : null,
-			lastError: r.lastError,
-			updatedAt: r.updatedAt.toISOString(),
-		}));
-});
+export const listMyIntegrationAccounts = createServerFn({ method: "GET" })
+	.middleware([authMiddleware])
+	.handler(async ({ context }): Promise<IntegrationAccount[]> => {
+		const { userId } = context;
+		const rows = await db
+			.select({
+				id: integrationAccounts.id,
+				provider: integrationAccounts.provider,
+				handle: integrationAccounts.handle,
+				config: integrationAccounts.config,
+				lastSyncedAt: integrationAccounts.lastSyncedAt,
+				lastError: integrationAccounts.lastError,
+				updatedAt: integrationAccounts.updatedAt,
+			})
+			.from(integrationAccounts)
+			.where(eq(integrationAccounts.userId, userId))
+			.orderBy(asc(integrationAccounts.provider));
+		// "linkedin" stays in the DB enum (Postgres can't drop enum values) but
+		// isn't a valid Provider anymore — drop any leftover row instead of
+		// showing an integration the UI no longer has a form for.
+		return rows
+			.filter(
+				(r): r is typeof r & { provider: Provider } =>
+					r.provider !== "linkedin",
+			)
+			.map((r) => ({
+				id: r.id,
+				provider: r.provider,
+				handle: r.handle,
+				config: toClientConfig(r.config),
+				lastSyncedAt: r.lastSyncedAt ? r.lastSyncedAt.toISOString() : null,
+				lastError: r.lastError,
+				updatedAt: r.updatedAt.toISOString(),
+			}));
+	});
 
 export const upsertIntegrationAccount = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => upsertSchema.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 
 		const [planRow] = await db
 			.select({ plan: profiles.plan })
@@ -159,9 +156,10 @@ export const upsertIntegrationAccount = createServerFn({ method: "POST" })
 	});
 
 export const deleteIntegrationAccount = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => providerInputSchema.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 		await db.batch([
 			db
 				.delete(integrationCache)
@@ -184,9 +182,10 @@ export const deleteIntegrationAccount = createServerFn({ method: "POST" })
 	});
 
 export const refreshIntegration = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
 	.validator((input) => providerInputSchema.parse(input))
-	.handler(async ({ data }) => {
-		const userId = await requireUserId();
+	.handler(async ({ data, context }) => {
+		const { userId } = context;
 
 		const [account] = await db
 			.select()
@@ -286,61 +285,63 @@ export const refreshIntegration = createServerFn({ method: "POST" })
 // que better-auth ya guardó en `account` para leer el username real (GitHub
 // no lo expone como accountId, ese es el numeric id) y conectar la
 // integración sin que el usuario tenga que repetir su username a mano.
-export const autoConnectGithub = createServerFn({ method: "POST" }).handler(
-	async (): Promise<{ connected: boolean; handle?: string }> => {
-		const userId = await requireUserId();
+export const autoConnectGithub = createServerFn({ method: "POST" })
+	.middleware([authMiddleware])
+	.handler(
+		async ({ context }): Promise<{ connected: boolean; handle?: string }> => {
+			const { userId } = context;
 
-		const [githubAccount] = await db
-			.select({ id: authAccount.id })
-			.from(authAccount)
-			.where(
-				and(
-					eq(authAccount.userId, userId),
-					eq(authAccount.providerId, "github"),
-				),
-			)
-			.limit(1);
+			const [githubAccount] = await db
+				.select({ id: authAccount.id })
+				.from(authAccount)
+				.where(
+					and(
+						eq(authAccount.userId, userId),
+						eq(authAccount.providerId, "github"),
+					),
+				)
+				.limit(1);
 
-		if (!githubAccount) return { connected: false };
+			if (!githubAccount) return { connected: false };
 
-		try {
-			// Tokens are encrypted at rest (account.encryptOAuthTokens), so
-			// they go through better-auth to be decrypted, not read raw.
-			const { accessToken } = await auth.api.getAccessToken({
-				body: { accountId: githubAccount.id },
-				headers: getRequestHeaders(),
-			});
-			if (!accessToken) return { connected: false };
-
-			const res = await fetch("https://api.github.com/user", {
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-					"User-Agent": "DevLinks",
-					Accept: "application/vnd.github+json",
-				},
-			});
-			if (!res.ok) return { connected: false };
-
-			const profile = (await res.json()) as { login?: string };
-			if (!profile.login) return { connected: false };
-
-			await db
-				.insert(integrationAccounts)
-				.values({
-					userId,
-					provider: "github",
-					handle: profile.login,
-					config: {},
-				})
-				.onConflictDoNothing({
-					target: [integrationAccounts.userId, integrationAccounts.provider],
+			try {
+				// Tokens are encrypted at rest (account.encryptOAuthTokens), so
+				// they go through better-auth to be decrypted, not read raw.
+				const { accessToken } = await auth.api.getAccessToken({
+					body: { accountId: githubAccount.id },
+					headers: getRequestHeaders(),
 				});
+				if (!accessToken) return { connected: false };
 
-			return { connected: true, handle: profile.login };
-		} catch {
-			// GitHub caído/rate-limited: no debe bloquear el onboarding, el
-			// usuario siempre puede conectar GitHub a mano después.
-			return { connected: false };
-		}
-	},
-);
+				const res = await fetch("https://api.github.com/user", {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+						"User-Agent": "DevLinks",
+						Accept: "application/vnd.github+json",
+					},
+				});
+				if (!res.ok) return { connected: false };
+
+				const profile = (await res.json()) as { login?: string };
+				if (!profile.login) return { connected: false };
+
+				await db
+					.insert(integrationAccounts)
+					.values({
+						userId,
+						provider: "github",
+						handle: profile.login,
+						config: {},
+					})
+					.onConflictDoNothing({
+						target: [integrationAccounts.userId, integrationAccounts.provider],
+					});
+
+				return { connected: true, handle: profile.login };
+			} catch {
+				// GitHub caído/rate-limited: no debe bloquear el onboarding, el
+				// usuario siempre puede conectar GitHub a mano después.
+				return { connected: false };
+			}
+		},
+	);

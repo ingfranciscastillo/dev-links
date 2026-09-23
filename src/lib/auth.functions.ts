@@ -1,8 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { auth } from "@/lib/auth";
+import { type Auth, auth } from "@/lib/auth";
 
-type FullSession = typeof auth.$Infer.Session;
+// Must stay a type-only reference: a module-level `typeof auth` makes the
+// server-fn compiler keep the `auth` import in the client bundle.
+type FullSession = Auth["$Infer"]["Session"];
 
 // getSession is an RPC endpoint the browser can call directly, so whatever
 // it returns lands in client JS. The raw getSession() result

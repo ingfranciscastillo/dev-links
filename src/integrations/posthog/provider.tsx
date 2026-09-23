@@ -1,7 +1,45 @@
 import { PostHogProvider as BasePostHogProvider } from "@posthog/react";
 import { useRouter } from "@tanstack/react-router";
-import posthog from "posthog-js";
+import posthog, { type BeforeSendFn } from "posthog-js";
 import { type ReactNode, useEffect } from "react";
+
+// One-time secrets that can appear in a page URL (the password-reset link is
+// /reset-password?token=...). PostHog records the full URL on every event
+// ($current_url, $referrer, initial-URL person props), so they are redacted
+// before anything leaves the browser.
+const SENSITIVE_PARAMS = ["token", "code", "state"];
+
+function redactUrl(value: string): string {
+	if (!value.includes("?")) return value;
+	try {
+		const url = new URL(value);
+		let changed = false;
+		for (const key of SENSITIVE_PARAMS) {
+			if (url.searchParams.has(key)) {
+				url.searchParams.set(key, "[redacted]");
+				changed = true;
+			}
+		}
+		return changed ? url.toString() : value;
+	} catch {
+		return value;
+	}
+}
+
+function redactProps(props: Record<string, unknown> | undefined) {
+	if (!props) return;
+	for (const [key, value] of Object.entries(props)) {
+		if (typeof value === "string") props[key] = redactUrl(value);
+	}
+}
+
+export const redactSensitiveUrls: BeforeSendFn = (event) => {
+	if (!event) return event;
+	redactProps(event.properties);
+	redactProps(event.$set);
+	redactProps(event.$set_once);
+	return event;
+};
 
 if (typeof window !== "undefined" && import.meta.env.VITE_POSTHOG_KEY) {
 	posthog.init(import.meta.env.VITE_POSTHOG_KEY, {
@@ -22,6 +60,7 @@ if (typeof window !== "undefined" && import.meta.env.VITE_POSTHOG_KEY) {
 		disable_session_recording: true,
 		capture_heatmaps: false,
 		capture_dead_clicks: false,
+		before_send: redactSensitiveUrls,
 	});
 }
 

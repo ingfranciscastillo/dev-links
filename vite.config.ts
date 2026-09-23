@@ -116,6 +116,22 @@ const config = defineConfig(({ command, mode }) => {
 					"/**": {
 						headers: buildSecurityHeaders(env),
 					},
+					// Per-user responses: never stored by the browser or any
+					// shared cache (e.g. the Back button after signing out on a
+					// shared computer). Nitro merges these with the rule above.
+					...Object.fromEntries(
+						[
+							"/dashboard",
+							"/dashboard/**",
+							"/onboarding",
+							"/_serverFn/**",
+							"/api/auth/**",
+							"/api/analytics/**",
+						].map((path) => [
+							path,
+							{ headers: { "Cache-Control": "private, no-store" } },
+						]),
+					),
 				},
 
 				rollupConfig: {

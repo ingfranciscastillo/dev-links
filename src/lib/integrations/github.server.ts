@@ -2,6 +2,14 @@ import type { FetchResult, GithubPayload } from "./types";
 
 const UA = "DevLinks-Integrations/1.0";
 
+// Each pinned slug is interpolated straight into an api.github.com request
+// path, so a value like "../rate_limit" or one containing a query string
+// could redirect the (scopeless, but still real) shared token's request to a
+// different endpoint — fetch() resolves dot segments. Only accept the
+// "owner/repo" shape GitHub itself uses: owners are alphanumeric/hyphen, and
+// "." / ".." are never valid repo names.
+export const REPO_SLUG_RE = /^[A-Za-z0-9-]+\/(?!\.\.?$)[\w.-]+$/;
+
 async function ghFetch(url: string, token?: string) {
 	const res = await fetch(url, {
 		headers: {
@@ -80,12 +88,6 @@ export async function fetchGithub(input: {
 		),
 	]);
 
-	// Each slug is interpolated straight into the request path below, so an
-	// unvalidated value like "../rate_limit" or one containing a query
-	// string could redirect the (scopeless, but still real) shared token's
-	// request to a different api.github.com endpoint. Only accept the
-	// "owner/repo" shape GitHub itself uses.
-	const REPO_SLUG_RE = /^[\w.-]+\/[\w.-]+$/;
 	const pinnedSlugs = (input.config.pinned ?? [])
 		.filter((slug) => REPO_SLUG_RE.test(slug))
 		.slice(0, 6);

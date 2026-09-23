@@ -8,6 +8,7 @@ import {
 import { waitUntil } from "@vercel/functions";
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins/admin";
+import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
 import { username } from "better-auth/plugins/username";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import DodoPayments from "dodopayments";
@@ -173,6 +174,13 @@ export const auth = betterAuth({
 	},
 
 	plugins: [
+		// Rejects passwords found in known breaches on sign-up, change and
+		// reset. k-anonymity: only the first 5 chars of the SHA-1 hash leave
+		// the server. Fails closed (500) if the HIBP API is unreachable.
+		haveIBeenPwned({
+			customPasswordCompromisedMessage:
+				"This password has appeared in a data breach. Please choose a different one.",
+		}),
 		username({
 			minUsernameLength: 3,
 			maxUsernameLength: 30,
@@ -252,14 +260,20 @@ export const auth = betterAuth({
 		storage: "database",
 		window: 60,
 		max: 100,
+		// Keys are matched against the path *without* the /api/auth base path
+		// (see resolveRateLimitConfig in better-auth) — the previous
+		// "/api/auth/..." keys never matched, so none of these applied.
 		customRules: {
-			"/api/auth/sign-in/email": { window: 60, max: 5 },
-			"/api/auth/sign-up/email": { window: 60, max: 3 },
-			"/api/auth/forget-password": { window: 60, max: 3 },
-			"/api/auth/reset-password": { window: 60, max: 3 },
-			"/api/auth/verify-email": { window: 60, max: 5 },
-			"/api/auth/sign-in/social": { window: 60, max: 10 },
-			"/api/auth/sign-out": false,
+			"/sign-in/email": { window: 60, max: 5 },
+			"/sign-in/username": { window: 60, max: 5 },
+			"/sign-up/email": { window: 60, max: 3 },
+			"/request-password-reset": { window: 60, max: 3 },
+			"/reset-password": { window: 60, max: 3 },
+			"/change-password": { window: 60, max: 5 },
+			"/send-verification-email": { window: 60, max: 3 },
+			"/verify-email": { window: 60, max: 5 },
+			"/sign-in/social": { window: 60, max: 10 },
+			"/sign-out": false,
 		},
 	},
 

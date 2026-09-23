@@ -40,6 +40,19 @@ export type IntegrationAccount = {
 	updatedAt: string;
 };
 
+// OAuth callbacks (Dribbble/Pinterest/Product Hunt) keep the provider's
+// tokens in `config` for the server-side fetchers. The dashboard never needs
+// them, so they're dropped before `config` crosses into client JS.
+const SECRET_CONFIG_KEYS = new Set(["access_token", "refresh_token"]);
+
+function toClientConfig(config: unknown): Record<string, Json> {
+	return Object.fromEntries(
+		Object.entries((config ?? {}) as Record<string, Json>).filter(
+			([key]) => !SECRET_CONFIG_KEYS.has(key),
+		),
+	);
+}
+
 async function requireUserId(): Promise<string> {
 	const session = await ensureSession();
 	return session.user.id;
@@ -73,7 +86,7 @@ export const listMyIntegrationAccounts = createServerFn({
 			id: r.id,
 			provider: r.provider,
 			handle: r.handle,
-			config: (r.config ?? {}) as Record<string, Json>,
+			config: toClientConfig(r.config),
 			lastSyncedAt: r.lastSyncedAt ? r.lastSyncedAt.toISOString() : null,
 			lastError: r.lastError,
 			updatedAt: r.updatedAt.toISOString(),

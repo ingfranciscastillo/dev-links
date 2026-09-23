@@ -8,6 +8,7 @@ import posthog from "posthog-js";
 import { type ReactNode, useState } from "react";
 import toast from "react-hot-toast";
 
+import { ActiveSessions } from "@/components/dashboard/ActiveSessions";
 import { PageTitle } from "@/components/motion/PageTitle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -212,6 +213,16 @@ function SettingsPage() {
 								? "Manage subscription"
 								: "Upgrade to Pro"}
 					</button>
+				</section>
+
+				<section className="py-8">
+					<SectionIntro
+						label="Sessions"
+						title="Active sessions"
+						description="Devices currently signed in to your account. Sessions end 7 days after sign-in."
+					/>
+
+					<ActiveSessions />
 				</section>
 
 				<section className="py-8">

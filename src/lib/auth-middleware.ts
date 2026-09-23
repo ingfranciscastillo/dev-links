@@ -10,8 +10,13 @@ import { auth } from "@/lib/auth";
 // type-check, instead of silently shipping unauthenticated.
 export const authMiddleware = createMiddleware({ type: "function" }).server(
 	async ({ next }) => {
+		// Bypass the 5-minute cookie cache: every server function checks the
+		// session row itself, so a revoked session (sign-out elsewhere,
+		// password change, ban) can't keep reading or writing data until
+		// its cached copy expires. Page navigation still uses the cache.
 		const session = await auth.api.getSession({
 			headers: getRequestHeaders(),
+			query: { disableCookieCache: true },
 		});
 		if (!session) {
 			throw new Error("Unauthorized");

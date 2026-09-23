@@ -245,8 +245,11 @@ export const auth = betterAuth({
 	},
 
 	session: {
+		// Absolute lifetime: disableSessionRefresh stops using the session
+		// from pushing expiresAt forward (updateAge no longer applies), so a
+		// session ends 7 days after sign-in no matter how active it is.
 		expiresIn: 60 * 60 * 24 * 7,
-		updateAge: 60 * 60 * 24,
+		disableSessionRefresh: true,
 		freshAge: 60 * 60,
 		cookieCache: {
 			enabled: true,

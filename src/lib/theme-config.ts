@@ -212,24 +212,40 @@ export const fontOptions = [
 export type FontKey = (typeof fontOptions)[number]["value"];
 export type FontCategory = (typeof fontOptions)[number]["category"];
 
+// Every theme value is interpolated into a <style> tag on the public profile,
+// so free-form strings let anyone close the tag and inject HTML/script
+// (stored XSS). Colors accept only what the color picker emits; fonts only
+// the known keys (the editor has no custom-font input).
+const THEME_COLOR_RE =
+	/^(?:#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\)|hsla?\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*(?:,\s*(?:0|1|0?\.\d+)\s*)?\))$/i;
+
+export function isValidThemeColor(value: string): boolean {
+	return THEME_COLOR_RE.test(value);
+}
+
+const themeColor = z.string().max(64).regex(THEME_COLOR_RE, "Invalid color");
+const themeFont = z.enum(
+	fontOptions.map((f) => f.value) as [FontKey, ...FontKey[]],
+);
+
 export const themeV2Schema = z.object({
 	// Colors
-	bg: z.string(), // hex — page background
-	fg: z.string(), // hex — text
-	muted: z.string(), // muted text
-	surface: z.string(), // cards
-	border: z.string(), // borders
-	accent: z.string(), // primary accent
-	accent2: z.string().optional(), // for gradients
+	bg: themeColor, // page background
+	fg: themeColor, // text
+	muted: themeColor, // muted text
+	surface: themeColor, // cards
+	border: themeColor, // borders
+	accent: themeColor, // primary accent
+	accent2: themeColor.optional(), // for gradients
 
 	// Background style
 	bgStyle: z.enum(["solid", "gradient", "radial", "mesh", "grid", "dots"]),
 	bgAngle: z.number().min(0).max(360).default(135),
 
 	// Typography
-	headingFont: z.string(), // FontKey or custom family
-	bodyFont: z.string(),
-	monoFont: z.string(),
+	headingFont: themeFont,
+	bodyFont: themeFont,
+	monoFont: themeFont,
 	fontSizeScale: z.number().min(0.85).max(1.25).default(1),
 	letterSpacing: z.number().min(-2).max(4).default(0), // px
 
@@ -477,7 +493,11 @@ export function themeToStyleTag(
 	// perfil se filtra al scrollbar de todo el dashboard. El caller decide.
 	const scrollbar = scrollbarCss(t, options?.scrollbarTarget ?? "html");
 
-	return `${scope} {\n${body}\n}\n${scopeBase}\n${headings}\n${monoEls}\n${card}\n${muted}\n${surface}\n${borderC}\n${panel}\n${shikiVars}\n${container}\n${glass}\n${hover}\n${btn}\n${scrollbar}\n${custom}`;
+	const css = `${scope} {\n${body}\n}\n${scopeBase}\n${headings}\n${monoEls}\n${card}\n${muted}\n${surface}\n${borderC}\n${panel}\n${shikiVars}\n${container}\n${glass}\n${hover}\n${btn}\n${scrollbar}\n${custom}`;
+	// Rendered via dangerouslySetInnerHTML into <style>: whatever a stored
+	// theme contains, it must never be able to close the tag. `<` is never
+	// needed in valid CSS outside strings, and "\3c " is its CSS escape.
+	return css.replace(/</g, "\\3c ");
 }
 
 function hoverCss(kind: ThemeV2["hover"], scope: string): string {

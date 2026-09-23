@@ -38,7 +38,9 @@ import {
 } from "@/lib/queries/profile-data";
 import {
 	type FontCategory,
+	type FontKey,
 	fontOptions,
+	isValidThemeColor,
 	type ThemeV2,
 	themeToStyleTag,
 } from "@/lib/theme-config";
@@ -295,9 +297,21 @@ function ColorField({
 	value: string;
 	onChange: (value: string) => void;
 }) {
+	// The text input keeps a local draft and only saves once it's a valid
+	// color — every save hits the server, which rejects partial values like
+	// "#1a" and would roll the field back mid-typing.
+	const [draft, setDraft] = useState(value);
+	useEffect(() => setDraft(value), [value]);
+
+	const commit = (next: string) => {
+		setDraft(next);
+		const trimmed = next.trim();
+		if (isValidThemeColor(trimmed) && trimmed !== value) onChange(trimmed);
+	};
+
 	return (
 		<Row label={label}>
-			<ColorPicker value={value} onValueChange={onChange}>
+			<ColorPicker value={value} onValueChange={commit}>
 				<div className="flex min-w-0 items-center gap-3">
 					<ColorPickerTrigger asChild>
 						<button
@@ -310,8 +324,9 @@ function ColorField({
 					</ColorPickerTrigger>
 
 					<Input
-						value={value}
-						onChange={(event) => onChange(event.target.value)}
+						value={draft}
+						onChange={(event) => commit(event.target.value)}
+						aria-invalid={!isValidThemeColor(draft.trim())}
 						className="h-10 min-w-0 flex-1 rounded-none border-x-0 border-t-0 border-b-border bg-transparent px-0 font-mono text-xs shadow-none focus-visible:border-brand focus-visible:ring-0"
 					/>
 				</div>
@@ -574,8 +589,8 @@ function FontPicker({
 	categories,
 }: {
 	label: string;
-	value: string;
-	onChange: (value: string) => void;
+	value: FontKey;
+	onChange: (value: FontKey) => void;
 	categories: readonly FontCategory[];
 }) {
 	const options = fontOptions.filter((font) =>

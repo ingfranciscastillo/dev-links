@@ -9,6 +9,7 @@ import { integrationAccounts, integrationCache, profiles } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { authMiddleware } from "@/lib/auth-middleware";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
+import { REPO_SLUG_RE } from "@/lib/integrations/github.server";
 import { SECRET_CONFIG_KEYS } from "@/lib/integrations/secrets.server";
 import { PROVIDERS, type Provider } from "@/lib/integrations/types";
 import { limitsFor } from "@/lib/plan-limits";
@@ -17,11 +18,52 @@ type Batch = [BatchItem<"pg">, ...Array<BatchItem<"pg">>];
 
 const providerSchema = z.enum([...PROVIDERS] as [Provider, ...Provider[]]);
 
-const upsertSchema = z.object({
-	provider: providerSchema,
-	handle: z.string().trim().min(1).max(120),
-	config: z.record(z.string(), z.unknown()).default({}),
-});
+// These only connect through their OAuth callback, which verifies the handle
+// against the token it obtained. Accepting them here would let a user claim
+// any handle and write their own access_token into config.
+const OAUTH_ONLY_PROVIDERS = new Set<Provider>([
+	"dribbble",
+	"pinterest",
+	"producthunt",
+]);
+
+// config reaches runProviderFetch, so each provider only accepts the keys its
+// fetcher reads. Pinned slugs use the same check github.server.ts applies.
+const githubConfigSchema = z
+	.object({
+		pinned: z.array(z.string().max(100).regex(REPO_SLUG_RE)).max(6).optional(),
+	})
+	.strict();
+const emptyConfigSchema = z.object({}).strict();
+
+const upsertSchema = z
+	.object({
+		provider: providerSchema,
+		handle: z.string().trim().min(1).max(120),
+		config: z.record(z.string(), z.unknown()).default({}),
+	})
+	.transform((input, ctx) => {
+		if (OAUTH_ONLY_PROVIDERS.has(input.provider)) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["provider"],
+				message: "This integration can only be connected through OAuth",
+			});
+			return z.NEVER;
+		}
+		const configSchema =
+			input.provider === "github" ? githubConfigSchema : emptyConfigSchema;
+		const config = configSchema.safeParse(input.config);
+		if (!config.success) {
+			ctx.addIssue({
+				code: "custom",
+				path: ["config"],
+				message: "Invalid integration config",
+			});
+			return z.NEVER;
+		}
+		return { ...input, config: config.data };
+	});
 
 const providerInputSchema = z.object({ provider: providerSchema });
 

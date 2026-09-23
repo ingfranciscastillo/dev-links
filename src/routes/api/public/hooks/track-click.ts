@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { user as userTable } from "@/db/auth-schema";
 import { db } from "@/db/index";
-import { linkClicks, profiles } from "@/db/schema";
+import { linkClicks, links } from "@/db/schema";
 import {
 	extractCountry,
 	extractIP,
@@ -16,10 +16,14 @@ import { rateLimit } from "@/lib/rate-limit.server";
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 30;
 
+// url/title are still accepted from older clients but ignored: the endpoint
+// is unauthenticated, so the link's URL and title come from the DB row, and
+// the click only counts if linkId is an active link owned by that profile.
+// Otherwise anyone could write arbitrary rows into another user's analytics.
 const bodySchema = z.object({
 	username: z.string().min(1).max(64),
-	linkId: z.uuid().optional().nullable(),
-	url: z.url().max(2048),
+	linkId: z.uuid(),
+	url: z.string().max(2048).optional().nullable(),
 	title: z.string().max(200).optional().nullable(),
 	referrer: z.string().max(1024).optional().nullable(),
 });
@@ -35,21 +39,25 @@ export const Route = createFileRoute("/api/public/hooks/track-click")({
 					return new Response("Bad request", { status: 400 });
 				}
 
-				const [profile] = await db
-					.select({ id: profiles.id })
-					.from(profiles)
-					.innerJoin(userTable, eq(userTable.id, profiles.id))
+				const [link] = await db
+					.select({ userId: links.userId, url: links.url, title: links.title })
+					.from(links)
+					.innerJoin(userTable, eq(userTable.id, links.userId))
 					.where(
-						sql`lower(${userTable.username}) = ${payload.username.toLowerCase()}`,
+						and(
+							eq(links.id, payload.linkId),
+							eq(links.active, true),
+							sql`lower(${userTable.username}) = ${payload.username.toLowerCase()}`,
+						),
 					)
 					.limit(1);
 
-				if (!profile) return new Response("ok");
+				if (!link) return new Response("ok");
 
 				const ip = extractIP(request);
 				if (
 					!rateLimit(
-						`click:${ip}:${profile.id}`,
+						`click:${ip}:${link.userId}`,
 						RATE_LIMIT_WINDOW_MS,
 						RATE_LIMIT_MAX,
 					)
@@ -63,10 +71,10 @@ export const Route = createFileRoute("/api/public/hooks/track-click")({
 
 				try {
 					await db.insert(linkClicks).values({
-						profileUserId: profile.id,
-						linkId: payload.linkId || null,
-						linkUrl: payload.url,
-						linkTitle: payload.title || null,
+						profileUserId: link.userId,
+						linkId: payload.linkId,
+						linkUrl: link.url,
+						linkTitle: link.title,
 						ipHash: hashIP(ip),
 						ua: ua.slice(0, 512),
 						device: parsed.device,

@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import { and, asc, eq, sql } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { z } from "zod";
 import { account as authAccount } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { integrationAccounts, integrationCache, profiles } from "@/db/schema";
+import { auth } from "@/lib/auth";
 import { ensureSession } from "@/lib/auth.functions";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
 import { PROVIDERS, type Provider } from "@/lib/integrations/types";
@@ -289,7 +291,7 @@ export const autoConnectGithub = createServerFn({ method: "POST" }).handler(
 		const userId = await requireUserId();
 
 		const [githubAccount] = await db
-			.select({ accessToken: authAccount.accessToken })
+			.select({ id: authAccount.id })
 			.from(authAccount)
 			.where(
 				and(
@@ -299,12 +301,20 @@ export const autoConnectGithub = createServerFn({ method: "POST" }).handler(
 			)
 			.limit(1);
 
-		if (!githubAccount?.accessToken) return { connected: false };
+		if (!githubAccount) return { connected: false };
 
 		try {
+			// Tokens are encrypted at rest (account.encryptOAuthTokens), so
+			// they go through better-auth to be decrypted, not read raw.
+			const { accessToken } = await auth.api.getAccessToken({
+				body: { accountId: githubAccount.id },
+				headers: getRequestHeaders(),
+			});
+			if (!accessToken) return { connected: false };
+
 			const res = await fetch("https://api.github.com/user", {
 				headers: {
-					Authorization: `Bearer ${githubAccount.accessToken}`,
+					Authorization: `Bearer ${accessToken}`,
 					"User-Agent": "DevLinks",
 					Accept: "application/vnd.github+json",
 				},

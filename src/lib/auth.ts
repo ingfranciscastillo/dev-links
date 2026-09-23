@@ -160,6 +160,11 @@ export const auth = betterAuth({
 	socialProviders,
 
 	account: {
+		// GitHub/Google tokens are stored for server-side use (see
+		// autoConnectGithub); encrypt them at rest with BETTER_AUTH_SECRET.
+		// Rows written before this was enabled are still read fine —
+		// decryptOAuthToken passes through values that aren't encrypted.
+		encryptOAuthTokens: true,
 		accountLinking: {
 			enabled: true,
 			trustedProviders: ["github", "google"],
@@ -258,6 +263,12 @@ export const auth = betterAuth({
 	},
 
 	trustedOrigins,
+
+	// Nothing in the browser needs the provider tokens, but these endpoints
+	// hand them to any script running with the user's session cookie (an
+	// XSS would get a live GitHub/Google token). Server code still reaches
+	// them through auth.api, which doesn't go through the HTTP router.
+	disabledPaths: ["/get-access-token", "/refresh-token"],
 
 	advanced: {
 		useSecureCookies: process.env.NODE_ENV === "production",

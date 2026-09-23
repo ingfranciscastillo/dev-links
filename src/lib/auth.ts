@@ -15,7 +15,7 @@ import { eq } from "drizzle-orm";
 import * as authSchema from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { profiles } from "@/db/schema";
-import { sendEmail } from "@/lib/email";
+import { escapeHtml, sendEmail } from "@/lib/email";
 import { absoluteUrl } from "@/lib/site";
 
 // El SDK exige un bearerToken no vacío al construirse — sin fallback, no
@@ -137,7 +137,7 @@ export const auth = betterAuth({
 			await sendEmail({
 				to: user.email,
 				subject: "Reset your dev-links password",
-				html: `<p>Hi ${user.name ?? ""},</p><p>Click the link below to reset your password. It expires in 1 hour.</p><p><a href="${url}">${url}</a></p>`,
+				html: `<p>Hi ${escapeHtml(user.name ?? "")},</p><p>Click the link below to reset your password. It expires in 1 hour.</p><p><a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>`,
 				text: `Reset your password: ${url}`,
 			});
 		},
@@ -152,7 +152,7 @@ export const auth = betterAuth({
 			await sendEmail({
 				to: user.email,
 				subject: "Verify your dev-links email",
-				html: `<p>Welcome to dev-links, ${user.name ?? ""}.</p><p>Confirm your email: <a href="${url}">${url}</a></p>`,
+				html: `<p>Welcome to dev-links, ${escapeHtml(user.name ?? "")}.</p><p>Confirm your email: <a href="${escapeHtml(url)}">${escapeHtml(url)}</a></p>`,
 				text: `Verify your email: ${url}`,
 			});
 		},

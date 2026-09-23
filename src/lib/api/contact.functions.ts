@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { sendEmail } from "@/lib/email";
+import { escapeHtml, sendEmail } from "@/lib/email";
 import { emailSchema } from "@/lib/schemas/auth";
 
 export const contactSchema = z.object({
@@ -12,14 +12,6 @@ export const contactSchema = z.object({
 	// mandar el email.
 	website: z.string().optional(),
 });
-
-function escapeHtml(value: string) {
-	return value
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;")
-		.replace(/"/g, "&quot;");
-}
 
 export const sendContactMessage = createServerFn({ method: "POST" })
 	.validator((input) => contactSchema.parse(input))

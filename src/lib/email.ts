@@ -5,6 +5,15 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 
 const client = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
+// For interpolating user-controlled values (names, messages) into email HTML.
+export function escapeHtml(value: string) {
+	return value
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;");
+}
+
 type SendArgs = {
 	to: string;
 	subject: string;

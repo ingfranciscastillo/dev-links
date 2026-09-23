@@ -24,7 +24,7 @@ const urlOrEmpty = z
 	.max(500)
 	.refine(
 		(v) => v === "" || isSafeUrl(v),
-		"Must be a valid http(s)/mailto/tel URL",
+		"Enter a full link, like https://example.com",
 	);
 
 const talkInput = z.object({
@@ -52,7 +52,7 @@ const supportInput = z.object({
 		.trim()
 		.min(1)
 		.max(500)
-		.refine(isSafeUrl, "Must be a valid http(s)/mailto/tel URL"),
+		.refine(isSafeUrl, "Enter a full link, like https://example.com"),
 	server_id: z
 		.string()
 		.trim()

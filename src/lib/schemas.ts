@@ -11,7 +11,7 @@ function isSafeUrl(value: string): boolean {
 		return false;
 	}
 }
-const safeUrl = (message = "Must be a valid http(s)/mailto/tel URL") =>
+const safeUrl = (message = "Enter a full link, like https://example.com") =>
 	z.string().refine(isSafeUrl, message);
 
 export const linkSchema = z.object({

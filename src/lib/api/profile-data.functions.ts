@@ -51,7 +51,7 @@ function isSafeUrl(value: string): boolean {
 		return false;
 	}
 }
-const URL_SCHEME_MESSAGE = "Must be a valid http(s)/mailto/tel URL";
+const URL_SCHEME_MESSAGE = "Enter a full link, like https://example.com";
 const requiredUrl = z.string().min(1).refine(isSafeUrl, URL_SCHEME_MESSAGE);
 const optionalUrl = z
 	.string()

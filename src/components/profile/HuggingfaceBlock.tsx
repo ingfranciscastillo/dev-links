@@ -1,6 +1,7 @@
 import { SiHuggingface } from "@icons-pack/react-simple-icons";
 import { ArrowRightUpIcon, HeartIcon } from "@solar-icons/react/linear";
 import type { HuggingfacePayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -30,7 +31,7 @@ export function HuggingfaceBlock({
 					<SiHuggingface className="h-3.5 w-3.5" /> Hugging Face
 				</span>
 				<a
-					href={payload.profile.url}
+					href={sanitizeHref(payload.profile.url)}
 					target="_blank"
 					rel="noreferrer"
 					className={cx(
@@ -52,7 +53,7 @@ export function HuggingfaceBlock({
 				{payload.models.map((m) => (
 					<a
 						key={m.id}
-						href={m.url}
+						href={sanitizeHref(m.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

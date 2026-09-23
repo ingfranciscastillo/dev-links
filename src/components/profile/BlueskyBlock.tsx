@@ -1,6 +1,7 @@
 import { SiBluesky } from "@icons-pack/react-simple-icons";
 import { HeartIcon, RepeatIcon } from "@solar-icons/react/linear";
 import type { BlueskyPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -26,7 +27,7 @@ export function BlueskyBlock({
 					<SiBluesky className="h-3.5 w-3.5" /> Bluesky
 				</span>
 				<a
-					href={payload.profile.url}
+					href={sanitizeHref(payload.profile.url)}
 					target="_blank"
 					rel="noreferrer"
 					className={cx(
@@ -41,7 +42,7 @@ export function BlueskyBlock({
 				{payload.posts.slice(0, 5).map((p) => (
 					<a
 						key={p.url}
-						href={p.url}
+						href={sanitizeHref(p.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

@@ -5,6 +5,7 @@ import {
 	StarIcon,
 } from "@solar-icons/react/linear";
 import type { DockerhubPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -41,7 +42,7 @@ export function DockerhubBlock({
 				{payload.repos.slice(0, 6).map((r) => (
 					<a
 						key={r.url}
-						href={r.url}
+						href={sanitizeHref(r.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

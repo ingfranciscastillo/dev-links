@@ -4,6 +4,7 @@ import {
 	DownloadMinimalisticIcon,
 } from "@solar-icons/react/linear";
 import type { NpmPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -53,7 +54,7 @@ export function NpmBlock({
 				{payload.packages.slice(0, 8).map((p) => (
 					<a
 						key={p.name}
-						href={p.url}
+						href={sanitizeHref(p.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

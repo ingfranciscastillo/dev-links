@@ -1,5 +1,6 @@
 import { SiPinterest } from "@icons-pack/react-simple-icons";
 import type { PinterestPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -25,7 +26,7 @@ export function PinterestBlock({
 					<SiPinterest className="h-3.5 w-3.5" /> Pinterest
 				</span>
 				<a
-					href={payload.profile.url}
+					href={sanitizeHref(payload.profile.url)}
 					target="_blank"
 					rel="noreferrer"
 					className={cx(
@@ -40,7 +41,7 @@ export function PinterestBlock({
 				{payload.pins.map((p) => (
 					<a
 						key={p.id}
-						href={p.url}
+						href={sanitizeHref(p.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

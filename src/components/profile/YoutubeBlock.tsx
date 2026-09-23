@@ -1,5 +1,6 @@
 import { SiYoutube } from "@icons-pack/react-simple-icons";
 import type { YoutubePayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -25,7 +26,7 @@ export function YoutubeBlock({
 					<SiYoutube className="h-3.5 w-3.5" /> Videos & talks
 				</span>
 				<a
-					href={payload.channel.url}
+					href={sanitizeHref(payload.channel.url)}
 					target="_blank"
 					rel="noreferrer"
 					className={cx(
@@ -40,7 +41,7 @@ export function YoutubeBlock({
 				{payload.videos.slice(0, 6).map((v) => (
 					<a
 						key={v.url}
-						href={v.url}
+						href={sanitizeHref(v.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

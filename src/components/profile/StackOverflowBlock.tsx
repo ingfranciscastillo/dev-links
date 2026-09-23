@@ -1,5 +1,6 @@
 import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import type { StackOverflowPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -25,7 +26,7 @@ export function StackOverflowBlock({
 					Stack Overflow
 				</h2>
 				<a
-					href={user.link}
+					href={sanitizeHref(user.link)}
 					target="_blank"
 					rel="noreferrer"
 					className={cx(
@@ -74,7 +75,7 @@ export function StackOverflowBlock({
 						{answers.map((a) => (
 							<li key={a.answer_id}>
 								<a
-									href={a.link}
+									href={sanitizeHref(a.link)}
 									target="_blank"
 									rel="noreferrer"
 									className={cx(

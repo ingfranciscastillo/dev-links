@@ -1,6 +1,7 @@
 import { SiLeetcode } from "@icons-pack/react-simple-icons";
 import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import type { LeetcodePayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -101,7 +102,7 @@ export function LeetcodeBlock({
 					))}
 				</ul>
 				<a
-					href={payload.url}
+					href={sanitizeHref(payload.url)}
 					target="_blank"
 					rel="noreferrer"
 					className={cx(

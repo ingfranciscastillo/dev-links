@@ -2,6 +2,7 @@ import { SiGitlab } from "@icons-pack/react-simple-icons";
 import { ArrowRightUpIcon, StarIcon } from "@solar-icons/react/linear";
 import { GitFork } from "lucide-react";
 import type { GitlabPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -27,7 +28,7 @@ export function GitlabBlock({
 					<SiGitlab className="h-3.5 w-3.5" /> GitLab
 				</span>
 				<a
-					href={payload.profile.url}
+					href={sanitizeHref(payload.profile.url)}
 					target="_blank"
 					rel="noreferrer"
 					className={cx(
@@ -42,7 +43,7 @@ export function GitlabBlock({
 				{payload.repos.slice(0, 6).map((r) => (
 					<a
 						key={r.url}
-						href={r.url}
+						href={sanitizeHref(r.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

@@ -6,6 +6,7 @@ import {
 	HeartIcon,
 } from "@solar-icons/react/linear";
 import type { DevtoPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -42,7 +43,7 @@ export function DevtoBlock({
 				{payload.articles.map((a) => (
 					<a
 						key={a.id}
-						href={a.url}
+						href={sanitizeHref(a.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

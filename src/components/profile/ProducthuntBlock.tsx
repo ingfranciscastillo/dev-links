@@ -1,6 +1,7 @@
 import { SiProducthunt } from "@icons-pack/react-simple-icons";
 import { AltArrowUpIcon, ChatRoundIcon } from "@solar-icons/react/linear";
 import type { ProductHuntPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -26,7 +27,7 @@ export function ProducthuntBlock({
 					<SiProducthunt className="h-3.5 w-3.5" /> Product Hunt
 				</span>
 				<a
-					href={payload.profile.url}
+					href={sanitizeHref(payload.profile.url)}
 					target="_blank"
 					rel="noreferrer"
 					className={cx(
@@ -41,7 +42,7 @@ export function ProducthuntBlock({
 				{payload.posts.map((p) => (
 					<a
 						key={p.id}
-						href={p.url}
+						href={sanitizeHref(p.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

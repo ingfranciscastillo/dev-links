@@ -1,6 +1,7 @@
 import { SiMedium } from "@icons-pack/react-simple-icons";
 import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import type { MediumPayload } from "@/lib/integrations/types";
+import { sanitizeHref } from "@/lib/safe-url";
 
 function cx(...classes: Array<string | false | null | undefined>) {
 	return classes.filter(Boolean).join(" ");
@@ -36,7 +37,7 @@ export function MediumBlock({
 				{payload.posts.map((p) => (
 					<a
 						key={p.url}
-						href={p.url}
+						href={sanitizeHref(p.url)}
 						target="_blank"
 						rel="noreferrer"
 						className={cx(

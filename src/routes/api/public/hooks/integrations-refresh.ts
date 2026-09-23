@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from "node:crypto";
 import { createFileRoute } from "@tanstack/react-router";
 import { eq, isNull, lt, or, type SQL } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
@@ -18,9 +19,20 @@ const STALE_MS = 24 * 60 * 60 * 1000;
 const MAX_ACCOUNTS = 100;
 type Batch = [BatchItem<"pg">, ...Array<BatchItem<"pg">>];
 
+// Constant-time check so response timing doesn't leak how much of the
+// secret a guess got right. Both sides are hashed first because
+// timingSafeEqual needs equal-length buffers.
+function isValidCronAuth(request: Request, secret: string): boolean {
+	const digest = (value: string) => createHash("sha256").update(value).digest();
+	return timingSafeEqual(
+		digest(request.headers.get("authorization") ?? ""),
+		digest(`Bearer ${secret}`),
+	);
+}
+
 async function refreshStaleIntegrations(request: Request) {
 	const secret = process.env.CRON_SECRET;
-	if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+	if (!secret || !isValidCronAuth(request, secret)) {
 		return Response.json(
 			{ ok: false as const, error: "Unauthorized" },
 			{ status: 401 },

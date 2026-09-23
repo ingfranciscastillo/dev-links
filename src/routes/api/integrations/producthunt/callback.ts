@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/index";
 import { integrationAccounts, profiles } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { encryptConfigSecrets } from "@/lib/integrations/secrets.server";
 import { limitsFor } from "@/lib/plan-limits";
 import { absoluteUrl } from "@/lib/site";
 import { STATE_COOKIE } from "./authorize";
@@ -151,20 +152,23 @@ async function handleCallback(request: Request) {
 		refresh_token: tokenJson.refresh_token ?? null,
 	};
 
+	// Tokens are encrypted at rest; runProviderFetch decrypts them.
+	const storedConfig = encryptConfigSecrets(config);
+
 	await db
 		.insert(integrationAccounts)
 		.values({
 			userId: session.user.id,
 			provider: "producthunt",
 			handle: username,
-			config,
+			config: storedConfig,
 			lastError: null,
 		})
 		.onConflictDoUpdate({
 			target: [integrationAccounts.userId, integrationAccounts.provider],
 			set: {
 				handle: username,
-				config,
+				config: storedConfig,
 				lastError: null,
 				updatedAt: new Date(),
 			},

@@ -9,6 +9,7 @@ import { integrationAccounts, integrationCache, profiles } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { ensureSession } from "@/lib/auth.functions";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
+import { SECRET_CONFIG_KEYS } from "@/lib/integrations/secrets.server";
 import { PROVIDERS, type Provider } from "@/lib/integrations/types";
 import { limitsFor } from "@/lib/plan-limits";
 
@@ -45,7 +46,6 @@ export type IntegrationAccount = {
 // OAuth callbacks (Dribbble/Pinterest/Product Hunt) keep the provider's
 // tokens in `config` for the server-side fetchers. The dashboard never needs
 // them, so they're dropped before `config` crosses into client JS.
-const SECRET_CONFIG_KEYS = new Set(["access_token", "refresh_token"]);
 
 function toClientConfig(config: unknown): Record<string, Json> {
 	return Object.fromEntries(

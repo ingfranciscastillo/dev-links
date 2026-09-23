@@ -13,6 +13,7 @@ import { fetchMedium } from "./medium.server";
 import { fetchNpm } from "./npm.server";
 import { fetchPinterest } from "./pinterest.server";
 import { fetchProductHunt } from "./producthunt.server";
+import { decryptConfigSecrets } from "./secrets.server";
 import { fetchStackOverflow } from "./stackoverflow.server";
 import type { FetchResult, Provider } from "./types";
 import { fetchWakatime } from "./wakatime.server";
@@ -20,8 +21,14 @@ import { fetchYoutube } from "./youtube.server";
 
 export async function runProviderFetch(
 	provider: Provider,
-	input: { handle: string; config: Record<string, unknown> },
+	stored: { handle: string; config: Record<string, unknown> },
 ): Promise<FetchResult[]> {
+	// OAuth tokens in config are encrypted at rest (see secrets.server.ts);
+	// every caller passes the raw DB row, so decrypt once here.
+	const input = {
+		handle: stored.handle,
+		config: decryptConfigSecrets(stored.config),
+	};
 	switch (provider) {
 		case "github":
 			return fetchGithub({

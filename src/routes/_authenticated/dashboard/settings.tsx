@@ -75,12 +75,16 @@ function SettingsPage() {
 			const { error } = await authClient.changePassword({
 				currentPassword,
 				newPassword: parsedPassword.data,
+				// A password change is usually a response to suspected
+				// compromise: sign out every other device (this one keeps a
+				// fresh session).
+				revokeOtherSessions: true,
 			});
 
 			if (error) {
 				toast.error(error.message ?? "Couldn't update password");
 			} else {
-				toast.success("Password updated");
+				toast.success("Password updated. Other devices were signed out.");
 				formElement.reset();
 			}
 		} catch (error) {

@@ -5,6 +5,7 @@ import {
 	portal,
 	webhooks,
 } from "@dodopayments/better-auth";
+import { waitUntil } from "@vercel/functions";
 import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins/admin";
 import { username } from "better-auth/plugins/username";
@@ -271,6 +272,13 @@ export const auth = betterAuth({
 	disabledPaths: ["/get-access-token", "/refresh-token"],
 
 	advanced: {
+		// Without a handler, better-auth awaits the reset/verification emails
+		// before responding, so forget-password answers measurably slower for
+		// an existing email than for an unknown one (account enumeration).
+		// waitUntil sends them after the response while keeping the Vercel
+		// function alive until they finish; outside Vercel it's a no-op and
+		// the promise simply runs to completion.
+		backgroundTasks: { handler: waitUntil },
 		useSecureCookies: process.env.NODE_ENV === "production",
 		cookiePrefix: "devlinks",
 		defaultCookieAttributes: {

@@ -23,8 +23,19 @@ type SendArgs = {
 
 export async function sendEmail({ to, subject, html, text }: SendArgs) {
 	if (!client) {
+		// The body carries live password-reset / verification links, and in
+		// production anything printed lands in the Vercel logs — where it
+		// would let anyone with log access take over the account. Only print
+		// it for local development.
+		if (process.env.NODE_ENV === "production") {
+			console.warn(
+				"[email] RESEND_API_KEY missing: email not sent (content omitted).",
+				{ subject },
+			);
+			return;
+		}
 		console.warn(
-			"[email] RESEND_API_KEY missing, printing to console instead of sending.",
+			"[email] RESEND_API_KEY missing, printing to console instead of sending (dev only).",
 			{ to, subject },
 		);
 		console.info(text ?? html);

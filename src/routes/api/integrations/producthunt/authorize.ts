@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { auth } from "@/lib/auth";
+import { methodNotAllowed } from "@/lib/http";
 import { absoluteUrl } from "@/lib/site";
 
 // Product Hunt has no API to read another user's launches — the only way
@@ -52,6 +53,7 @@ export const Route = createFileRoute("/api/integrations/producthunt/authorize")(
 	{
 		server: {
 			handlers: {
+				...methodNotAllowed(["GET"]),
 				GET: ({ request }) => startAuthorize(request),
 			},
 		},

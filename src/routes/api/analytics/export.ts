@@ -4,6 +4,7 @@ import { db } from "@/db/index";
 import { linkClicks, pageViews, profiles } from "@/db/schema";
 import { resolveSource } from "@/lib/api/analytics.functions";
 import { auth } from "@/lib/auth";
+import { methodNotAllowed } from "@/lib/http";
 import { clientIp, securityLog } from "@/lib/security-log";
 
 const ALLOWED_DAYS = new Set([7, 30, 90]);
@@ -158,6 +159,7 @@ async function handleExport(request: Request) {
 export const Route = createFileRoute("/api/analytics/export")({
 	server: {
 		handlers: {
+			...methodNotAllowed(["GET"]),
 			GET: ({ request }) => handleExport(request),
 		},
 	},

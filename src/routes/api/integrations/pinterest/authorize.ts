@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { auth } from "@/lib/auth";
+import { methodNotAllowed } from "@/lib/http";
 import { absoluteUrl } from "@/lib/site";
 
 // Same reasoning as Product Hunt/Dribbble: Pinterest's API has no public
@@ -46,6 +47,7 @@ async function startAuthorize(request: Request) {
 export const Route = createFileRoute("/api/integrations/pinterest/authorize")({
 	server: {
 		handlers: {
+			...methodNotAllowed(["GET"]),
 			GET: ({ request }) => startAuthorize(request),
 		},
 	},

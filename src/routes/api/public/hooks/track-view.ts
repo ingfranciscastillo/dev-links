@@ -11,6 +11,7 @@ import {
 	parseUA,
 } from "@/lib/analytics-parse.server";
 import { detectInAppSource } from "@/lib/analytics-sources";
+import { methodNotAllowed, requireJson } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit.server";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -28,7 +29,10 @@ const bodySchema = z.object({
 export const Route = createFileRoute("/api/public/hooks/track-view")({
 	server: {
 		handlers: {
+			...methodNotAllowed(["POST"]),
 			POST: async ({ request }) => {
+				const unsupported = requireJson(request);
+				if (unsupported) return unsupported;
 				let payload: z.infer<typeof bodySchema>;
 				try {
 					payload = bodySchema.parse(await request.json());

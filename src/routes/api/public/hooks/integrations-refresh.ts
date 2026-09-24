@@ -4,6 +4,7 @@ import { eq, isNull, lt, or, type SQL } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 import { db } from "@/db/index";
 import { integrationAccounts, integrationCache } from "@/db/schema";
+import { methodNotAllowed } from "@/lib/http";
 import { runProviderFetch } from "@/lib/integrations/dispatch.server";
 import type { Provider } from "@/lib/integrations/types";
 
@@ -159,6 +160,7 @@ async function refreshStaleIntegrations(request: Request) {
 export const Route = createFileRoute("/api/public/hooks/integrations-refresh")({
 	server: {
 		handlers: {
+			...methodNotAllowed(["GET", "POST"]),
 			// Vercel Cron Jobs invoke via GET; POST stays for manual/curl triggers.
 			GET: ({ request }) => refreshStaleIntegrations(request),
 			POST: ({ request }) => refreshStaleIntegrations(request),

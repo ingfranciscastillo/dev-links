@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db/index";
 import { integrationAccounts, profiles } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { methodNotAllowed } from "@/lib/http";
 import { encryptConfigSecrets } from "@/lib/integrations/secrets.server";
 import { limitsFor } from "@/lib/plan-limits";
 import { absoluteUrl } from "@/lib/site";
@@ -178,6 +179,7 @@ async function handleCallback(request: Request) {
 export const Route = createFileRoute("/api/integrations/pinterest/callback")({
 	server: {
 		handlers: {
+			...methodNotAllowed(["GET"]),
 			GET: ({ request }) => handleCallback(request),
 		},
 	},

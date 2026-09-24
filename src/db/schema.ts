@@ -447,3 +447,15 @@ export const linkClicks = pgTable(
 		),
 	],
 );
+
+// Fixed-window request counters for public endpoints (contact form, tracking,
+// GitHub grader). Lives in the DB because in-memory counters are per serverless
+// instance and reset on every cold start. `key` is "<scope>:<hmac>" — the
+// client IP is never stored in clear. See src/lib/rate-limit.server.ts.
+export const requestLimits = pgTable("request_limits", {
+	key: text("key").primaryKey(),
+	count: integer("count").notNull(),
+	windowStart: timestamp("window_start", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});

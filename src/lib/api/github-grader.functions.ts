@@ -4,6 +4,7 @@ import { z } from "zod";
 import { type GraderReport, gradeGithubProfile } from "@/lib/github-grader";
 import { fetchGithub } from "@/lib/integrations/github.server";
 import type { GithubPayload } from "@/lib/integrations/types";
+import { consumeRateLimit } from "@/lib/rate-limit.server";
 
 const UA = "DevLinks-GithubGrader/1.0";
 
@@ -26,19 +27,10 @@ export type GithubGraderOutcome =
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const cache = new Map<string, { expires: number; data: GithubGraderResult }>();
 
+// Per-IP limit is DB-backed (rate-limit.server.ts), so it holds across
+// serverless instances; the result cache above stays in memory.
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX = 15;
-const hits = new Map<string, number[]>();
-
-function allowRequest(ip: string): boolean {
-	const now = Date.now();
-	const windowStart = now - RATE_LIMIT_WINDOW_MS;
-	const recent = (hits.get(ip) ?? []).filter((t) => t > windowStart);
-	if (recent.length >= RATE_LIMIT_MAX) return false;
-	recent.push(now);
-	hits.set(ip, recent);
-	return true;
-}
 
 async function hasProfileReadme(username: string): Promise<boolean> {
 	const token = process.env.GITHUB_TOKEN;
@@ -79,7 +71,14 @@ export const gradeGithubUsername = createServerFn({ method: "GET" })
 		// single visitor bypass this limiter and exhaust the shared
 		// GITHUB_TOKEN. The raw socket address below can't be spoofed.
 		const ip = getRequestIP() ?? "0.0.0.0";
-		if (!allowRequest(ip)) {
+		if (
+			!(await consumeRateLimit(
+				"grader",
+				ip,
+				RATE_LIMIT_WINDOW_MS,
+				RATE_LIMIT_MAX,
+			))
+		) {
 			return { ok: false, reason: "rate_limited" };
 		}
 

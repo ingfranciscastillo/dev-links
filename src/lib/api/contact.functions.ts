@@ -1,7 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequestHeaders } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { escapeHtml, sendEmail } from "@/lib/email";
+import { consumeRateLimit } from "@/lib/rate-limit.server";
 import { emailSchema } from "@/lib/schemas/auth";
+import { clientIp, securityLog } from "@/lib/security-log";
+
+const CONTACT_WINDOW_MS = 60 * 60 * 1000;
+const CONTACT_MAX = 3;
 
 export const contactSchema = z.object({
 	name: z.string().min(1).max(120),
@@ -18,6 +24,16 @@ export const sendContactMessage = createServerFn({ method: "POST" })
 	.handler(async ({ data }) => {
 		if (data.website) {
 			return { ok: true as const };
+		}
+
+		// Public and sends an email per call: without a limit anyone could
+		// flood the inbox and burn the email provider's quota.
+		const ip = clientIp(getRequestHeaders()) ?? "unknown";
+		if (
+			!(await consumeRateLimit("contact", ip, CONTACT_WINDOW_MS, CONTACT_MAX))
+		) {
+			securityLog("contact.rate_limited", "blocked", { ip });
+			throw new Error("Too many messages. Please try again later.");
 		}
 
 		const to = process.env.CONTACT_EMAIL || "support@devlinks.app";

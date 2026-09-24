@@ -12,7 +12,7 @@ import {
 } from "@/lib/analytics-parse.server";
 import { detectInAppSource } from "@/lib/analytics-sources";
 import { methodNotAllowed, requireJson } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit.server";
+import { consumeRateLimit } from "@/lib/rate-limit.server";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 30;
@@ -60,11 +60,12 @@ export const Route = createFileRoute("/api/public/hooks/track-click")({
 
 				const ip = extractIP(request);
 				if (
-					!rateLimit(
-						`click:${ip}:${link.userId}`,
+					!(await consumeRateLimit(
+						"click",
+						`${ip}:${link.userId}`,
 						RATE_LIMIT_WINDOW_MS,
 						RATE_LIMIT_MAX,
-					)
+					))
 				) {
 					return new Response("ok"); // no signal to the caller, just drop
 				}

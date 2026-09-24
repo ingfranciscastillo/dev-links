@@ -7,6 +7,7 @@ import {
 } from "@dodopayments/better-auth";
 import { waitUntil } from "@vercel/functions";
 import { betterAuth } from "better-auth";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { admin } from "better-auth/plugins/admin";
 import { haveIBeenPwned } from "better-auth/plugins/haveibeenpwned";
 import { username } from "better-auth/plugins/username";
@@ -18,6 +19,7 @@ import { db } from "@/db/index";
 import { profiles } from "@/db/schema";
 import { escapeHtml, sendEmail } from "@/lib/email";
 import { absoluteUrl } from "@/lib/site";
+import { allowedImageOrigins, validateUserInput } from "@/lib/user-input";
 
 // El SDK exige un bearerToken no vacío al construirse — sin fallback, no
 // tener DODO_PAYMENTS_API_KEY seteada tira abajo *todo* auth.ts (login
@@ -281,6 +283,20 @@ export const auth = betterAuth({
 	},
 
 	trustedOrigins,
+
+	// sign-up and /update-user write name/image straight from the client,
+	// bypassing profile-data's validators (the profile form caps the name at
+	// 60 chars, but updateUser accepted anything, and any string as image).
+	hooks: {
+		before: createAuthMiddleware(async (ctx) => {
+			if (ctx.path !== "/sign-up/email" && ctx.path !== "/update-user") return;
+			const error = validateUserInput(
+				ctx.body as Record<string, unknown> | undefined,
+				allowedImageOrigins(process.env.R2_PUBLIC_URL),
+			);
+			if (error) throw new APIError("BAD_REQUEST", { message: error });
+		}),
+	},
 
 	// Nothing in the browser needs the provider tokens, but these endpoints
 	// hand them to any script running with the user's session cookie (an

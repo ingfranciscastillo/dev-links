@@ -4,6 +4,7 @@ import { db } from "@/db/index";
 import { linkClicks, pageViews, profiles } from "@/db/schema";
 import { resolveSource } from "@/lib/api/analytics.functions";
 import { auth } from "@/lib/auth";
+import { clientIp, securityLog } from "@/lib/security-log";
 
 const ALLOWED_DAYS = new Set([7, 30, 90]);
 
@@ -43,6 +44,16 @@ async function handleExport(request: Request) {
 	const daysParam = Number(url.searchParams.get("days"));
 	const days = ALLOWED_DAYS.has(daysParam) ? daysParam : 30;
 	const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+	// Bulk data export: a high-risk operation per OWASP logging guidance.
+	if (type === "views" || type === "clicks") {
+		securityLog("data.analytics_export", "success", {
+			userId,
+			type,
+			days,
+			ip: clientIp(request.headers),
+		});
+	}
 
 	if (type === "views") {
 		const rows = await db

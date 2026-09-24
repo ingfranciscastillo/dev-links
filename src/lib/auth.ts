@@ -17,7 +17,9 @@ import { eq } from "drizzle-orm";
 import * as authSchema from "@/db/auth-schema";
 import { db } from "@/db/index";
 import { profiles } from "@/db/schema";
+import { auditAuthEndpoint } from "@/lib/auth-audit.server";
 import { escapeHtml, sendEmail } from "@/lib/email";
+import { securityLog } from "@/lib/security-log";
 import { absoluteUrl } from "@/lib/site";
 import { allowedImageOrigins, validateUserInput } from "@/lib/user-input";
 
@@ -284,6 +286,24 @@ export const auth = betterAuth({
 
 	trustedOrigins,
 
+	// better-auth's own warnings/errors as single JSON lines, same shape as
+	// the security audit log (lib/security-log.ts) so both can be searched
+	// together in Vercel. JSON.stringify also escapes CR/LF (no log forging).
+	logger: {
+		level: "warn",
+		log: (level, message, ...args) => {
+			const line = JSON.stringify({
+				ts: new Date().toISOString(),
+				type: "better-auth",
+				level,
+				message,
+				args,
+			});
+			if (level === "error") console.error(line);
+			else console.warn(line);
+		},
+	},
+
 	// sign-up and /update-user write name/image straight from the client,
 	// bypassing profile-data's validators (the profile form caps the name at
 	// 60 chars, but updateUser accepted anything, and any string as image).
@@ -295,6 +315,11 @@ export const auth = betterAuth({
 				allowedImageOrigins(process.env.R2_PUBLIC_URL),
 			);
 			if (error) throw new APIError("BAD_REQUEST", { message: error });
+		}),
+		// Audit trail for credential, recovery, session and admin endpoints —
+		// runs for failures too (ctx.context.returned is the APIError).
+		after: createAuthMiddleware(async (ctx) => {
+			auditAuthEndpoint(ctx);
 		}),
 	},
 
@@ -341,7 +366,7 @@ export const auth = betterAuth({
 			update: {
 				after: async (user) => {
 					const u = user as { id?: string } | undefined;
-					console.info("[auth] user.updated", { userId: u?.id });
+					securityLog("auth.user_updated", "success", { userId: u?.id });
 				},
 			},
 		},
@@ -353,7 +378,7 @@ export const auth = betterAuth({
 			create: {
 				after: async (account) => {
 					const a = account as { userId?: string; providerId?: string };
-					console.info("[auth] account.created", {
+					securityLog("auth.account_created", "success", {
 						userId: a?.userId,
 						providerId: a?.providerId,
 					});
@@ -362,15 +387,38 @@ export const auth = betterAuth({
 		},
 		session: {
 			create: {
+				// Every sign-in path (email, OAuth callback, admin impersonation)
+				// ends here; impersonatedBy is set when an admin impersonates.
 				after: async (session) => {
-					const s = session as { userId?: string } | undefined;
-					console.info("[auth] session.created", { userId: s?.userId });
+					const s = session as
+						| {
+								userId?: string;
+								ipAddress?: string | null;
+								userAgent?: string | null;
+								impersonatedBy?: string | null;
+						  }
+						| undefined;
+					securityLog(
+						s?.impersonatedBy
+							? "auth.impersonation_started"
+							: "auth.session_created",
+						"success",
+						{
+							userId: s?.userId,
+							impersonatedBy: s?.impersonatedBy ?? undefined,
+							ip: s?.ipAddress ?? undefined,
+							userAgent: s?.userAgent ?? undefined,
+						},
+					);
 				},
 			},
 			delete: {
 				before: async (session) => {
-					const s = session as { id?: string } | undefined;
-					console.info("[auth] session.revoked", { sessionId: s?.id });
+					const s = session as { id?: string; userId?: string } | undefined;
+					securityLog("auth.session_revoked", "success", {
+						sessionId: s?.id,
+						userId: s?.userId,
+					});
 				},
 			},
 		},

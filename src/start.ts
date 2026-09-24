@@ -1,4 +1,5 @@
 import { createCsrfMiddleware, createStart } from "@tanstack/react-start";
+import { clientIp, securityLog } from "@/lib/security-log";
 
 // CSRF defense for server functions, TanStack Start's built-in middleware
 // (OWASP: Fetch Metadata, falling back to Origin, then Referer). The session
@@ -11,6 +12,19 @@ import { createCsrfMiddleware, createStart } from "@tanstack/react-start";
 // the Vercel cron); better-auth checks the origin of /api/auth itself.
 export const csrfMiddleware = createCsrfMiddleware({
 	filter: (ctx) => ctx.handlerType === "serverFn",
+	// Same 403 as the default, plus an audit line for the blocked attempt.
+	failureResponse: (ctx) => {
+		const headers = ctx.request.headers;
+		securityLog("csrf.blocked", "blocked", {
+			path: new URL(ctx.request.url).pathname,
+			method: ctx.request.method,
+			secFetchSite: headers.get("sec-fetch-site"),
+			origin: headers.get("origin"),
+			referer: headers.get("referer"),
+			ip: clientIp(headers),
+		});
+		return new Response("Forbidden", { status: 403 });
+	},
 });
 
 export const startInstance = createStart(() => ({

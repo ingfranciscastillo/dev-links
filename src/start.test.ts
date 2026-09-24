@@ -67,4 +67,18 @@ describe("CSRF middleware (server functions)", () => {
 		).toEqual({ passed: true, status: null });
 		expect(await run({}, "router")).toEqual({ passed: true, status: null });
 	});
+
+	it("writes a security log line for each blocked request", async () => {
+		const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+		await run({ Origin: "https://evil.example", "x-forwarded-for": "6.6.6.6" });
+		const entry = JSON.parse(warn.mock.calls.at(-1)?.[0] as string);
+		expect(entry).toMatchObject({
+			event: "csrf.blocked",
+			outcome: "blocked",
+			path: "/_serverFn/abc",
+			origin: "https://evil.example",
+			ip: "6.6.6.6",
+		});
+		warn.mockRestore();
+	});
 });

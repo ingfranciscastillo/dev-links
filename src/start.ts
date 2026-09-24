@@ -1,4 +1,5 @@
 import { createCsrfMiddleware, createStart } from "@tanstack/react-start";
+import { errorSanitizerMiddleware } from "@/lib/error-middleware";
 import { clientIp, securityLog } from "@/lib/security-log";
 
 // CSRF defense for server functions, TanStack Start's built-in middleware
@@ -29,4 +30,6 @@ export const csrfMiddleware = createCsrfMiddleware({
 
 export const startInstance = createStart(() => ({
 	requestMiddleware: [csrfMiddleware],
+	// First in the chain so it also wraps authMiddleware and every handler.
+	functionMiddleware: [errorSanitizerMiddleware],
 }));

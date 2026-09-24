@@ -36,7 +36,12 @@ import {
 	useRemoveSupportLink,
 	useUpdateSupportLink,
 } from "@/lib/queries/profile-data";
-import { type SupportLinkItem, supportLinkSchema } from "@/lib/schemas";
+import {
+	COMMUNITY_PLATFORMS,
+	SUPPORT_PLATFORMS,
+	type SupportLinkItem,
+	supportLinkSchema,
+} from "@/lib/schemas";
 import { zodField } from "@/lib/schemas/field";
 
 export const Route = createFileRoute("/_authenticated/dashboard/support")({
@@ -54,14 +59,6 @@ export const Route = createFileRoute("/_authenticated/dashboard/support")({
 });
 
 type Category = "support" | "community";
-
-const SUPPORT_PLATFORMS = [
-	"buymeacoffee",
-	"kofi",
-	"ghsponsors",
-	"patreon",
-] as const;
-const COMMUNITY_PLATFORMS = ["discord", "slack"] as const;
 
 function SupportPage() {
 	const data = useProfileData();

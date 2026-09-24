@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { profileInput } from "@/lib/api/profile-data.functions";
+import { profileInput } from "@/lib/api/profile-data.schemas";
 import { authClient } from "@/lib/auth-client";
 
 export type UsernameStatus = "idle" | "checking" | "available" | "taken";

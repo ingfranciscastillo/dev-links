@@ -38,11 +38,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import {
-	BIO_MAX_LENGTH,
-	type ProfileCore,
-	profileInput,
-} from "@/lib/api/profile-data.functions";
+import type { ProfileCore } from "@/lib/api/profile-data.functions";
+import { BIO_MAX_LENGTH, profileInput } from "@/lib/api/profile-data.schemas";
 import { COUNTRIES } from "@/lib/countries";
 import { LANGUAGES } from "@/lib/languages";
 import {

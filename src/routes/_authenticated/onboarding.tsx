@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { autoConnectGithub } from "@/lib/api/integrations/account.functions";
-import { profileInput } from "@/lib/api/profile-data.functions";
+import { profileInput } from "@/lib/api/profile-data.schemas";
 import { useUpdateProfile } from "@/lib/queries/profile-data";
 import { zodField } from "@/lib/schemas/field";
 import { slugifyUsername } from "@/lib/user";

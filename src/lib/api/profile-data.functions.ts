@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
-import { z } from "zod";
 import { user as authUser } from "@/db/auth-schema";
 import { db } from "@/db/index";
 import {
@@ -14,14 +13,30 @@ import {
 	talks,
 	themes,
 } from "@/db/schema";
+import {
+	articleInput,
+	discoveryInput,
+	idInput,
+	linkInput,
+	profileInput,
+	projectInput,
+	reorderInput,
+	snippetInput,
+	supportLinkInput,
+	talkInput,
+	templateInput,
+	updateArticleInput,
+	updateLinkInput,
+	updateProjectInput,
+	updateSnippetInput,
+	updateSupportLinkInput,
+	updateTalkInput,
+	wipeInput,
+} from "@/lib/api/profile-data.schemas";
 import { authMiddleware } from "@/lib/auth-middleware";
 import { limitsFor } from "@/lib/plan-limits";
 import { defaultTheme, type ProfileData } from "@/lib/schemas";
-import {
-	SOCIAL_PLATFORM_KEYS,
-	type SocialLinks,
-	sanitizeSocialLinks,
-} from "@/lib/social-links";
+import { type SocialLinks, sanitizeSocialLinks } from "@/lib/social-links";
 import {
 	parseThemeConfig,
 	type ThemeV2,
@@ -37,31 +52,6 @@ async function getPlanLimits(userId: string) {
 		.limit(1);
 	return limitsFor(row?.plan);
 }
-
-// Authoritative server-side scheme allow-list for every URL a visitor can
-// click on a public profile — the sole gate, since this file's validators
-// (not the client-only ones in schemas.ts) are the actual trust boundary.
-// zod's own .url()/z.url() only checks syntax, not scheme, so it would still
-// accept "javascript:..." — this refine is what actually blocks it.
-const SAFE_URL_SCHEMES = new Set(["http:", "https:", "mailto:", "tel:"]);
-function isSafeUrl(value: string): boolean {
-	try {
-		return SAFE_URL_SCHEMES.has(new URL(value).protocol);
-	} catch {
-		return false;
-	}
-}
-const URL_SCHEME_MESSAGE = "Enter a full link, like https://example.com";
-const requiredUrl = z.string().min(1).refine(isSafeUrl, URL_SCHEME_MESSAGE);
-const optionalUrl = z
-	.string()
-	.refine((v) => v === "" || isSafeUrl(v), URL_SCHEME_MESSAGE)
-	.optional();
-const nullableOptionalUrl = z
-	.string()
-	.refine((v) => v === "" || isSafeUrl(v), URL_SCHEME_MESSAGE)
-	.nullable()
-	.optional();
 
 // db.transaction no existe en el driver neon-http; los writes multi-statement
 // van por db.batch (endpoint batch de Neon: un roundtrip, atómico).
@@ -264,37 +254,7 @@ export const getMyProfileCore = createServerFn({ method: "GET" })
 		};
 	});
 
-const idInput = z.object({ id: z.string() });
-
 // ---------- profile (user + profiles core fields) ----------
-
-export const BIO_MAX_LENGTH = 160;
-
-// Username libre pegado por el usuario ("@handle", URL completa, con
-// espacios) — sanitizeSocialLinks se encarga de limpiarlo antes de guardar.
-const socialUsername = z.string().trim().max(80).optional().or(z.literal(""));
-
-const socialLinksInput = z
-	.object(
-		Object.fromEntries(
-			SOCIAL_PLATFORM_KEYS.map((key) => [key, socialUsername]),
-		) as Record<(typeof SOCIAL_PLATFORM_KEYS)[number], typeof socialUsername>,
-	)
-	.partial()
-	.default({});
-
-export const profileInput = z.object({
-	name: z.string().min(2).max(60),
-	username: z
-		.string()
-		.min(3)
-		.max(24)
-		.regex(/^[a-z0-9_-]+$/, "Only a-z, 0-9, _ and -"),
-	bio: z.string().max(BIO_MAX_LENGTH).optional().or(z.literal("")),
-	website: optionalUrl,
-	calendarLink: optionalUrl,
-	socialLinks: socialLinksInput,
-});
 
 export const upsertMyProfile = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -345,20 +305,6 @@ export const upsertMyProfile = createServerFn({ method: "POST" })
 		return { ok: true as const };
 	});
 
-const discoveryInput = z.object({
-	country: z
-		.string()
-		.length(2)
-		.regex(/^[A-Z]+$/)
-		.optional()
-		.or(z.literal("")),
-	primaryLanguage: z.string().max(40).optional().or(z.literal("")),
-	seniority: z.string().max(40).optional().or(z.literal("")),
-	technologies: z.array(z.string().min(1).max(40)).max(20).default([]),
-	available: z.boolean().default(false),
-	discoverable: z.boolean().default(false),
-});
-
 export const updateDiscovery = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator((input) => discoveryInput.parse(input))
@@ -385,12 +331,6 @@ export const updateDiscovery = createServerFn({ method: "POST" })
 	});
 
 // ---------- links ----------
-
-const linkInput = z.object({
-	title: z.string().min(1),
-	url: requiredUrl,
-	description: z.string().optional(),
-});
 
 export const addLink = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -436,14 +376,6 @@ export const addLink = createServerFn({ method: "POST" })
 		};
 	});
 
-const updateLinkInput = z.object({
-	id: z.string(),
-	title: z.string().optional(),
-	url: optionalUrl,
-	description: z.string().nullable().optional(),
-	active: z.boolean().optional(),
-});
-
 export const updateLink = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator((input) => updateLinkInput.parse(input))
@@ -465,8 +397,6 @@ export const removeLink = createServerFn({ method: "POST" })
 			.delete(links)
 			.where(and(eq(links.id, data.id), eq(links.userId, userId)));
 	});
-
-const reorderInput = z.object({ ids: z.array(z.string()) });
 
 export const reorderLinks = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -499,15 +429,6 @@ export const toggleLink = createServerFn({ method: "POST" })
 	});
 
 // ---------- projects ----------
-
-const projectInput = z.object({
-	name: z.string().min(1),
-	description: z.string().default(""),
-	tech: z.array(z.string()).default([]),
-	github: optionalUrl,
-	demo: optionalUrl,
-	status: z.enum(["shipped", "wip", "archived"]).default("shipped"),
-});
 
 export const addProject = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -565,8 +486,6 @@ export const addProject = createServerFn({ method: "POST" })
 		};
 	});
 
-const updateProjectInput = projectInput.partial().extend({ id: z.string() });
-
 export const updateProject = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator((input) => updateProjectInput.parse(input))
@@ -590,12 +509,6 @@ export const removeProject = createServerFn({ method: "POST" })
 	});
 
 // ---------- snippets ----------
-
-const snippetInput = z.object({
-	title: z.string().min(1),
-	language: z.string().default("ts"),
-	code: z.string(),
-});
 
 export const addSnippet = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -636,8 +549,6 @@ export const addSnippet = createServerFn({ method: "POST" })
 		};
 	});
 
-const updateSnippetInput = snippetInput.partial().extend({ id: z.string() });
-
 export const updateSnippet = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator((input) => updateSnippetInput.parse(input))
@@ -661,14 +572,6 @@ export const removeSnippet = createServerFn({ method: "POST" })
 	});
 
 // ---------- articles ----------
-
-const articleInput = z.object({
-	title: z.string().min(1),
-	summary: z.string().optional(),
-	url: requiredUrl,
-	source: z.string().optional(),
-	date: z.string(), // ISO
-});
 
 export const addArticle = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -696,15 +599,6 @@ export const addArticle = createServerFn({ method: "POST" })
 		};
 	});
 
-const updateArticleInput = z.object({
-	id: z.string(),
-	title: z.string().optional(),
-	summary: z.string().nullable().optional(),
-	url: optionalUrl,
-	source: z.string().nullable().optional(),
-	date: z.string().optional(),
-});
-
 export const updateArticle = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator((input) => updateArticleInput.parse(input))
@@ -728,15 +622,6 @@ export const removeArticle = createServerFn({ method: "POST" })
 	});
 
 // ---------- talks ----------
-
-const talkInput = z.object({
-	title: z.string().min(1),
-	event: z.string().optional(),
-	description: z.string().optional(),
-	date: z.string().nullable().optional(),
-	slidesUrl: nullableOptionalUrl,
-	videoUrl: nullableOptionalUrl,
-});
 
 export const addTalk = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -766,16 +651,6 @@ export const addTalk = createServerFn({ method: "POST" })
 		};
 	});
 
-const updateTalkInput = z.object({
-	id: z.string(),
-	title: z.string().optional(),
-	event: z.string().optional(),
-	description: z.string().optional(),
-	date: z.string().nullable().optional(),
-	slidesUrl: nullableOptionalUrl,
-	videoUrl: nullableOptionalUrl,
-});
-
 export const updateTalk = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator((input) => updateTalkInput.parse(input))
@@ -799,14 +674,6 @@ export const removeTalk = createServerFn({ method: "POST" })
 	});
 
 // ---------- support links ----------
-
-const supportLinkInput = z.object({
-	category: z.enum(["support", "community"]),
-	platform: z.string().min(1),
-	label: z.string().optional(),
-	url: requiredUrl,
-	serverId: z.string().nullable().optional(),
-});
 
 export const addSupportLink = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -835,15 +702,6 @@ export const addSupportLink = createServerFn({ method: "POST" })
 			serverId: row.serverId,
 		};
 	});
-
-const updateSupportLinkInput = z.object({
-	id: z.string(),
-	category: z.enum(["support", "community"]).optional(),
-	platform: z.string().optional(),
-	label: z.string().optional(),
-	url: optionalUrl,
-	serverId: z.string().nullable().optional(),
-});
 
 export const updateSupportLink = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
@@ -885,8 +743,6 @@ export const updateTheme = createServerFn({ method: "POST" })
 		await upsertTheme(userId, data, null);
 	});
 
-const templateInput = z.object({ templateId: z.string() });
-
 export const applyThemeTemplate = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.validator((input) => templateInput.parse(input))
@@ -905,8 +761,6 @@ export const resetTheme = createServerFn({ method: "POST" })
 	});
 
 // ---------- wipe ----------
-
-const wipeInput = z.object({ username: z.string() });
 
 export const wipeProfileData = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])

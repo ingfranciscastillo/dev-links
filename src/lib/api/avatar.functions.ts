@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { authMiddleware } from "@/lib/auth-middleware";
+import { detectImageType } from "@/lib/image-type";
 import { uploadAvatar } from "@/lib/r2.server";
 
 const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
@@ -28,7 +29,13 @@ export const uploadMyAvatar = createServerFn({ method: "POST" })
 		}
 
 		const buffer = Buffer.from(await file.arrayBuffer());
-		const image = await uploadAvatar(userId, buffer, file.type);
+		// file.type is whatever the client claims; the bytes decide, and the
+		// detected type (not the declared one) is what R2 serves it as.
+		const detectedType = detectImageType(buffer);
+		if (!detectedType) {
+			throw new Error("Only PNG, JPG or WEBP images are allowed");
+		}
+		const image = await uploadAvatar(userId, buffer, detectedType);
 
 		// No escribe user.image acá — el caller hace authClient.updateUser()
 		// con la URL devuelta, para que better-auth reemita la cookie de
